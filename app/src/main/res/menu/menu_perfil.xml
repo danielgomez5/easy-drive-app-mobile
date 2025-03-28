@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:title="Perfil"
+        android:id="@+id/menuPerfil"
+        android:icon="@drawable/person_selector"
+        android:checked="true"
+        />
+    <item
+        android:title="Configuració"
+        android:id="@+id/menuConfig"
+        android:icon="@drawable/settings_selector"
+        android:checked="false"
+        />
+    <item
+        android:title="Historial viatges"
+        android:id="@+id/menuHistorial"
+        android:icon="@drawable/baseline_history_24"
+        android:checked="false"
+        />
+    <item
+        android:title="Ajuda"
+        android:id="@+id/menuContacte"
+        android:icon="@drawable/help_selector"
+        android:checked="false"
+        />
+</menu>

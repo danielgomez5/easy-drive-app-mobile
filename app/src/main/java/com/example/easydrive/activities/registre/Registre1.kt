@@ -1,4 +1,4 @@
-package com.example.easydrive.activities.regitre
+package com.example.easydrive.activities.registre
 
 import android.content.Intent
 import android.os.Bundle
