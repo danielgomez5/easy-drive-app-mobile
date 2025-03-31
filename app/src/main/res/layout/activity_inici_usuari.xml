@@ -17,10 +17,11 @@
         android:name="com.example.easydrive.fragments.HomeUsuari"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/bnv"/>
-    <ImageButton
+    <de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:id="@+id/btnPerfil"
+        android:src="@drawable/logo_easydrive"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_margin="20dp"/>
@@ -40,6 +41,7 @@
         app:menu="@menu/menu_perfil"
         android:id="@+id/navigator"
         android:layout_gravity="start"
+        app:headerLayout="@layout/header_layout"
         />
 
 </androidx.drawerlayout.widget.DrawerLayout>

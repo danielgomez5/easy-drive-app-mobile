@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="250dp"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    app:behavior_hideable="true"
+    app:behavior_peekHeight="0dp"
+    app:circularflow_radiusInDP="20dp"
+    android:background="#fdecda"
+    style="@style/Widget.Material3.BottomSheet.Modal"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+</androidx.constraintlayout.widget.ConstraintLayout>

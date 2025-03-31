@@ -28,7 +28,6 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
         actionBarDrawerToggle = ActionBarDrawerToggle(this, binding.main, R.string.obert, R.string.tancat)
         binding.main.addDrawerListener(actionBarDrawerToggle)
         binding.navigator.setNavigationItemSelectedListener(this)

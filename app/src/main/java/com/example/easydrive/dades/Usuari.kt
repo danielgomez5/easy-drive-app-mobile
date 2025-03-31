@@ -1,16 +1,19 @@
 package com.example.easydrive.dades
 
+import java.io.Serializable
+
 data class Usuari(
-    val dni: String,
-    val nom: String,
-    val cognom: String,
-    val email:String,
-    val telefon: String,
-    val data_neix: String,
-    val passwordHash: String,
-    val foto_perfil: Int,
-    val foto_carnet: Int,
-    val rol: Int,
-    val horari: String,
-    val diponibiliat: Boolean?
-)
+    var dni: String?,
+    var nom: String?,
+    var cognom: String?,
+    var email:String?,
+    var telefon: String?,
+    var data_neix: String?,
+    var passwordHash: String?,
+    var foto_perfil: Int?,
+    var foto_carnet: Int?,
+    var rol: Boolean?,
+    var horari: String?,
+    var diponibiliat: Boolean?,
+    var idZona: Int?
+) : Serializable
