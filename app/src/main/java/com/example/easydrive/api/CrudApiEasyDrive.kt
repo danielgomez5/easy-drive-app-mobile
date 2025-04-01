@@ -2,6 +2,7 @@ package com.example.easydrive.api
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.example.easydrive.R
 import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Usuari
@@ -12,11 +13,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 import java.security.SecureRandom
 import java.security.cert.CertificateFactory
 import javax.net.ssl.X509TrustManager
@@ -31,40 +37,6 @@ class CrudApiEasyDrive() : CoroutineScope {
         get() = Dispatchers.Main + job
 
     val urlBase = "http://172.16.24.115:7126/"
-
-    /*fun getSafeOkHttpClient(): OkHttpClient {
-        val certificateFactory = CertificateFactory.getInstance("X.509")
-        val inputStream = context.resources.openRawResource(R.raw.certificat) // Nombre del archivo sin extensión
-        var certificate: java.security.cert.Certificate? = null
-        // Intentamos cargar el certificado y manejar el error si ocurre
-        try {
-            certificate = inputStream.use { certificateFactory.generateCertificate(it) }
-            // Si no hay excepciones hasta aquí, el certificado está bien cargado.
-        } catch (e: Exception) {
-            Log.e("Certificado", "Error al cargar el certificado", e)
-            // Puedes manejar el error aquí (por ejemplo, lanzar una excepción personalizada, mostrar un mensaje al usuario, etc.)
-            throw RuntimeException("Error al cargar el certificado", e)
-        }
-
-        // El código original sigue aquí después de verificar que el certificado se haya cargado correctamente
-        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType()).apply {
-            load(null, null)
-            setCertificateEntry("ca", certificate)
-        }
-
-        val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()).apply {
-            init(keyStore)
-        }
-
-        val sslContext = SSLContext.getInstance("TLS").apply {
-            init(null, trustManagerFactory.trustManagers, SecureRandom())
-        }
-
-        return OkHttpClient.Builder()
-            .sslSocketFactory(sslContext.socketFactory, trustManagerFactory.trustManagers[0] as X509TrustManager)
-            .build()
-    }*/
-
 
     private fun getClient(): OkHttpClient {
         var logging = HttpLoggingInterceptor()
@@ -95,7 +67,7 @@ class CrudApiEasyDrive() : CoroutineScope {
             return false
     }
 
-    fun getZona(): List<Zona> ?{
+    /*fun getZona(): List<Zona> ?{
         var resposta : Response<List<Zona>>? = null
         runBlocking {
             val cor = launch {
@@ -107,5 +79,61 @@ class CrudApiEasyDrive() : CoroutineScope {
             return resposta!!.body()
         else
             return null
+    }*/
+
+    fun getComunitats(): List<String>? {
+        var resposta : Response<List<String>>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getComunitats()
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return resposta!!.body()
+        else
+            return null
+    }
+
+    fun getZonaxComunitat(comunitat :String): List<Zona>? {
+        var resposta : Response<List<Zona>>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getZonesXComunitat(comunitat)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return resposta!!.body()
+        else
+            return null
     }
 }
+
+    /*fun pujaArxiu(ruta: String, context:Context): Boolean{
+        val file = File(ruta)
+        if (!file.exists()){
+            Toast.makeText(context, "No existeix l'arxiu", Toast.LENGTH_LONG).show()
+            Log.i("pujaArxiu", "No existeix l'arxiu: "+ruta)
+            return false
+        }else {
+            val foto : RequestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
+            val bodyImatge = MultipartBody.Part.createFormData("image", file.name, foto)
+
+            var resposta : Response<Missatge>? = null
+            runBlocking {
+                val cor = launch {
+                    resposta = getRetrofit().create(ApiService::class.java).uploadFile(bodyImatge)
+                }
+                cor.join()
+            }
+            if (resposta!!.isSuccessful)
+                return true
+            else{
+                Log.i("resposta", resposta!!.message().toString())
+                return false
+            }
+
+        }
+
+    }*/

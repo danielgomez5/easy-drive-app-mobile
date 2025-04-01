@@ -90,10 +90,14 @@
                     app:endIconMode="custom"
                     app:endIconDrawable="@drawable/baseline_calendar_month_24"
                     android:focusable="false"
+                    android:inputType="none"
                     android:clickable="true">
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:clickable="true"
                         android:id="@+id/tie_dataNeixR2"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -139,12 +143,13 @@
                     android:layout_marginHorizontal="20dp"
                     android:layout_marginTop="20dp"
                     android:hint="Provincia"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     app:layout_constraintTop_toTopOf="parent">
                     <AutoCompleteTextView
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
+                        android:layout_height="60dp"
                         android:id="@+id/actv_provinciaR2"
-                        android:inputType="none"
+                        android:inputType="text"
                         android:focusable="false"
                         android:maxLines="1"
                         android:singleLine="true"
@@ -160,12 +165,14 @@
                     android:layout_marginHorizontal="20dp"
                     android:layout_marginBottom="20dp"
                     android:hint="Ciutat"
-                    android:id="@+id/til6CardR2">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/til6CardR2"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                    <AutoCompleteTextView
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:id="@+id/tie_ciutatR2"
+                        android:layout_height="60dp"
+                        android:id="@+id/actv_ciutatR2"
                         android:inputType="text"
+                        android:focusable="false"
                         android:maxLines="1"
                         android:singleLine="true"
                         android:imeOptions="actionDone"/>
@@ -175,12 +182,44 @@
 
         </androidx.cardview.widget.CardView>
 
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/card3R2"
+            app:layout_constraintTop_toBottomOf="@+id/card2R2"
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="20dp"
+            android:layout_marginHorizontal="20dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btnPujada"
+                    android:layout_marginHorizontal="40dp"
+                    android:layout_marginVertical="20dp"
+                    android:text="Puja foto"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textInfoPujada"
+                    android:textAlignment="center"
+                    android:layout_marginHorizontal="40dp"
+                    android:layout_marginBottom="20dp"
+                    android:hint="nnn"/>
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
         <com.google.android.material.button.MaterialButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/btnSeguent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/card2R2"
+            app:layout_constraintTop_toBottomOf="@+id/card3R2"
             android:text="Següent"
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="70dp"
