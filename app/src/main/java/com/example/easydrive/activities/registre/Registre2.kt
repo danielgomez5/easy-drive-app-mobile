@@ -6,12 +6,15 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.easydrive.R
@@ -22,6 +25,7 @@ import com.example.easydrive.databinding.ActivityRegistre2Binding
 import com.google.android.material.datepicker.MaterialDatePicker
 import java.io.File
 import java.io.FileInputStream
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -29,6 +33,7 @@ import java.util.Locale
 class Registre2 : AppCompatActivity() {
     private lateinit var binding: ActivityRegistre2Binding
     private var usuari: Usuari?=null
+    private var ruta: String ?=null
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,19 +48,33 @@ class Registre2 : AppCompatActivity() {
         }
 
         usuari = intent.getSerializableExtra("usuari") as? Usuari
+        binding.til5CardR2.visibility = View.GONE
+        binding.til6CardR2.visibility = View.GONE
 
         val crud = CrudApiEasyDrive()
         var zona = crud.getComunitats() ?: listOf()
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, zona)
-        binding.actvProvinciaR2.setAdapter(adapter)
+        binding.actvComunitatR2.setAdapter(adapter)
 
         var ciutatsZona: List<Zona>? = null
+        var provinciaZona: List<Zona>?=null
         var nomCiutat: List<String>? = null
-
-        binding.actvProvinciaR2.setOnItemClickListener { parent, view, position, id ->
+        var nomProvincia: List<String>? = null
+        binding.actvComunitatR2.setOnItemClickListener { parent, view, position, id ->
+            binding.til5CardR2.visibility = View.VISIBLE
             val comunitat = zona[position]
 
-            ciutatsZona = crud.getZonaxComunitat(comunitat)
+            provinciaZona = crud.getZonaxComunitat(comunitat)
+            nomProvincia = provinciaZona?.map { it.provincia }
+
+            val adapterProvincia = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, nomProvincia!!)
+            binding.actvProvinciaR2.setAdapter(adapterProvincia)
+        }
+        binding.actvProvinciaR2.setOnItemClickListener { parent, view, position, id ->
+            binding.til6CardR2.visibility = View.VISIBLE
+            val provincia = nomProvincia?.get(position)
+
+            ciutatsZona = crud.getZonaxProvincia(provincia.toString())
             nomCiutat = ciutatsZona?.map { it.ciutat }
 
             val adapterciutat = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, nomCiutat!!)
@@ -64,11 +83,9 @@ class Registre2 : AppCompatActivity() {
 
         var zonaEscollida: Zona? = null
         binding.actvCiutatR2.setOnItemClickListener { parent, view, position, id ->
-            // Asegúrate de que nomCiutat no sea null o vacío antes de acceder
             val ciudadSeleccionada = nomCiutat?.get(position)
 
             if (ciudadSeleccionada != null) {
-                // También puedes encontrar la zona directamente
                 zonaEscollida = ciutatsZona?.find { it.ciutat == ciudadSeleccionada }
                 Log.d("zonaEscollida", zonaEscollida.toString())
             }
@@ -87,8 +104,15 @@ class Registre2 : AppCompatActivity() {
 
             datePicker.addOnPositiveButtonClickListener {
                 val sdf = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-                val date = sdf.format(it)
-                binding.tieDataNeixR2.setText(date)
+                val dateString = sdf.format(it)
+                binding.tieDataNeixR2.setText(dateString)
+                try {
+                    // Convertimos el String de vuelta a Date
+                    val date = sdf.parse(dateString)
+                    usuari?.data_neix = date
+                } catch (e: ParseException) {
+                    e.printStackTrace()
+                }
             }
         }
 
@@ -98,14 +122,14 @@ class Registre2 : AppCompatActivity() {
                 usuari?.nom = binding.tieNomR2.text.toString()
                 usuari?.cognom = binding.tieCognomR2.text.toString()
                 usuari?.dni = binding.tieDniR2.text.toString()
-                usuari?.data_neix = binding.tieDataNeixR2.text.toString()
+                //usuari?.data_neix = binding.tieDataNeixR2.text.toString()
                 usuari?.idZona = zonaEscollida?.id
                 when(usuari?.rol){
                     true ->{
-                        addUsuari()
+                        addTaxista()
                     }
                     false ->{
-                        addTaxista()
+                        addUsuari()
                     }
                     else -> {
                         addUsuari()
@@ -117,36 +141,12 @@ class Registre2 : AppCompatActivity() {
         }
 
         resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val imageUri = result.data?.data
-                /*val ruta = getRealPathFromUri(imageUri)
-                if (ruta != null) {
-                    val byteArray = convertirImagenABinary(ruta)
-                    if (byteArray != null) {
-                        usuari?.foto_perfil = byteArray
-                        Log.d("foto_perfil", "Foto asignada correctamente")
-                    } else {
-                        Log.e("foto_perfil", "Error al convertir la imagen a bytes")
-                    }
-                } else {
-                    Log.e("foto_perfil", "Ruta de la imagen no encontrada")
-                }*/
-                if (imageUri != null) {
-                    // Convertir la imagen a un array de bytes usando el InputStream
-                    val byteArray = convertirImagenABinary(imageUri)
-                    if (byteArray != null) {
-                        usuari?.foto_perfil = byteArray
-                        Log.d("foto_perfil", "Foto asignada correctamente")
-                    } else {
-                        Log.e("foto_perfil", "Error al convertir la imagen a bytes")
-                    }
-                } else {
-                    Log.e("foto_perfil", "Uri de imagen nula")
-                }
+            if (result.resultCode == RESULT_OK){
+                var imageUri = result.data?.data
 
-                // Convertir la imagen a un array de bytes
-                /*val byteArray = convertirImagenABinary(ruta)
-                usuari?.foto_perfil = byteArray*/
+                ruta = getRealPathFromUri(imageUri)
+                Log.d("ruta launcher", ruta.toString())
+
             }
         }
 
@@ -162,15 +162,17 @@ class Registre2 : AppCompatActivity() {
     }
 
     private fun addTaxista() {
-        val intent = Intent(this,Registre3::class.java)
+        val intent = Intent(this,RegistreCotxe::class.java)
         intent.putExtra("usuari",usuari)
-        Log.d("usuari prova", usuari.toString())
+        Log.d("usuari prova taxi", usuari.toString())
         startActivity(intent)
     }
 
     private fun addUsuari() {
-        val intent = Intent(this,RegistreCotxe::class.java)
+        val intent = Intent(this,Registre3::class.java)
         intent.putExtra("usuari",usuari)
+        intent.putExtra("ruta", ruta)
+        Log.d("ruta prova", ruta.toString())
         Log.d("usuari prova", usuari.toString())
         startActivity(intent)
     }
@@ -193,7 +195,7 @@ class Registre2 : AppCompatActivity() {
         }
     }
 
-    fun convertirImagenABinary(uri: Uri?): ByteArray? {
+    /*fun convertirImagenABinary(uri: Uri?): ByteArray? {
         return try {
             // Obtener el InputStream directamente del Uri
             val inputStream = contentResolver.openInputStream(uri!!)
@@ -205,5 +207,5 @@ class Registre2 : AppCompatActivity() {
             e.printStackTrace()
             null
         }
-    }
+    }*/
 }

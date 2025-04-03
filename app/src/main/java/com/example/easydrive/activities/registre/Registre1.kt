@@ -16,6 +16,7 @@ import com.example.easydrive.databinding.ActivityRegistre1Binding
 class Registre1 : AppCompatActivity() {
     private lateinit var binding: ActivityRegistre1Binding
     private var identificador: Int = -1
+    var usuari: Usuari?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,31 +33,32 @@ class Registre1 : AppCompatActivity() {
             startActivity(Intent(this,MainActivity::class.java))
         }
 
-        var usuari = Usuari(null, null,null,null,null,null,null,null,null,null,null,null,null)
+        usuari = Usuari(null, null,null,null,null,null,null,null,null,null,null,null,null)
         binding.btnSeguent.setOnClickListener {
-            if (identificador != -1) {
-                if (!binding.tieNumMobilR1.text.isNullOrBlank() || !binding.tieCorreuR1.text.isNullOrBlank() || !binding.tieRepeteixCorreuR1.text.isNullOrBlank()){
-                    if (binding.tieCorreuR1.text.toString().equals(binding.tieRepeteixCorreuR1.text.toString())){
-                        if (identificador == 1){
-                            usuari.rol = true
-                        } else{
-                            usuari.rol = false
-                        }
+            /*if (identificador != -1) {
 
-                        usuari.telefon = binding.tieNumMobilR1.text?.toString()
-                        usuari.email = binding.tieCorreuR1.text?.toString()
-                        val intent = Intent(this,Registre2::class.java)
-                        intent.putExtra("usuari",usuari)
-                        Log.d("prova usuari", usuari.toString())
-                        startActivity(intent)
-                    }else{
-                        Toast.makeText(this, "Correu no consideix",Toast.LENGTH_LONG).show()
-                    }
-                } else{
-                    Toast.makeText(this, "error",Toast.LENGTH_LONG).show()
-                }
             }else{
                 Toast.makeText(this, "Error escull bla bla 2 opcions", Toast.LENGTH_LONG).show()
+            }*/
+            if (!binding.tieNumMobilR1.text.isNullOrBlank() || !binding.tieCorreuR1.text.isNullOrBlank() || !binding.tieRepeteixCorreuR1.text.isNullOrBlank()){
+                if (binding.tieCorreuR1.text.toString().equals(binding.tieRepeteixCorreuR1.text.toString())){
+                    /*if (identificador == 1){
+                        usuari.rol = true
+                    } else{
+                        usuari.rol = false
+                    }*/
+
+                    usuari?.telefon = binding.tieNumMobilR1.text?.toString()
+                    usuari?.email = binding.tieCorreuR1.text?.toString()
+                    val intent = Intent(this,Registre2::class.java)
+                    intent.putExtra("usuari",usuari)
+                    Log.d("prova usuari", usuari.toString())
+                    startActivity(intent)
+                }else{
+                    Toast.makeText(this, "Correu no consideix",Toast.LENGTH_LONG).show()
+                }
+            } else{
+                Toast.makeText(this, "error",Toast.LENGTH_LONG).show()
             }
 
 
@@ -66,10 +68,10 @@ class Registre1 : AppCompatActivity() {
             if (isChecked){
                 when(checkedId){
                     R.id.btnUsuari -> {
-                        identificador = 0
+                        usuari?.rol = false
                     }
                     R.id.btnTaxista -> {
-                        identificador = 1
+                        usuari?.rol = true
                     }
                 }
             }
