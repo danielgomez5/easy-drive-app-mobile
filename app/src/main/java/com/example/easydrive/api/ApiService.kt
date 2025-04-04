@@ -1,5 +1,6 @@
 package com.example.easydrive.api
 
+import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.Zona
@@ -17,8 +18,13 @@ import retrofit2.http.Query
 
 interface ApiService {
 
+    //Posts
     @POST("/api/usuari")
     suspend fun insertUser(@Body usuari: Usuari): Response<Missatge>
+
+    @POST("/api/cotxe")
+    suspend fun insertCotxe(@Body cotxe: Cotxe): Response<Missatge>
+
     /*@Multipart
     @POST("/api/usuari")
     suspend fun insertUser(
@@ -27,6 +33,7 @@ interface ApiService {
         @Part f_tecnica: MultipartBody.Part?
     ): Response<Missatge>*/
 
+    //Puts
     @Multipart
     @PUT("/api/usuari_image/{id}")
     suspend fun updateUserImage(
@@ -34,6 +41,14 @@ interface ApiService {
         @Part f_tecnica: MultipartBody.Part?
     ): Response<Missatge>
 
+    @Multipart
+    @PUT("/api/cotxe_tecinc/{matricula}")
+    suspend fun updateCotxeFTecnic(@Path("matricula") matricula: String, a_tecnic: MultipartBody.Part?): Response<Missatge>
+
+    @PUT("/api/zona/{id}")
+    suspend fun updateZonaCuberta(@Path("id") id: String) : Response<Missatge>
+
+    //Gets
     @GET("/api/zones")
     suspend fun getZones(): Response<List<Zona>>
 
@@ -41,10 +56,11 @@ interface ApiService {
     suspend fun getComunitats(): Response<List<String>>
 
     @GET("/api/zones_provincia/{comunitat}")
-    suspend fun getZonesXComunitat(@Path("comunitat") comunitat: String): Response<List<Zona>>
+    suspend fun getZonesXComunitat(@Path("comunitat") comunitat: String): Response<List<String>>
 
     @GET("/api/zones_ciutat/{provincia}")
     suspend fun getZonesXProvincia(@Path("provincia") provincia: String): Response<List<Zona>>
+
 
     /*
     * @GET("/api/zones_ciutat/")

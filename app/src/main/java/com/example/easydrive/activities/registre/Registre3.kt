@@ -11,17 +11,22 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_usuari.IniciUsuari
 import com.example.easydrive.api.CrudApiEasyDrive
+import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.databinding.ActivityRegistre3Binding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class Registre3 : AppCompatActivity() {
     private lateinit var binding : ActivityRegistre3Binding
     private var usuari: Usuari?=null
     private var ruta: String ?=null
+    private var fotoCarnet: String? = null
+    private var arxiuTecnic: File? = null
+    private var cotxe: Cotxe?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +45,12 @@ class Registre3 : AppCompatActivity() {
         Log.d("usuari r3", usuari.toString())
 
         binding.imagebtnR1.setOnClickListener {
-            startActivity(Intent(this, Registre2::class.java))
+            if (usuari?.rol == true){
+                startActivity(Intent(this, RegistreCotxe::class.java))
+            }else{
+                startActivity(Intent(this, Registre2::class.java))
+            }
+
         }
 
         binding.crearCompte.setOnClickListener {

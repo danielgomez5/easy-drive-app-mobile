@@ -145,7 +145,9 @@
                     android:layout_marginTop="20dp"
                     android:hint="Comunitat"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:inputType="none"
+                    android:clickable="true">
                     <AutoCompleteTextView
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
@@ -164,7 +166,9 @@
                     android:layout_marginHorizontal="20dp"
                     android:layout_marginTop="10dp"
                     android:hint="Provincia"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:inputType="none"
+                    android:clickable="true">
                     <AutoCompleteTextView
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
@@ -185,7 +189,9 @@
                     android:layout_marginHorizontal="20dp"
                     android:hint="Ciutat"
                     android:id="@+id/til6CardR2"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:inputType="none"
+                    android:clickable="true">
                     <AutoCompleteTextView
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
@@ -233,21 +239,131 @@
 
         </androidx.cardview.widget.CardView>
 
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cardHorari"
+            app:layout_constraintTop_toBottomOf="@+id/card3R2"
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="20dp"
+            android:layout_marginHorizontal="20dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingVertical="20dp">
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp">
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_marginEnd="10dp"
+                        app:layout_constraintEnd_toStartOf="@+id/tildatafinalR2"
+                        android:hint="Dia Inici"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:id="@+id/tildatainiciR2">
+                        <AutoCompleteTextView
+                            android:layout_width="match_parent"
+                            android:layout_height="60dp"
+                            android:id="@+id/actv_dIniciR2"
+                            android:inputType="text"
+                            android:focusable="false"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:imeOptions="actionDone"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/tildatainiciR2"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginStart="10dp"
+                        android:hint="Dia Final"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:id="@+id/tildatafinalR2">
+                        <AutoCompleteTextView
+                            android:layout_width="match_parent"
+                            android:layout_height="60dp"
+                            android:id="@+id/actv_dFinalR2"
+                            android:inputType="text"
+                            android:focusable="false"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:imeOptions="actionDone"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="10dp">
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_marginEnd="10dp"
+                        app:layout_constraintEnd_toStartOf="@+id/tilhorafinalR2"
+                        android:hint="Hora inici"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:id="@+id/tilhorainiciR2">
+                        <AutoCompleteTextView
+                            android:layout_width="match_parent"
+                            android:layout_height="60dp"
+                            android:id="@+id/actv_tipusRC"
+                            android:inputType="text"
+                            android:focusable="false"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:imeOptions="actionDone"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/tilhorainiciR2"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginStart="10dp"
+                        android:hint="Hora final"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:id="@+id/tilhorafinalR2">
+                        <AutoCompleteTextView
+                            android:layout_width="match_parent"
+                            android:layout_height="60dp"
+                            android:id="@+id/actv_capacitatRC"
+                            android:inputType="text"
+                            android:focusable="false"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:imeOptions="actionDone"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
         <com.google.android.material.button.MaterialButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/btnSeguent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/card3R2"
+            app:layout_constraintTop_toBottomOf="@+id/cardHorari"
             android:text="Següent"
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="70dp"
             android:layout_marginBottom="25dp"
             app:icon="@drawable/baseline_arrow_forward_24"
             app:iconGravity="textEnd"/>
-
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </ScrollView>

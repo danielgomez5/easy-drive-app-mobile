@@ -98,8 +98,8 @@ class CrudApiEasyDrive() : CoroutineScope {
             return null
     }
 
-    fun getZonaxComunitat(comunitat: String): List<Zona>? {
-        var resposta: Response<List<Zona>>? = null
+    fun getZonaxComunitat(comunitat: String): List<String>? {
+        var resposta: Response<List<String>>? = null
         runBlocking {
             val cor = launch {
                 resposta =
@@ -128,7 +128,7 @@ class CrudApiEasyDrive() : CoroutineScope {
             return null
     }
 
-    fun updateUserFoto(id : String, rutaPerfil: String?, rutaTecnica: String?): Boolean {
+    fun updateUserFoto(id : String, rutaPerfil: String?, fotoCarnet: String?): Boolean {
         val filePerfil = File(rutaPerfil)
         //val fileTecnica = File(rutaTecnica)
 
@@ -155,58 +155,27 @@ class CrudApiEasyDrive() : CoroutineScope {
         }
     }
 
-}
+    fun updateCotxeFitxaTecnica(id : String, rutaFitxaTecnica: File): Boolean {
 
-/*suspend fun insertUsuari(usuari: Usuari, ruta: String): Boolean{
-        val file = File(ruta)
-        if (!file.exists()){
-            Log.i("pujaArxiu", "No existeix l'arxiu: "+ruta)
-            return false
-        }else {
-            val gson = Gson()
-            val jsonUsuari = gson.toJson(usuari)
-            val requestBodyUsuari = jsonUsuari.toRequestBody("application/json".toMediaTypeOrNull())
+        val requestBodyPerfil = rutaFitxaTecnica.asRequestBody("file/*".toMediaTypeOrNull())
 
-            // Crear la imagen como `MultipartBody.Part`
-            val foto: RequestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
-            val bodyImatge = MultipartBody.Part.createFormData("f_perfil", file.name, foto)
+        val fitxaTecnica = MultipartBody.Part.createFormData("f_perfil", rutaFitxaTecnica.name, requestBodyPerfil)
 
-            var resposta: Response<Missatge>? = null
-
-                    resposta = getRetrofit().create(ApiService::class.java).insertUser(requestBodyUsuari, bodyImatge, null)
-
-            if (resposta!!.isSuccessful)
-                return true
-            else
-                return false
-
-        }
-    }*/
-
-    /*fun pujaArxiu(ruta: String, context:Context): Boolean{
-        val file = File(ruta)
-        if (!file.exists()){
-            Toast.makeText(context, "No existeix l'arxiu", Toast.LENGTH_LONG).show()
-            Log.i("pujaArxiu", "No existeix l'arxiu: "+ruta)
-            return false
-        }else {
-            val foto : RequestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
-            val bodyImatge = MultipartBody.Part.createFormData("image", file.name, foto)
-
-            var resposta : Response<Missatge>? = null
-            runBlocking {
-                val cor = launch {
-                    resposta = getRetrofit().create(ApiService::class.java).uploadFile(bodyImatge)
+        return runBlocking {
+            try {
+                val resposta = getRetrofit().create(ApiService::class.java).updateCotxeFTecnic(id, fitxaTecnica)
+                if (resposta.isSuccessful) {
+                    Log.d("API", "Imagen subida correctamente")
+                    true
+                } else {
+                    Log.e("APIError", "Error en la respuesta: ${resposta.message()}")
+                    false
                 }
-                cor.join()
+            } catch (e: Exception) {
+                Log.e("APIError", "Error al realizar la petición: ${e.localizedMessage}")
+                false
             }
-            if (resposta!!.isSuccessful)
-                return true
-            else{
-                Log.i("resposta", resposta!!.message().toString())
-                return false
-            }
-
         }
+    }
 
-    }*/
+}

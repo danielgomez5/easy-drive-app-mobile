@@ -8,13 +8,11 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.easydrive.R
@@ -23,11 +21,9 @@ import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.Zona
 import com.example.easydrive.databinding.ActivityRegistre2Binding
 import com.google.android.material.datepicker.MaterialDatePicker
-import java.io.File
-import java.io.FileInputStream
-import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 class Registre2 : AppCompatActivity() {
@@ -35,6 +31,7 @@ class Registre2 : AppCompatActivity() {
     private var usuari: Usuari?=null
     private var ruta: String ?=null
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
+    private var zonaEscollida: Zona? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,46 +47,13 @@ class Registre2 : AppCompatActivity() {
         usuari = intent.getSerializableExtra("usuari") as? Usuari
         binding.til5CardR2.visibility = View.GONE
         binding.til6CardR2.visibility = View.GONE
-
-        val crud = CrudApiEasyDrive()
-        var zona = crud.getComunitats() ?: listOf()
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, zona)
-        binding.actvComunitatR2.setAdapter(adapter)
-
-        var ciutatsZona: List<Zona>? = null
-        var provinciaZona: List<Zona>?=null
-        var nomCiutat: List<String>? = null
-        var nomProvincia: List<String>? = null
-        binding.actvComunitatR2.setOnItemClickListener { parent, view, position, id ->
-            binding.til5CardR2.visibility = View.VISIBLE
-            val comunitat = zona[position]
-
-            provinciaZona = crud.getZonaxComunitat(comunitat)
-            nomProvincia = provinciaZona?.map { it.provincia }
-
-            val adapterProvincia = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, nomProvincia!!)
-            binding.actvProvinciaR2.setAdapter(adapterProvincia)
-        }
-        binding.actvProvinciaR2.setOnItemClickListener { parent, view, position, id ->
-            binding.til6CardR2.visibility = View.VISIBLE
-            val provincia = nomProvincia?.get(position)
-
-            ciutatsZona = crud.getZonaxProvincia(provincia.toString())
-            nomCiutat = ciutatsZona?.map { it.ciutat }
-
-            val adapterciutat = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, nomCiutat!!)
-            binding.actvCiutatR2.setAdapter(adapterciutat)
+        if (usuari?.rol == true){
+            binding.cardHorari.visibility = View.VISIBLE
+        } else{
+            binding.cardHorari.visibility = View.GONE
         }
 
-        var zonaEscollida: Zona? = null
-        binding.actvCiutatR2.setOnItemClickListener { parent, view, position, id ->
-            val ciudadSeleccionada = nomCiutat?.get(position)
-
-            if (ciudadSeleccionada != null) {
-                zonaEscollida = ciutatsZona?.find { it.ciutat == ciudadSeleccionada }
-                Log.d("zonaEscollida", zonaEscollida.toString())
-            }
-        }
+        carregaComboBox()
 
         binding.imagebtnR1.setOnClickListener {
             startActivity(Intent(this, Registre1::class.java))
@@ -104,15 +68,9 @@ class Registre2 : AppCompatActivity() {
 
             datePicker.addOnPositiveButtonClickListener {
                 val sdf = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-                val dateString = sdf.format(it)
-                binding.tieDataNeixR2.setText(dateString)
-                try {
-                    // Convertimos el String de vuelta a Date
-                    val date = sdf.parse(dateString)
-                    usuari?.data_neix = date
-                } catch (e: ParseException) {
-                    e.printStackTrace()
-                }
+                val date = Date(it) // Convertimos el timestamp a Date
+                binding.tieDataNeixR2.setText(sdf.format(date)) // Mostrarla bien en el input
+                usuari?.data_neix = date // Guardar como Date
             }
         }
 
@@ -161,9 +119,50 @@ class Registre2 : AppCompatActivity() {
         }
     }
 
+    private fun carregaComboBox() {
+        val crud = CrudApiEasyDrive()
+        var zona = crud.getComunitats() ?: listOf()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, zona)
+        binding.actvComunitatR2.setAdapter(adapter)
+
+        var ciutatsZona: List<Zona>? = null
+        var nomCiutat: List<String>? = null
+        var nomProvincia: List<String>? = null
+        binding.actvComunitatR2.setOnItemClickListener { parent, view, position, id ->
+            binding.til5CardR2.visibility = View.VISIBLE
+            val comunitat = zona[position]
+
+            nomProvincia = crud.getZonaxComunitat(comunitat)
+
+            val adapterProvincia = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, nomProvincia!!)
+            binding.actvProvinciaR2.setAdapter(adapterProvincia)
+        }
+        binding.actvProvinciaR2.setOnItemClickListener { parent, view, position, id ->
+            binding.til6CardR2.visibility = View.VISIBLE
+            val provincia = nomProvincia?.get(position)
+
+            ciutatsZona = crud.getZonaxProvincia(provincia.toString())
+            nomCiutat = ciutatsZona?.map { it.ciutat }
+
+            val adapterciutat = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, nomCiutat!!)
+            binding.actvCiutatR2.setAdapter(adapterciutat)
+        }
+
+
+        binding.actvCiutatR2.setOnItemClickListener { parent, view, position, id ->
+            val ciudadSeleccionada = nomCiutat?.get(position)
+
+            if (ciudadSeleccionada != null) {
+                zonaEscollida = ciutatsZona?.find { it.ciutat == ciudadSeleccionada }
+                Log.d("zonaEscollida", zonaEscollida.toString())
+            }
+        }
+    }
+
     private fun addTaxista() {
         val intent = Intent(this,RegistreCotxe::class.java)
         intent.putExtra("usuari",usuari)
+        intent.putExtra("ruta", ruta)
         Log.d("usuari prova taxi", usuari.toString())
         startActivity(intent)
     }
@@ -194,18 +193,4 @@ class Registre2 : AppCompatActivity() {
             cursor?.close()
         }
     }
-
-    /*fun convertirImagenABinary(uri: Uri?): ByteArray? {
-        return try {
-            // Obtener el InputStream directamente del Uri
-            val inputStream = contentResolver.openInputStream(uri!!)
-            val byteArray = inputStream?.readBytes() // Lee el archivo como bytes
-
-            inputStream?.close() // Cerrar el InputStream
-            byteArray
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }*/
 }

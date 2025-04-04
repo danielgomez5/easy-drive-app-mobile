@@ -33,12 +33,6 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        /*val crud = CrudApiEasyDrive()
-
-        var zona = crud.getZona()
-
-        Log.d("zones", zona.toString())*/
         // Aquí sería donde puedes agregar el código para los permisos
         if (comprovaPermisLectura()) {
             permis_lectura = true
