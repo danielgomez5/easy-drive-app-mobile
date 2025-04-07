@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import com.example.easydrive.R
 import com.example.easydrive.databinding.ActivityIniciUsuariBinding
 import com.example.easydrive.fragments.HomeUsuari
+import com.example.easydrive.fragments.ViatgesGuardats
 import com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener
 
 class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
@@ -39,6 +40,7 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         binding.bnv.setOnItemSelectedListener { item ->
             when(item.itemId){
                 R.id.menuInici -> canviaFragment(HomeUsuari())
+                R.id.menuDestinsGuardats -> canviaFragment(ViatgesGuardats())
                 else -> canviaFragment(HomeUsuari())
             }
         }

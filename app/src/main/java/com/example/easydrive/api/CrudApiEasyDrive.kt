@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import com.example.easydrive.R
+import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.Zona
@@ -55,11 +56,26 @@ class CrudApiEasyDrive() : CoroutineScope {
 
     }
 
+    //Insert
     fun insertUsuari(usuari: Usuari): Boolean {
         var resposta: Response<Missatge>? = null
         runBlocking {
             val cor = launch {
                 resposta = getRetrofit().create(ApiService::class.java).insertUser(usuari)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
+
+    fun insertCotxe(cotxe: Cotxe): Boolean {
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).insertCotxe(cotxe)
             }
             cor.join()
         }
@@ -84,6 +100,7 @@ class CrudApiEasyDrive() : CoroutineScope {
             return null
     }*/
 
+    //GET
     fun getComunitats(): List<String>? {
         var resposta: Response<List<String>>? = null
         runBlocking {
@@ -128,19 +145,22 @@ class CrudApiEasyDrive() : CoroutineScope {
             return null
     }
 
-    fun updateUserFoto(id : String, rutaPerfil: String?, fotoCarnet: String?): Boolean {
+    //Update
+    fun updateUserFoto(id: String, rutaPerfil: String?, fotoCarnet: String?): Boolean {
         val filePerfil = File(rutaPerfil)
         //val fileTecnica = File(rutaTecnica)
 
         val requestBodyPerfil = filePerfil.asRequestBody("image/*".toMediaTypeOrNull())
         //val requestBodyTecnica = fileTecnica.asRequestBody("image/*".toMediaTypeOrNull())
 
-        val partPerfil = MultipartBody.Part.createFormData("f_perfil", filePerfil.name, requestBodyPerfil)
+        val partPerfil =
+            MultipartBody.Part.createFormData("f_perfil", filePerfil.name, requestBodyPerfil)
         //val partTecnica = MultipartBody.Part.createFormData("image", fileTecnica.name, requestBodyTecnica)
 
         return runBlocking {
             try {
-                val resposta = getRetrofit().create(ApiService::class.java).updateUserImage(id, partPerfil, null)
+                val resposta = getRetrofit().create(ApiService::class.java)
+                    .updateUserImage(id, partPerfil, null)
                 if (resposta.isSuccessful) {
                     Log.d("API", "Imagen subida correctamente")
                     true
@@ -155,15 +175,17 @@ class CrudApiEasyDrive() : CoroutineScope {
         }
     }
 
-    fun updateCotxeFitxaTecnica(id : String, rutaFitxaTecnica: File): Boolean {
+    fun updateCotxeFitxaTecnica(id: String, rutaFitxaTecnica: File): Boolean {
 
         val requestBodyPerfil = rutaFitxaTecnica.asRequestBody("file/*".toMediaTypeOrNull())
 
-        val fitxaTecnica = MultipartBody.Part.createFormData("f_perfil", rutaFitxaTecnica.name, requestBodyPerfil)
+        val fitxaTecnica =
+            MultipartBody.Part.createFormData("f_perfil", rutaFitxaTecnica.name, requestBodyPerfil)
 
         return runBlocking {
             try {
-                val resposta = getRetrofit().create(ApiService::class.java).updateCotxeFTecnic(id, fitxaTecnica)
+                val resposta = getRetrofit().create(ApiService::class.java)
+                    .updateCotxeFTecnic(id, fitxaTecnica)
                 if (resposta.isSuccessful) {
                     Log.d("API", "Imagen subida correctamente")
                     true
@@ -177,5 +199,19 @@ class CrudApiEasyDrive() : CoroutineScope {
             }
         }
     }
-
 }
+   /* fun updateZonaCoberta(id: String): Boolean{
+        var resposta: Response<List<String>>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).updateZonaCuberta(id)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return resposta!!.body()
+        else
+            return null
+    }
+
+}*/
