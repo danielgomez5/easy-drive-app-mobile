@@ -25,27 +25,33 @@ interface ApiService {
     @POST("/api/cotxe")
     suspend fun insertCotxe(@Body cotxe: Cotxe): Response<Missatge>
 
-    /*@Multipart
+    @Multipart
     @POST("/api/usuari")
-    suspend fun insertUser(
+    suspend fun insertUser2(
         @Part("usuari") usuari: RequestBody,
-        @Part f_perfil: MultipartBody.Part?,
-        @Part f_tecnica: MultipartBody.Part?
-    ): Response<Missatge>*/
+        @Part fotoPerfil: MultipartBody.Part?,
+        @Part fotoCarnet: MultipartBody.Part?
+    ): Response<Missatge>
 
     //Puts
     @Multipart
     @PUT("/api/usuari_image/{id}")
     suspend fun updateUserImage(
+        @Path("id") id: String, @Part f_perfil: MultipartBody.Part?
+    ): Response<Missatge>
+
+    @Multipart
+    @PUT("/api/usuari_image/{id}")
+    suspend fun updateUserImageCarnet(
         @Path("id") id: String, @Part f_perfil: MultipartBody.Part?,
         @Part f_tecnica: MultipartBody.Part?
     ): Response<Missatge>
 
     @Multipart
-    @PUT("/api/cotxe_tecinc/{matricula}")
-    suspend fun updateCotxeFTecnic(@Path("matricula") matricula: String, a_tecnic: MultipartBody.Part?): Response<Missatge>
+    @PUT("/api/cotxe_ftecnic/{matricula}")
+    suspend fun updateCotxeFTecnic(@Path("matricula") matricula: String, @Part f_tecnic: MultipartBody.Part?): Response<Missatge>
 
-    @PUT("/api/zona/{id}")
+    @PUT("/api/zona_habilitada/{id}")
     suspend fun updateZonaCuberta(@Path("id") id: String) : Response<Missatge>
 
     //Gets
@@ -61,9 +67,4 @@ interface ApiService {
     @GET("/api/zones_ciutat/{provincia}")
     suspend fun getZonesXProvincia(@Path("provincia") provincia: String): Response<List<Zona>>
 
-
-    /*
-    * @GET("/api/zones_ciutat/")
-    suspend fun getZonesXComunitat(@Query("comunitat") comunitat: String): Response<List<Zona>>
-    * */
 }

@@ -2,6 +2,7 @@ package com.example.easydrive.activities.registre
 
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -21,6 +22,8 @@ import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.Zona
 import com.example.easydrive.databinding.ActivityRegistre2Binding
 import com.google.android.material.datepicker.MaterialDatePicker
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -67,12 +70,14 @@ class Registre2 : AppCompatActivity() {
             datePicker.show(supportFragmentManager, "DATE_PICKER")
 
             datePicker.addOnPositiveButtonClickListener {
-                val sdf = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
-                val date = Date(it) // Convertimos el timestamp a Date
-                binding.tieDataNeixR2.setText(sdf.format(date)) // Mostrarla bien en el input
-                usuari?.data_neix = date // Guardar como Date
+                val sdfBD = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val date = Date(it)
+                binding.tieDataNeixR2.setText(sdf.format(date))
+                usuari?.dataNaixement = sdfBD.format(date)
             }
         }
+
 
         binding.btnSeguent.setOnClickListener {
             if (!binding.tieNomR2.text.isNullOrBlank() && !binding.tieCognomR2.text.isNullOrBlank() && !binding.tieDniR2.text.isNullOrBlank() && !binding.tieDataNeixR2.text.isNullOrBlank()){
@@ -80,7 +85,6 @@ class Registre2 : AppCompatActivity() {
                 usuari?.nom = binding.tieNomR2.text.toString()
                 usuari?.cognom = binding.tieCognomR2.text.toString()
                 usuari?.dni = binding.tieDniR2.text.toString()
-                //usuari?.data_neix = binding.tieDataNeixR2.text.toString()
                 usuari?.idZona = zonaEscollida?.id
                 when(usuari?.rol){
                     true ->{
@@ -98,13 +102,20 @@ class Registre2 : AppCompatActivity() {
             }
         }
 
-        resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        /*resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK){
                 var imageUri = result.data?.data
-
                 ruta = getRealPathFromUri(imageUri)
                 Log.d("ruta launcher", ruta.toString())
 
+            }
+        }*/
+        resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK){
+                val imageUri = result.data?.data
+                //ruta = imageUri?.let { comprimirImagen(it) } // ← Esto es un String
+                usuari?.fotoPerfil = imageUri?.let { comprimirImagen(it) }
+                Log.d("ruta comprimida", usuari?.fotoPerfil.toString())
             }
         }
 
@@ -192,5 +203,15 @@ class Registre2 : AppCompatActivity() {
         } finally {
             cursor?.close()
         }
+    }
+
+    fun comprimirImagen(uri: Uri): String? {
+        val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+        val file = File(cacheDir, "compressed_image_${System.currentTimeMillis()}.jpg")
+        val outputStream = FileOutputStream(file)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream) // Calidad: 50%
+        outputStream.flush()
+        outputStream.close()
+        return file.absolutePath
     }
 }

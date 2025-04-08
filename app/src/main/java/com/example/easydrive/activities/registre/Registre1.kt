@@ -3,6 +3,7 @@ package com.example.easydrive.activities.registre
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -35,33 +36,24 @@ class Registre1 : AppCompatActivity() {
 
         usuari = Usuari(null, null,null,null,null,null,null,null,null,null,null,null,null)
         binding.btnSeguent.setOnClickListener {
-            /*if (identificador != -1) {
-
+            if (binding.toggleButton.checkedButtonId != View.NO_ID) {
+                if (!binding.tieNumMobilR1.text.isNullOrBlank() || !binding.tieCorreuR1.text.isNullOrBlank() || !binding.tieRepeteixCorreuR1.text.isNullOrBlank()){
+                    if (binding.tieCorreuR1.text.toString().equals(binding.tieRepeteixCorreuR1.text.toString())){
+                        usuari?.telefon = binding.tieNumMobilR1.text?.toString()
+                        usuari?.email = binding.tieCorreuR1.text?.toString()
+                        val intent = Intent(this,Registre2::class.java)
+                        intent.putExtra("usuari",usuari)
+                        Log.d("prova usuari", usuari.toString())
+                        startActivity(intent)
+                    }else{
+                        Toast.makeText(this, "Correu no consideix",Toast.LENGTH_LONG).show()
+                    }
+                } else{
+                    Toast.makeText(this, "error",Toast.LENGTH_LONG).show()
+                }
             }else{
                 Toast.makeText(this, "Error escull bla bla 2 opcions", Toast.LENGTH_LONG).show()
-            }*/
-            if (!binding.tieNumMobilR1.text.isNullOrBlank() || !binding.tieCorreuR1.text.isNullOrBlank() || !binding.tieRepeteixCorreuR1.text.isNullOrBlank()){
-                if (binding.tieCorreuR1.text.toString().equals(binding.tieRepeteixCorreuR1.text.toString())){
-                    /*if (identificador == 1){
-                        usuari.rol = true
-                    } else{
-                        usuari.rol = false
-                    }*/
-
-                    usuari?.telefon = binding.tieNumMobilR1.text?.toString()
-                    usuari?.email = binding.tieCorreuR1.text?.toString()
-                    val intent = Intent(this,Registre2::class.java)
-                    intent.putExtra("usuari",usuari)
-                    Log.d("prova usuari", usuari.toString())
-                    startActivity(intent)
-                }else{
-                    Toast.makeText(this, "Correu no consideix",Toast.LENGTH_LONG).show()
-                }
-            } else{
-                Toast.makeText(this, "error",Toast.LENGTH_LONG).show()
             }
-
-
         }
 
         binding.toggleButton.addOnButtonCheckedListener { group, checkedId, isChecked ->

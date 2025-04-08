@@ -1,9 +1,7 @@
 package com.example.easydrive.api
 
-import android.content.Context
+
 import android.util.Log
-import android.widget.Toast
-import com.example.easydrive.R
 import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Usuari
@@ -15,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -26,12 +25,6 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
-import java.security.SecureRandom
-import java.security.cert.CertificateFactory
-import javax.net.ssl.X509TrustManager
-import java.security.KeyStore
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManagerFactory
 import kotlin.coroutines.CoroutineContext
 
 class CrudApiEasyDrive() : CoroutineScope {
@@ -52,8 +45,6 @@ class CrudApiEasyDrive() : CoroutineScope {
         val gson = GsonBuilder().setLenient().create()
         return Retrofit.Builder().baseUrl(urlBase).client(getClient())
             .addConverterFactory(GsonConverterFactory.create(gson)).build()
-
-
     }
 
     //Insert
@@ -71,6 +62,46 @@ class CrudApiEasyDrive() : CoroutineScope {
             return false
     }
 
+    fun insertUsuari2(usuari: Usuari): Boolean {
+        val gson = Gson()  // Crear la instancia de Gson
+
+        // Archivos para las imágenes
+        val filePerfil = if (!usuari.fotoPerfil.isNullOrEmpty()) File(usuari.fotoPerfil) else null
+        val fileTecnica = if (!usuari.fotoCarnet.isNullOrEmpty()) File(usuari.fotoCarnet) else null
+
+        var partPerfil: MultipartBody.Part? = null
+        if (filePerfil != null) {
+            val requestBodyPerfil = filePerfil.asRequestBody("image/*".toMediaTypeOrNull())
+            partPerfil = MultipartBody.Part.createFormData("fotoPerfil", filePerfil.name, requestBodyPerfil)
+        }
+
+        var partCarnet: MultipartBody.Part? = null
+        if (fileTecnica != null) {
+            val requestBodyTecnica = fileTecnica.asRequestBody("image/*".toMediaTypeOrNull())
+            partCarnet = MultipartBody.Part.createFormData("fotoCarnet", fileTecnica.name, requestBodyTecnica)
+        }
+
+        // Crear un RequestBody para el objeto Usuari (en formato JSON)
+        val usuariJson = gson.toJson(usuari).toRequestBody("application/json".toMediaTypeOrNull())
+
+        // Realizar la llamada al servidor
+        var respuesta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                respuesta = getRetrofit().create(ApiService::class.java).insertUser2(usuariJson, partPerfil, partCarnet)
+            }
+            cor.join()
+        }
+
+        if (respuesta!!.isSuccessful) {
+            Log.d("InsertUsuari", "Usuario añadido correctamente")
+            return true
+        } else {
+            Log.d("InsertUsuari", "Error en la respuesta: ${respuesta?.message()}")
+            return false
+        }
+    }
+
     fun insertCotxe(cotxe: Cotxe): Boolean {
         var resposta: Response<Missatge>? = null
         runBlocking {
@@ -84,7 +115,6 @@ class CrudApiEasyDrive() : CoroutineScope {
         else
             return false
     }
-
 
     /*fun getZona(): List<Zona> ?{
         var resposta : Response<List<Zona>>? = null
@@ -146,21 +176,17 @@ class CrudApiEasyDrive() : CoroutineScope {
     }
 
     //Update
-    fun updateUserFoto(id: String, rutaPerfil: String?, fotoCarnet: String?): Boolean {
+    fun updateUserFoto(id: String, rutaPerfil: String?): Boolean {
         val filePerfil = File(rutaPerfil)
-        //val fileTecnica = File(rutaTecnica)
 
         val requestBodyPerfil = filePerfil.asRequestBody("image/*".toMediaTypeOrNull())
-        //val requestBodyTecnica = fileTecnica.asRequestBody("image/*".toMediaTypeOrNull())
 
-        val partPerfil =
-            MultipartBody.Part.createFormData("f_perfil", filePerfil.name, requestBodyPerfil)
-        //val partTecnica = MultipartBody.Part.createFormData("image", fileTecnica.name, requestBodyTecnica)
+        val partPerfil = MultipartBody.Part.createFormData("f_perfil", filePerfil.name, requestBodyPerfil)
 
         return runBlocking {
             try {
                 val resposta = getRetrofit().create(ApiService::class.java)
-                    .updateUserImage(id, partPerfil, null)
+                    .updateUserImage(id, partPerfil)
                 if (resposta.isSuccessful) {
                     Log.d("API", "Imagen subida correctamente")
                     true
@@ -175,19 +201,48 @@ class CrudApiEasyDrive() : CoroutineScope {
         }
     }
 
-    fun updateCotxeFitxaTecnica(id: String, rutaFitxaTecnica: File): Boolean {
+    fun updateUserFotoPerfilCarnet(id: String, rutaPerfil: String?, fotoCarnet: String?): Boolean {
+        val filePerfil = File(rutaPerfil)
+        val fileTecnica = File(fotoCarnet)
 
+        val requestBodyPerfil = filePerfil.asRequestBody("image/*".toMediaTypeOrNull())
+        val requestBodyTecnica = fileTecnica.asRequestBody("image/*".toMediaTypeOrNull())
+
+        val partPerfil =
+            MultipartBody.Part.createFormData("f_perfil", filePerfil.name, requestBodyPerfil)
+        val partTecnica = MultipartBody.Part.createFormData("f_tecnica", fileTecnica.name, requestBodyTecnica)
+
+        return runBlocking {
+            try {
+                val resposta = getRetrofit().create(ApiService::class.java)
+                    .updateUserImageCarnet(id, partPerfil, partTecnica)
+                if (resposta.isSuccessful) {
+                    Log.d("API", "Imagen subida correctamente")
+                    true
+                } else {
+                    Log.e("APIError", "Error en la respuesta: ${resposta.message()}")
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("APIError", "Error al realizar la petición: ${e.localizedMessage}")
+                false
+            }
+        }
+    }
+
+    fun updateCotxeFitxaTecnica(id: String, rutaFitxa: String): Boolean {
+        val rutaFitxaTecnica = File(rutaFitxa)
         val requestBodyPerfil = rutaFitxaTecnica.asRequestBody("file/*".toMediaTypeOrNull())
 
         val fitxaTecnica =
-            MultipartBody.Part.createFormData("f_perfil", rutaFitxaTecnica.name, requestBodyPerfil)
+            MultipartBody.Part.createFormData("f_tecnic", rutaFitxaTecnica.name, requestBodyPerfil)
 
         return runBlocking {
             try {
                 val resposta = getRetrofit().create(ApiService::class.java)
                     .updateCotxeFTecnic(id, fitxaTecnica)
                 if (resposta.isSuccessful) {
-                    Log.d("API", "Imagen subida correctamente")
+                    Log.d("API", "Archivo subido correctamente")
                     true
                 } else {
                     Log.e("APIError", "Error en la respuesta: ${resposta.message()}")
@@ -199,9 +254,9 @@ class CrudApiEasyDrive() : CoroutineScope {
             }
         }
     }
-}
-   /* fun updateZonaCoberta(id: String): Boolean{
-        var resposta: Response<List<String>>? = null
+
+    fun updateZonaCoberta(id: String): Boolean{
+        var resposta: Response<Missatge>? = null
         runBlocking {
             val cor = launch {
                 resposta = getRetrofit().create(ApiService::class.java).updateZonaCuberta(id)
@@ -209,9 +264,9 @@ class CrudApiEasyDrive() : CoroutineScope {
             cor.join()
         }
         if (resposta!!.isSuccessful)
-            return resposta!!.body()
+            return true
         else
-            return null
+            return false
     }
 
-}*/
+}

@@ -2,6 +2,7 @@ package com.example.easydrive.activities.registre
 
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -22,6 +23,7 @@ import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.databinding.ActivityRegistreCotxeBinding
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 
 class RegistreCotxe : AppCompatActivity() {
@@ -30,6 +32,7 @@ class RegistreCotxe : AppCompatActivity() {
     private var rutaPerfil: String? = null
     private var fotoCarnet: String? = null
     private var arxiuTecnic: File? = null
+    private var cotxe: Cotxe? = null
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
     //private lateinit var openDocumentLauncher: ActivityResultLauncher<Intent>
 
@@ -37,6 +40,7 @@ class RegistreCotxe : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
             Log.d("RegixtreCotxe", "URI seleccionada: $uri")
             arxiuTecnic= getFileFromUri(uri)
+            cotxe?.fotoFitxaTecnica = arxiuTecnic.toString()
             Log.d("arxiuTecnic launcher", arxiuTecnic.toString())
             /*uri?.let {
                 arxiuTecnic= getRealPathFromUri(uri)
@@ -56,19 +60,16 @@ class RegistreCotxe : AppCompatActivity() {
         }
         usuari = intent.getSerializableExtra("usuari") as? Usuari
         rutaPerfil = intent.getStringExtra("ruta")
-        var cotxe: Cotxe? = null
 
         carregarComboboxes()
 
         binding.imagebtnR1.setOnClickListener {
             startActivity(Intent(this, Registre2::class.java))
         }
-
-
+        cotxe = Cotxe(null,null,null,null,null,null,null,null,null)
         binding.btnSeguent.setOnClickListener {
-
             if (!binding.tieMarcaRC.text.isNullOrBlank() && !binding.tieModelRC.text.isNullOrBlank() && !binding.tieMatriculaRC.text.isNullOrBlank()
-                && binding.tieAnyRC.text.isNullOrBlank() && !binding.actvTipusRC.text.isNullOrBlank() && binding.tieColorRC.text.isNullOrBlank() && !binding.actvCapacitatRC.text.isNullOrBlank()
+                && !binding.tieAnyRC.text.isNullOrBlank() && !binding.actvTipusRC.text.isNullOrBlank() && !binding.tieColorRC.text.isNullOrBlank() && !binding.actvCapacitatRC.text.isNullOrBlank()
             ) {
                 cotxe?.matricula = binding.tieMatriculaRC.text.toString()
                 cotxe?.marca = binding.tieMarcaRC.text.toString()
@@ -96,12 +97,11 @@ class RegistreCotxe : AppCompatActivity() {
         }
         resultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    var imageUri = result.data?.data
-
-                    fotoCarnet = getRealPathFromUri(imageUri)
-                    Log.d("fotoCarnet launcher", fotoCarnet.toString())
-
+                if (result.resultCode == RESULT_OK){
+                    val imageUri = result.data?.data
+                    //ruta = imageUri?.let { comprimirImagen(it) } // ← Esto es un String
+                    usuari?.fotoCarnet = imageUri?.let { comprimirImagen(it) }
+                    Log.d("ruta comprimida", usuari?.fotoCarnet.toString())
                 }
             }
 
@@ -129,8 +129,13 @@ class RegistreCotxe : AppCompatActivity() {
         val intent = Intent(this,Registre3::class.java)
         intent.putExtra("usuari",usuari)
         intent.putExtra("ruta", rutaPerfil)
+        intent.putExtra("cotxe",cotxe)
+        intent.putExtra("fotoCarnet", fotoCarnet)
+        intent.putExtra("arxiuTecnic", arxiuTecnic.toString())
+
         Log.d("ruta prova", rutaPerfil.toString())
         Log.d("usuari prova", usuari.toString())
+        Log.d("cotxe prova", cotxe.toString())
         startActivity(intent)
     }
 
@@ -154,7 +159,7 @@ class RegistreCotxe : AppCompatActivity() {
         return listOf("2", "4", "5", "7", "8", "12")
     }
 
-    fun getRealPathFromUri(contentUri: Uri?): String? {
+    /*fun getRealPathFromUri(contentUri: Uri?): String? {
         var cursor: Cursor? = null
         return try {
             val proj = arrayOf(MediaStore.Images.Media.DATA)
@@ -165,6 +170,16 @@ class RegistreCotxe : AppCompatActivity() {
         } finally {
             cursor?.close()
         }
+    }*/
+
+    fun comprimirImagen(uri: Uri): String? {
+        val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+        val file = File(cacheDir, "compressed_image_${System.currentTimeMillis()}.jpg")
+        val outputStream = FileOutputStream(file)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream) // Calidad: 50%
+        outputStream.flush()
+        outputStream.close()
+        return file.absolutePath
     }
 
     fun getFileFromUri(uri: Uri?): File? {
