@@ -6,20 +6,16 @@ import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.Zona
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -62,46 +58,6 @@ class CrudApiEasyDrive() : CoroutineScope {
             return false
     }
 
-    fun insertUsuari2(usuari: Usuari): Boolean {
-        val gson = Gson()  // Crear la instancia de Gson
-
-        // Archivos para las imágenes
-        val filePerfil = if (!usuari.fotoPerfil.isNullOrEmpty()) File(usuari.fotoPerfil) else null
-        val fileTecnica = if (!usuari.fotoCarnet.isNullOrEmpty()) File(usuari.fotoCarnet) else null
-
-        var partPerfil: MultipartBody.Part? = null
-        if (filePerfil != null) {
-            val requestBodyPerfil = filePerfil.asRequestBody("image/*".toMediaTypeOrNull())
-            partPerfil = MultipartBody.Part.createFormData("fotoPerfil", filePerfil.name, requestBodyPerfil)
-        }
-
-        var partCarnet: MultipartBody.Part? = null
-        if (fileTecnica != null) {
-            val requestBodyTecnica = fileTecnica.asRequestBody("image/*".toMediaTypeOrNull())
-            partCarnet = MultipartBody.Part.createFormData("fotoCarnet", fileTecnica.name, requestBodyTecnica)
-        }
-
-        // Crear un RequestBody para el objeto Usuari (en formato JSON)
-        val usuariJson = gson.toJson(usuari).toRequestBody("application/json".toMediaTypeOrNull())
-
-        // Realizar la llamada al servidor
-        var respuesta: Response<Missatge>? = null
-        runBlocking {
-            val cor = launch {
-                respuesta = getRetrofit().create(ApiService::class.java).insertUser2(usuariJson, partPerfil, partCarnet)
-            }
-            cor.join()
-        }
-
-        if (respuesta!!.isSuccessful) {
-            Log.d("InsertUsuari", "Usuario añadido correctamente")
-            return true
-        } else {
-            Log.d("InsertUsuari", "Error en la respuesta: ${respuesta?.message()}")
-            return false
-        }
-    }
-
     fun insertCotxe(cotxe: Cotxe): Boolean {
         var resposta: Response<Missatge>? = null
         runBlocking {
@@ -116,19 +72,6 @@ class CrudApiEasyDrive() : CoroutineScope {
             return false
     }
 
-    /*fun getZona(): List<Zona> ?{
-        var resposta : Response<List<Zona>>? = null
-        runBlocking {
-            val cor = launch {
-                resposta = getRetrofit().create(ApiService::class.java).getZones()
-            }
-            cor.join()
-        }
-        if (resposta!!.isSuccessful)
-            return resposta!!.body()
-        else
-            return null
-    }*/
 
     //GET
     fun getComunitats(): List<String>? {
@@ -171,6 +114,20 @@ class CrudApiEasyDrive() : CoroutineScope {
         }
         if (resposta!!.isSuccessful)
             return resposta!!.body()
+        else
+            return null
+    }
+
+    fun getUsuariXCorreuContra(correu: String, pass: String): Usuari?{
+        var resposta: Response<List<Usuari>>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getUsuariViaContraPass()
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return resposta!!.body()?.get(0)
         else
             return null
     }

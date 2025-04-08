@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.easydrive.R
+import com.example.easydrive.activities.interficie_taxista.IniciTaxista
 import com.example.easydrive.activities.interficie_usuari.IniciUsuari
 import com.example.easydrive.api.CrudApiEasyDrive
 import com.example.easydrive.dades.Cotxe
@@ -130,7 +131,7 @@ class Registre3 : AppCompatActivity() {
         }
 
         if (taxistaAfegit && cotxeAfegit) {
-            startActivity(Intent(this, IniciUsuari::class.java))
+            startActivity(Intent(this, IniciTaxista::class.java))
         }
     }
 }

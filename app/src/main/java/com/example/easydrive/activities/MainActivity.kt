@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -12,8 +13,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.easydrive.R
+import com.example.easydrive.activities.interficie_taxista.IniciTaxista
+import com.example.easydrive.activities.interficie_usuari.IniciUsuari
 import com.example.easydrive.activities.registre.Registre1
 import com.example.easydrive.api.CrudApiEasyDrive
+import com.example.easydrive.dades.Usuari
 import com.example.easydrive.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -33,6 +37,7 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        val crud = CrudApiEasyDrive()
         // Aquí sería donde puedes agregar el código para los permisos
         if (comprovaPermisLectura()) {
             permis_lectura = true
@@ -57,7 +62,26 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
 
-
+        binding.btnLogin.setOnClickListener {
+            if (!binding.tieCorreuLogin.text.isNullOrBlank() && !binding.tieContrsenyaLogin.text.isNullOrBlank()){
+                val usuari = (crud.getUsuariXCorreuContra(binding.tieCorreuLogin.text.toString(), binding.tieContrsenyaLogin.text.toString()))
+                if (usuari !=null){
+                    when(usuari?.rol){
+                       false->{
+                           startActivity(Intent(this, IniciUsuari::class.java))
+                       }
+                        true->{
+                            startActivity(Intent(this, IniciTaxista::class.java))
+                        }
+                        else->{
+                            Toast.makeText(this, "El usuari no està registrat en la aplicació", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }else{
+                Toast.makeText(this, "N'hi ha un camp vuit", Toast.LENGTH_LONG).show()
+            }
+        }
     }
     fun comprovaPermisLectura(): Boolean {
         return ContextCompat.checkSelfPermission(
