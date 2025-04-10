@@ -32,6 +32,7 @@ class RegistreCotxe : AppCompatActivity() {
     private var rutaPerfil: String? = null
     private var fotoCarnet: String? = null
     private var arxiuTecnic: File? = null
+    //private var arxiuTecnic: String? = null
     private var cotxe: Cotxe? = null
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
     //private lateinit var openDocumentLauncher: ActivityResultLauncher<Intent>
@@ -39,14 +40,13 @@ class RegistreCotxe : AppCompatActivity() {
     private val openDocumentLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
             Log.d("RegixtreCotxe", "URI seleccionada: $uri")
-            arxiuTecnic= getFileFromUri(uri)
-            cotxe?.fotoFitxaTecnica = arxiuTecnic.toString()
-            Log.d("arxiuTecnic launcher", arxiuTecnic.toString())
-            /*uri?.let {
-                arxiuTecnic= getRealPathFromUri(uri)
+
+                //arxiuTecnic = getRealPathFromUri(uri)
+            arxiuTecnic = getFileFromUri(uri)
+                cotxe?.fotoFitxaTecnica = arxiuTecnic.toString()
                 Log.d("arxiuTecnic launcher", arxiuTecnic.toString())
-            }*/
-    }
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,7 +110,8 @@ class RegistreCotxe : AppCompatActivity() {
                 type = "text/plain"
             }
             openDocumentLauncher.launch(fitxer)*/
-            openDocumentLauncher.launch(arrayOf("application/octet-stream", "text/plain"))
+            //openDocumentLauncher.launch(arrayOf("application/octet-stream", "text/plain"))
+            openDocumentLauncher.launch(arrayOf("application/pdf"))
         }
 
         /*resultLauncher =
@@ -159,18 +160,24 @@ class RegistreCotxe : AppCompatActivity() {
         return listOf("2", "4", "5", "7", "8", "12")
     }
 
-    /*fun getRealPathFromUri(contentUri: Uri?): String? {
+    fun getRealPathFromUri(contentUri: Uri?): String? {
         var cursor: Cursor? = null
         return try {
-            val proj = arrayOf(MediaStore.Images.Media.DATA)
-            cursor = this.getContentResolver().query(contentUri!!, proj, null, null, null)
-            val column_index: Int = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-            cursor!!.moveToFirst()
-            cursor.getString(column_index)
+            // Consulta para obtener la ruta del archivo
+            val proj = arrayOf(MediaStore.Files.FileColumns.DATA)
+            cursor = this.contentResolver.query(contentUri!!, proj, null, null, null)
+            val column_index: Int = cursor!!.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA)
+            cursor.moveToFirst()
+
+            // Comprobamos si la ruta existe
+            val filePath = cursor.getString(column_index)
+            Log.d("getRealPathFromUri", "Ruta del archivo: $filePath")
+            filePath
         } finally {
             cursor?.close()
         }
-    }*/
+    }
+
 
     fun comprimirImagen(uri: Uri): String? {
         val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
@@ -182,11 +189,11 @@ class RegistreCotxe : AppCompatActivity() {
         return file.absolutePath
     }
 
-    fun getFileFromUri(uri: Uri?): File? {
+    /*fun getFileFromUri(uri: Uri?): File? {
         if (uri == null) return null
 
         val inputStream = this.getContentResolver().openInputStream(uri) ?: return null
-        val file = File(this.cacheDir, "temp_file")
+        val file = File(this.cacheDir)
 
         return try {
             file.outputStream().use { outputStream ->
@@ -199,7 +206,52 @@ class RegistreCotxe : AppCompatActivity() {
         } finally {
             inputStream.close()
         }
+    }*/
+    fun getFileFromUri(uri: Uri?): File? {
+        if (uri == null) return null
+
+        // Obtén el nombre del archivo
+        val fileName = getFileNameFromUri(uri) ?: "default_filename"
+
+        // Crea un archivo en un directorio específico (por ejemplo, el directorio de documentos)
+        val outputDir = File(getExternalFilesDir(null), "my_files") // Puedes cambiar esta ubicación según lo necesites
+        if (!outputDir.exists()) {
+            outputDir.mkdir() // Crea el directorio si no existe
+        }
+
+        val outputFile = File(outputDir, fileName)
+
+        val inputStream = contentResolver.openInputStream(uri) ?: return null
+
+        return try {
+            outputFile.outputStream().use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+            outputFile // Retorna el archivo
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        } finally {
+            inputStream.close()
+        }
     }
+
+    fun getFileNameFromUri(uri: Uri): String? {
+        var cursor: Cursor? = null
+        return try {
+            // Consulta para obtener el nombre del archivo
+            val proj = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
+            cursor = contentResolver.query(uri, proj, null, null, null)
+            val columnIndex: Int = cursor?.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME) ?: -1
+            cursor?.moveToFirst()
+
+            // Si se encuentra el nombre, lo devuelve
+            if (columnIndex != -1) cursor?.getString(columnIndex) else null
+        } finally {
+            cursor?.close()
+        }
+    }
+
 
 
 }

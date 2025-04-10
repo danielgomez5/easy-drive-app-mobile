@@ -58,31 +58,43 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.registre.setOnClickListener {
-            startActivity(Intent(this,Registre1::class.java))
+            startActivity(Intent(this, Registre1::class.java))
             finish()
         }
 
         binding.btnLogin.setOnClickListener {
-            if (!binding.tieCorreuLogin.text.isNullOrBlank() && !binding.tieContrsenyaLogin.text.isNullOrBlank()){
-                val usuari = (crud.getUsuariXCorreuContra(binding.tieCorreuLogin.text.toString(), binding.tieContrsenyaLogin.text.toString()))
-                if (usuari !=null){
-                    when(usuari?.rol){
-                       false->{
-                           startActivity(Intent(this, IniciUsuari::class.java))
-                       }
-                        true->{
+            if (!binding.tieCorreuLogin.text.isNullOrBlank() && !binding.tieContrsenyaLogin.text.isNullOrBlank()) {
+                val usuari = crud.getUsuariXCorreuContra(
+                    binding.tieCorreuLogin.text.toString(),
+                    binding.tieContrsenyaLogin.text.toString()
+                )
+                if (usuari != null) {
+                    when (usuari?.rol) {
+                        false -> {
+                            startActivity(Intent(this, IniciUsuari::class.java))
+                        }
+
+                        true -> {
                             startActivity(Intent(this, IniciTaxista::class.java))
                         }
-                        else->{
-                            Toast.makeText(this, "El usuari no està registrat en la aplicació", Toast.LENGTH_LONG).show()
+
+                        else -> {
+                            Toast.makeText(
+                                this,
+                                "El usuari no està registrat en la aplicació",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     }
+                }else{
+                    Toast.makeText(this, "No hi ha cap registre, profavore registrat", Toast.LENGTH_LONG).show()
                 }
-            }else{
+            } else {
                 Toast.makeText(this, "N'hi ha un camp vuit", Toast.LENGTH_LONG).show()
             }
         }
     }
+
     fun comprovaPermisLectura(): Boolean {
         return ContextCompat.checkSelfPermission(
             this,

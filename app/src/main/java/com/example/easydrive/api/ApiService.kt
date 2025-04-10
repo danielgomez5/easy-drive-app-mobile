@@ -67,7 +67,7 @@ interface ApiService {
     @GET("/api/zones_ciutat/{provincia}")
     suspend fun getZonesXProvincia(@Path("provincia") provincia: String): Response<List<Zona>>
 
-    @GET("/api/usuari_correu_contra")
-    suspend fun getUsuariViaContraPass(): Response<List<Usuari>>
+    @GET("/api/usuari_login")
+    suspend fun getUsuariViaContraPass(@Query("email") email: String, @Query("password") password: String): Response<Usuari>
 
 }

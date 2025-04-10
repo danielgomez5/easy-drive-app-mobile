@@ -118,16 +118,16 @@ class CrudApiEasyDrive() : CoroutineScope {
             return null
     }
 
-    fun getUsuariXCorreuContra(correu: String, pass: String): Usuari?{
-        var resposta: Response<List<Usuari>>? = null
+    fun getUsuariXCorreuContra(email: String, password: String): Usuari?{
+        var resposta: Response<Usuari>? = null
         runBlocking {
             val cor = launch {
-                resposta = getRetrofit().create(ApiService::class.java).getUsuariViaContraPass()
+                resposta = getRetrofit().create(ApiService::class.java).getUsuariViaContraPass(email, password)
             }
             cor.join()
         }
         if (resposta!!.isSuccessful)
-            return resposta!!.body()?.get(0)
+            return resposta!!.body()
         else
             return null
     }
@@ -189,7 +189,7 @@ class CrudApiEasyDrive() : CoroutineScope {
 
     fun updateCotxeFitxaTecnica(id: String, rutaFitxa: String): Boolean {
         val rutaFitxaTecnica = File(rutaFitxa)
-        val requestBodyPerfil = rutaFitxaTecnica.asRequestBody("file/*".toMediaTypeOrNull())
+        val requestBodyPerfil = rutaFitxaTecnica.asRequestBody("application/pdf".toMediaTypeOrNull())
 
         val fitxaTecnica =
             MultipartBody.Part.createFormData("f_tecnic", rutaFitxaTecnica.name, requestBodyPerfil)

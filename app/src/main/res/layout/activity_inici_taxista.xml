@@ -25,25 +25,36 @@
             android:src="@drawable/logo_easydrive"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_margin="20dp"/>
-        <LinearLayout
+            android:layout_marginTop="50dp"
+            android:layout_marginStart="20dp"/>
+        <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_margin="20dp">
-            <TextView
+            app:cardCornerRadius="20dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="20dp">
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Disponibilitat:"
-                android:textStyle="bold"/>
-            <Switch
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:id="@+id/switchDisponiblitat"/>
-        </LinearLayout>
+                android:orientation="horizontal"
+                android:padding="05dp"
+                >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Disponibilitat:"
+                    android:layout_marginStart="10dp"
+                    android:textStyle="bold"/>
+                <Switch
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:id="@+id/switchDisponiblitat"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
     <com.google.android.material.navigation.NavigationView
