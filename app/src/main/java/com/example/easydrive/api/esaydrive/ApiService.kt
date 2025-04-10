@@ -1,6 +1,7 @@
-package com.example.easydrive.api
+package com.example.easydrive.api.esaydrive
 
 import com.example.easydrive.dades.Cotxe
+import com.example.easydrive.dades.LoginRequest
 import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.Zona
@@ -14,7 +15,6 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface ApiService {
 
@@ -67,7 +67,9 @@ interface ApiService {
     @GET("/api/zones_ciutat/{provincia}")
     suspend fun getZonesXProvincia(@Path("provincia") provincia: String): Response<List<Zona>>
 
-    @GET("/api/usuari_login")
-    suspend fun getUsuariViaContraPass(@Query("email") email: String, @Query("password") password: String): Response<Usuari>
+    /*@GET("/api/usuari_login")
+    suspend fun getUsuariViaContraPass(@Query("email") email: String, @Query("password") password: String): Response<Usuari>*/
+    @POST("/api/usuari_login")
+    suspend fun loginUsuari(@Body loginRequest: LoginRequest): Response<Usuari>
 
 }

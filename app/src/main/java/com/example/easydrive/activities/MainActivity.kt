@@ -16,7 +16,7 @@ import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_taxista.IniciTaxista
 import com.example.easydrive.activities.interficie_usuari.IniciUsuari
 import com.example.easydrive.activities.registre.Registre1
-import com.example.easydrive.api.CrudApiEasyDrive
+import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.databinding.ActivityMainBinding
 
@@ -64,18 +64,22 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnLogin.setOnClickListener {
             if (!binding.tieCorreuLogin.text.isNullOrBlank() && !binding.tieContrsenyaLogin.text.isNullOrBlank()) {
-                val usuari = crud.getUsuariXCorreuContra(
+                val usuari = crud.loginUsuari(
                     binding.tieCorreuLogin.text.toString(),
                     binding.tieContrsenyaLogin.text.toString()
                 )
                 if (usuari != null) {
                     when (usuari?.rol) {
                         false -> {
-                            startActivity(Intent(this, IniciUsuari::class.java))
+                            val intent = Intent(this, IniciUsuari::class.java)
+                            intent.putExtra("user", usuari)
+                            startActivity(intent)
                         }
 
                         true -> {
-                            startActivity(Intent(this, IniciTaxista::class.java))
+                            val intent = Intent(this, IniciTaxista::class.java)
+                            intent.putExtra("user", usuari)
+                            startActivity(intent)
                         }
 
                         else -> {

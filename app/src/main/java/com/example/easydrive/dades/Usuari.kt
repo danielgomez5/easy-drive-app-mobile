@@ -19,3 +19,6 @@ data class Usuari(
     var diponibiliat: Boolean?,
     var idZona: Int?
 ) : Serializable
+
+//Variables generals:
+var user: Usuari?=null

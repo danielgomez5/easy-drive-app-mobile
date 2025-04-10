@@ -3,8 +3,11 @@ package com.example.easydrive.activities.interficie_usuari
 import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresPermission
@@ -16,16 +19,13 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
 import com.example.easydrive.R
+import com.example.easydrive.dades.Usuari
+import com.example.easydrive.dades.user
 import com.example.easydrive.databinding.ActivityIniciUsuariBinding
 import com.example.easydrive.fragments.HomeUsuari
 import com.example.easydrive.fragments.ViatgesGuardats
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener
 
 class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
@@ -44,15 +44,18 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        user = intent.getSerializableExtra("user") as? Usuari
+        Log.d("Usuari", user.toString())
         //permisos
         if(comprovarPermisos()){
             permisos = true
 
-
         }else{
             demanarPermisos()
         }
-
+        afegirFoto()
+        editarHeader()
         actionBarDrawerToggle = ActionBarDrawerToggle(this, binding.main, R.string.obert, R.string.tancat)
         binding.main.addDrawerListener(actionBarDrawerToggle)
         binding.navigator.setNavigationItemSelectedListener(this)
@@ -69,6 +72,25 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
             }
         }
 
+
+    }
+
+    private fun editarHeader() {
+        val headerView = binding.navigator.getHeaderView(0)
+        //posar nom
+        val nomUser = headerView.findViewById<TextView>(R.id.nomCognomHeader)
+        nomUser.text = "${user?.nom} ${user?.cognom}"
+        //posar imatge
+        var fotoUser = headerView.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.fotoHeader)
+        Glide.with(this)
+            .load("http://172.16.24.115:7126/Photos/${user?.fotoPerfil}")
+            .into(fotoUser)
+    }
+
+    private fun afegirFoto() {
+        Glide.with(this)
+            .load("http://172.16.24.115:7126/Photos/${user?.fotoPerfil}")
+            .into(binding.btnPerfil)
     }
 
 

@@ -1,4 +1,4 @@
-package com.example.easydrive.api
+package com.example.easydrive.api.openroute
 
 import com.example.easydrive.dades.OpenRouteDades
 import retrofit2.Response

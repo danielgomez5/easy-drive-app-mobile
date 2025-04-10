@@ -1,8 +1,8 @@
-package com.example.easydrive.api
-
+package com.example.easydrive.api.esaydrive
 
 import android.util.Log
 import com.example.easydrive.dades.Cotxe
+import com.example.easydrive.dades.LoginRequest
 import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.Zona
@@ -118,7 +118,7 @@ class CrudApiEasyDrive() : CoroutineScope {
             return null
     }
 
-    fun getUsuariXCorreuContra(email: String, password: String): Usuari?{
+    /*fun getUsuariXCorreuContra(email: String, password: String): Usuari?{
         var resposta: Response<Usuari>? = null
         runBlocking {
             val cor = launch {
@@ -130,6 +130,22 @@ class CrudApiEasyDrive() : CoroutineScope {
             return resposta!!.body()
         else
             return null
+    }*/
+    fun loginUsuari(email: String, password: String): Usuari? {
+        var resposta: Response<Usuari>? = null
+        runBlocking {
+            val job = launch {
+                val loginData = LoginRequest(email, password)
+                resposta = getRetrofit().create(ApiService::class.java).loginUsuari(loginData)
+            }
+            job.join()
+        }
+
+        return if (resposta?.isSuccessful == true) {
+            resposta!!.body()
+        } else {
+            null
+        }
     }
 
     //Update

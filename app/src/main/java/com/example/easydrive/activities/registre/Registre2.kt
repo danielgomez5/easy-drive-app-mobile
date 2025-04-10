@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.easydrive.R
-import com.example.easydrive.api.CrudApiEasyDrive
+import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.Zona
 import com.example.easydrive.databinding.ActivityRegistre2Binding

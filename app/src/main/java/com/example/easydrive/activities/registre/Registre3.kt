@@ -1,6 +1,7 @@
 package com.example.easydrive.activities.registre
 
 import android.content.Intent
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -11,7 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_taxista.IniciTaxista
 import com.example.easydrive.activities.interficie_usuari.IniciUsuari
-import com.example.easydrive.api.CrudApiEasyDrive
+import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.databinding.ActivityRegistre3Binding
@@ -72,7 +73,6 @@ class Registre3 : AppCompatActivity() {
                     } else {
                         addUsuari(crud)
                     }
-
                 }
             }
         }
@@ -89,7 +89,9 @@ class Registre3 : AppCompatActivity() {
                 }
             }
             Log.d("3 if", "s'ha afegit")
-            startActivity(Intent(this, IniciUsuari::class.java))
+            val intent = Intent(this, IniciUsuari::class.java)
+            intent.putExtra("user", usuari)
+            startActivity(intent)
         } else {
             Toast.makeText(this, "no s'ha afegit", Toast.LENGTH_LONG).show()
             Log.d("3 if", "no s'ha afegit")
@@ -131,7 +133,9 @@ class Registre3 : AppCompatActivity() {
         }
 
         if (taxistaAfegit && cotxeAfegit) {
-            startActivity(Intent(this, IniciTaxista::class.java))
+            val intent = Intent(this, IniciTaxista::class.java)
+            intent.putExtra("user", usuari)
+            startActivity(intent)
         }
     }
 }
