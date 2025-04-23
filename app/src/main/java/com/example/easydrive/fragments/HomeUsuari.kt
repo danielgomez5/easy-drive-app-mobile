@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_usuari.MapaRutaUsuari
 import com.example.easydrive.adaptadors.AdaptadorRVDestins
+import com.example.easydrive.api.geoapify.CrudGeo
 import com.example.easydrive.databinding.FragmentHomeUsuariBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -36,9 +37,6 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
     private lateinit var binding: FragmentHomeUsuariBinding
     private var map: GoogleMap? = null
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private var desti: Geocoder?=null
-    private var adreces = mutableListOf<Address>()
-    private var noms = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +55,6 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         binding.btnBuscar.setOnClickListener {
             startActivity(Intent(requireContext(), MapaRutaUsuari::class.java))
         }
-        desti = Geocoder(requireContext())
         binding.buscaDesti.setOnClickListener {
             buscaDesti()
         }
@@ -91,25 +88,13 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
     }
 
     private fun buscaDesti() {
-        val textBuscar = binding.tieDestiFragmentHU.text.toString()
+        var textBuscar = binding.tieDestiFragmentHU.text.toString()
+        textBuscar.replace(" ","+")
+        val crudGeo = CrudGeo(requireContext())
+        val listaCarrers = crudGeo.getLocationByName(textBuscar)
+        binding.rcv.adapter = AdaptadorRVDestins(listaCarrers)
+        binding.rcv.layoutManager = LinearLayoutManager(requireContext())
 
-        if (textBuscar.isNotBlank()) {
-            val resultats = desti?.getFromLocationName(textBuscar, 5)
-            Log.d("resultados", resultats.toString())
-            adreces.clear()
-
-            if (!resultats.isNullOrEmpty()) {
-                for (adreca in resultats) {
-                    adreces.add(adreca)//
-                }
-            } else {
-                Toast.makeText(requireContext(), "No s'ha trobat cap destinació amb aquest nom.", Toast.LENGTH_SHORT).show()
-            }
-            binding.rcv.layoutManager = LinearLayoutManager(requireContext())
-            binding.rcv.adapter = AdaptadorRVDestins(adreces)
-        } else {
-            Toast.makeText(requireContext(), "Introdueix un destí per buscar", Toast.LENGTH_SHORT).show()
-        }
     }
 
 

@@ -8,8 +8,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.easydrive.R
+import com.example.easydrive.dades.GeoapifyDades
 
-class AdaptadorRVDestins(val llista: List<Address>) : RecyclerView.Adapter<AdaptadorRVDestins.ViewHolder>() {
+class AdaptadorRVDestins(val llista: List<GeoapifyDades>) : RecyclerView.Adapter<AdaptadorRVDestins.ViewHolder>() {
 
     class ViewHolder(val vista: View) : RecyclerView.ViewHolder(vista) {
         val textCarrer = vista.findViewById<TextView>(R.id.nomDestiCard)
@@ -25,7 +26,7 @@ class AdaptadorRVDestins(val llista: List<Address>) : RecyclerView.Adapter<Adapt
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = llista[position]
-        holder.textCarrer.setText("${item.thoroughfare},")
-        holder.textCiutat.setText(item.locality)
+        holder.textCarrer.setText(item.address_line1.toString() + ",")
+        holder.textCiutat.setText(item.city.toString())
     }
 }

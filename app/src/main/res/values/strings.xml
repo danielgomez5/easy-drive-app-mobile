@@ -4,5 +4,6 @@
     <string name="tancat">Tancat\n</string>
     <string name="api">AIzaSyCuMa8TfRYEmw0_Hy3DFlw8_FvRGHPxsdQ</string>
     <string name="api_openroute">5b3ce3597851110001cf62486b2f59d01de74e3ea839da8909cb8240</string>
+    <string name="api_geoapify">94a3643f15f2472a8040d0e905f96463</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
