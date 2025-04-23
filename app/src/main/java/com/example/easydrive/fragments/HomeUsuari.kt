@@ -4,10 +4,13 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -15,8 +18,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_usuari.MapaRutaUsuari
+import com.example.easydrive.adaptadors.AdaptadorRVDestins
 import com.example.easydrive.databinding.FragmentHomeUsuariBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -32,6 +37,8 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
     private var map: GoogleMap? = null
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private var desti: Geocoder?=null
+    private var adreces = mutableListOf<Address>()
+    private var noms = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +46,6 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
 
         }
     }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -49,8 +55,13 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         mapFragment?.getMapAsync(this)
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
         binding.btnBuscar.setOnClickListener {
-            startActivity(Intent(requireContext(), HomeUsuari::class.java))
+            startActivity(Intent(requireContext(), MapaRutaUsuari::class.java))
         }
+        desti = Geocoder(requireContext())
+        binding.buscaDesti.setOnClickListener {
+            buscaDesti()
+        }
+
         return binding.root
     }
 
@@ -77,7 +88,30 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
                 Toast.makeText(requireContext(), "No s'ha pogut obtenir la ubicació", Toast.LENGTH_SHORT).show()
             }
         }
-
     }
+
+    private fun buscaDesti() {
+        val textBuscar = binding.tieDestiFragmentHU.text.toString()
+
+        if (textBuscar.isNotBlank()) {
+            val resultats = desti?.getFromLocationName(textBuscar, 5)
+            Log.d("resultados", resultats.toString())
+            adreces.clear()
+
+            if (!resultats.isNullOrEmpty()) {
+                for (adreca in resultats) {
+                    adreces.add(adreca)//
+                }
+            } else {
+                Toast.makeText(requireContext(), "No s'ha trobat cap destinació amb aquest nom.", Toast.LENGTH_SHORT).show()
+            }
+            binding.rcv.layoutManager = LinearLayoutManager(requireContext())
+            binding.rcv.adapter = AdaptadorRVDestins(adreces)
+        } else {
+            Toast.makeText(requireContext(), "Introdueix un destí per buscar", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
 
 }

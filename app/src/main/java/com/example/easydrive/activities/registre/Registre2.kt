@@ -209,7 +209,7 @@ class Registre2 : AppCompatActivity() {
         val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
         val file = File(cacheDir, "compressed_image_${System.currentTimeMillis()}.jpg")
         val outputStream = FileOutputStream(file)
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream) // Calidad: 50%
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 30, outputStream) // Calidad: 30%
         outputStream.flush()
         outputStream.close()
         return file.absolutePath
