@@ -11,5 +11,6 @@ data class Cotxe(
     var capacitat: Int?,
     var color: String?,
     var horesTreballades: Double?,
-    var fotoFitxaTecnica: String?
+    var fotoFitxaTecnica: String?,
+    var id_usuaris: List<Usuari>?
 ): Serializable

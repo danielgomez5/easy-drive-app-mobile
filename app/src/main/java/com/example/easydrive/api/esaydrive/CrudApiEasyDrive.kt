@@ -5,6 +5,7 @@ import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.LoginRequest
 import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Usuari
+import com.example.easydrive.dades.UsuariCotxeDTO
 import com.example.easydrive.dades.Zona
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
@@ -63,6 +64,20 @@ class CrudApiEasyDrive() : CoroutineScope {
         runBlocking {
             val cor = launch {
                 resposta = getRetrofit().create(ApiService::class.java).insertCotxe(cotxe)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
+
+    fun insertRelacioCotxeUsuari(relacioUsuariCotxe: UsuariCotxeDTO?): Boolean{
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).assignarCotxeAUsuari(relacioUsuariCotxe)
             }
             cor.join()
         }

@@ -4,6 +4,7 @@ import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.LoginRequest
 import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Usuari
+import com.example.easydrive.dades.UsuariCotxeDTO
 import com.example.easydrive.dades.Zona
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -24,6 +25,9 @@ interface ApiService {
 
     @POST("/api/cotxe")
     suspend fun insertCotxe(@Body cotxe: Cotxe): Response<Missatge>
+
+    @POST("/api/usuariCotxe")
+    suspend fun assignarCotxeAUsuari(@Body relacio: UsuariCotxeDTO?): Response<Missatge>
 
     @Multipart
     @POST("/api/usuari")

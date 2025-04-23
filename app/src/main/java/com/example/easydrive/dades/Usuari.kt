@@ -17,7 +17,8 @@ data class Usuari(
     var rol: Boolean?,
     var horari: String?,
     var diponibiliat: Boolean?,
-    var idZona: Int?
+    var idZona: Int?,
+    var matriculas: List<Cotxe>?
 ) : Serializable
 
 //Variables generals:

@@ -66,7 +66,7 @@ class RegistreCotxe : AppCompatActivity() {
         binding.imagebtnR1.setOnClickListener {
             startActivity(Intent(this, Registre2::class.java))
         }
-        cotxe = Cotxe(null,null,null,null,null,null,null,null,null)
+        cotxe = Cotxe(null,null,null,null,null,null,null,null,null, null)
         binding.btnSeguent.setOnClickListener {
             if (!binding.tieMarcaRC.text.isNullOrBlank() && !binding.tieModelRC.text.isNullOrBlank() && !binding.tieMatriculaRC.text.isNullOrBlank()
                 && !binding.tieAnyRC.text.isNullOrBlank() && !binding.actvTipusRC.text.isNullOrBlank() && !binding.tieColorRC.text.isNullOrBlank() && !binding.actvCapacitatRC.text.isNullOrBlank()

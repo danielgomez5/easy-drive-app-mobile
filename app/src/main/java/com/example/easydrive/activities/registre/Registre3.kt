@@ -15,6 +15,7 @@ import com.example.easydrive.activities.interficie_usuari.IniciUsuari
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.Usuari
+import com.example.easydrive.dades.UsuariCotxeDTO
 import com.example.easydrive.databinding.ActivityRegistre3Binding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -133,9 +134,17 @@ class Registre3 : AppCompatActivity() {
         }
 
         if (taxistaAfegit && cotxeAfegit) {
-            val intent = Intent(this, IniciTaxista::class.java)
-            intent.putExtra("user", usuari)
-            startActivity(intent)
+
+            var relacio: UsuariCotxeDTO? = null
+
+            relacio?.dniUsuari = usuari?.dni
+            relacio?.matriculaCotxe = cotxe?.matricula
+
+            if(crud.insertRelacioCotxeUsuari(relacio)){
+                val intent = Intent(this, IniciTaxista::class.java)
+                intent.putExtra("user", usuari)
+                startActivity(intent)
+            }
         }
     }
 }
