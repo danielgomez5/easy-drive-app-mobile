@@ -135,10 +135,11 @@ class Registre3 : AppCompatActivity() {
 
         if (taxistaAfegit && cotxeAfegit) {
 
-            var relacio: UsuariCotxeDTO? = null
-
-            relacio?.dniUsuari = usuari?.dni
-            relacio?.matriculaCotxe = cotxe?.matricula
+            val relacio = UsuariCotxeDTO(
+                dniUsuari = usuari?.dni ?: "",
+                matriculaCotxe = cotxe?.matricula ?: ""
+            )
+            Log.d("relacio",relacio.toString())
 
             if(crud.insertRelacioCotxeUsuari(relacio)){
                 val intent = Intent(this, IniciTaxista::class.java)

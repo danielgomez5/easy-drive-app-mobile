@@ -26,7 +26,7 @@ interface ApiService {
     @POST("/api/cotxe")
     suspend fun insertCotxe(@Body cotxe: Cotxe): Response<Missatge>
 
-    @POST("/api/usuariCotxe")
+    @POST("/api/usuari-cotxe")
     suspend fun assignarCotxeAUsuari(@Body relacio: UsuariCotxeDTO?): Response<Missatge>
 
     @Multipart
