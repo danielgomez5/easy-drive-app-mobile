@@ -7,6 +7,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.easydrive.R
+import com.example.easydrive.dades.rutaEscollida
 import com.example.easydrive.databinding.ActivityMapaRutaUsuariBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
@@ -25,6 +26,7 @@ class MapaRutaUsuari : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        binding.tieDestiMapausuari.setText(rutaEscollida?.address_line1+", "+rutaEscollida?.city)
 
         layout_bottom_sheet = findViewById(R.id.layout_bottom_sheet)
         bottom_behavior = BottomSheetBehavior.from(layout_bottom_sheet)

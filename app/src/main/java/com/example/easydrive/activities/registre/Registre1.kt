@@ -34,7 +34,7 @@ class Registre1 : AppCompatActivity() {
             startActivity(Intent(this,MainActivity::class.java))
         }
 
-        usuari = Usuari(null, null,null,null,null,null,null,null,null,null,null,null,null)
+        usuari = Usuari(null, null,null,null,null,null,null,null,null,null,null,null,null,null)
         binding.btnSeguent.setOnClickListener {
             if (binding.toggleButton.checkedButtonId != View.NO_ID) {
                 if (!binding.tieNumMobilR1.text.isNullOrBlank() || !binding.tieCorreuR1.text.isNullOrBlank() || !binding.tieRepeteixCorreuR1.text.isNullOrBlank()){

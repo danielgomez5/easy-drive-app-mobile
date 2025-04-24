@@ -23,6 +23,7 @@ import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_usuari.MapaRutaUsuari
 import com.example.easydrive.adaptadors.AdaptadorRVDestins
 import com.example.easydrive.api.geoapify.CrudGeo
+import com.example.easydrive.dades.rutaEscollida
 import com.example.easydrive.databinding.FragmentHomeUsuariBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -53,7 +54,11 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         mapFragment?.getMapAsync(this)
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
         binding.btnBuscar.setOnClickListener {
-            startActivity(Intent(requireContext(), MapaRutaUsuari::class.java))
+            if (rutaEscollida!= null){
+                /*val intent = Intent(requireContext(), MapaRutaUsuari::class.java)
+                startActivity(intent)*/
+                startActivity(Intent(requireContext(), MapaRutaUsuari::class.java))
+            }
         }
         binding.buscaDesti.setOnClickListener {
             buscaDesti()

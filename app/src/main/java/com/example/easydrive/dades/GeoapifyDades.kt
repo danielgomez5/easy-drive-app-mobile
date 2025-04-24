@@ -1,4 +1,7 @@
 package com.example.easydrive.dades
+data class GeoapifyResponse(
+    var results: List<GeoapifyDades>
+)
 
 data class GeoapifyDades(
     val address_line1: String,

@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.easydrive.R
 import com.example.easydrive.api.esaydrive.ApiService
 import com.example.easydrive.dades.GeoapifyDades
+import com.example.easydrive.dades.GeoapifyResponse
 import com.example.easydrive.dades.LoginRequest
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
@@ -39,19 +40,20 @@ class CrudGeo (val context: Context) : CoroutineScope {
             .addConverterFactory(GsonConverterFactory.create(gson)).build()
     }
 
-    fun getLocationByName(nomCarrer: String): List<GeoapifyDades>{
-        var resposta: Response<List<GeoapifyDades>>? = null
+    fun getLocationByName(nomCarrer: String): List<GeoapifyDades> {
+        var resposta: Response<GeoapifyResponse>? = null
         runBlocking {
             val cor = launch {
-                resposta = getRetrofit().create(ApiServiceGeo::class.java).buscarDesti(nomCarrer,apiKey)
+                resposta = getRetrofit().create(ApiServiceGeo::class.java).buscarDesti(nomCarrer, apiKey)
             }
             cor.join()
         }
-        if (resposta!!.isSuccessful){
-            return resposta.body()!!
-        }
-        else{
-            return emptyList()
+
+        return if (resposta!!.isSuccessful) {
+            resposta!!.body()?.results!!
+        } else {
+            emptyList()
         }
     }
+
 }
