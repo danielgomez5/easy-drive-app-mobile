@@ -1,6 +1,7 @@
 package com.example.easydrive.activities.interficie_usuari
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
@@ -21,6 +22,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.easydrive.R
+import com.example.easydrive.activities.menu.Perfil
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.user
 import com.example.easydrive.databinding.ActivityIniciUsuariBinding
@@ -110,7 +112,7 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         item.setChecked(true)
         when(item.itemId){
             R.id.menuPerfil -> {
-                Toast.makeText(this,"hola",Toast.LENGTH_LONG).show()
+                startActivity(Intent(this, Perfil::class.java))
             }
 
         }

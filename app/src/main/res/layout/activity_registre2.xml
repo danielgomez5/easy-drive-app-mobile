@@ -18,6 +18,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:src="@drawable/baseline_arrow_back_24"
             android:background="@drawable/roundcorner"
+            app:tint="?attr/colorOnSecondary"
             android:layout_marginTop="40dp"
             android:layout_marginStart="20dp"/>
 
