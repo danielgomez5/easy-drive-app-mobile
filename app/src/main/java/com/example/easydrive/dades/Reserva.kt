@@ -2,10 +2,10 @@ package com.example.easydrive.dades
 
 data class Reserva(
     val id:Int?,
-    val origen: String,
-    val desti: String,
-    val data_reserva : String,
-    val data_viatge : String,
-    val preu : Double,
-    val id_estat: Int
+    var origen: String,
+    var desti: String,
+    var data_reserva : String,
+    var data_viatge : String,
+    var preu : Double,
+    var id_estat: Int
 )

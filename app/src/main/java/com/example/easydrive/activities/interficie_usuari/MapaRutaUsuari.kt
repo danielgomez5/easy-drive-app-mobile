@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.widget.Button
 import android.widget.CheckBox
@@ -16,8 +18,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.easydrive.R
+import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.api.openroute.CrudOpenRoute
 import com.example.easydrive.dades.DadesPagament
+import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.rutaEscollida
 import com.example.easydrive.dades.rutaOrigen
 import com.example.easydrive.dades.user
@@ -35,6 +39,10 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.textfield.TextInputEditText
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.util.Date
+import java.util.Locale
 import kotlin.div
 import kotlin.text.toInt
 
@@ -49,6 +57,9 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
     var ubicacioActual: LatLng? = null
 
     var pagament: DadesPagament?=null
+    var preuTotal: Double?=null
+
+    var crud :CrudApiEasyDrive? =null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +84,46 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
 
         binding.btnConfirmar.setOnClickListener {
             bottom_behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            var dadespagament = crud?.getDadesPagament(user?.dni!!)
+            if (dadespagament != null){
+                layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_numTarjeta)
+                    .setText(dadespagament?.numero_tarjeta.toString())
+
+                layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_Caducitat)
+                    .setText(dadespagament?.data_expiracio.toString())
+
+            }
         }
+
+        val tietCaducitat = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_Caducitat)
+
+        tietCaducitat.addTextChangedListener(object : TextWatcher {
+            private var isEditing = false
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isEditing) return
+                isEditing = true
+
+                s?.let {
+                    val digits = it.toString().replace("[^\\d]".toRegex(), "")
+                    val formatted = when {
+                        digits.length >= 3 -> digits.substring(0, 2) + "/" + digits.substring(2.coerceAtMost(4))
+                        digits.length >= 1 -> digits
+                        else -> ""
+                    }
+
+                    tietCaducitat.setText(formatted)
+                    tietCaducitat.setSelection(formatted.length)
+                }
+
+                isEditing = false
+            }
+        })
+
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -116,7 +166,18 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                 pagament?.id_usuari = user?.dni.toString()
                 pagament?.titular = user?.nom.toString()+" "+user?.cognom.toString()
             }
+            Log.d("Reserva", pagament.toString())
 
+            val sdfBD = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val currentData = Date()
+            var reserva: Reserva?=null
+            reserva?.preu = preuTotal!!
+            reserva?.origen = rutaOrigen?.address_line1+ ", " +rutaOrigen?.city
+            reserva?.desti = rutaEscollida?.address_line1+ ", " +rutaEscollida?.city
+            reserva?.data_reserva = sdfBD.format(currentData)
+            reserva?.data_viatge = sdfBD.format(currentData)
+            reserva?.id_estat = 1
+            Log.d("Reserva", reserva.toString())
         }
 
 
@@ -137,7 +198,6 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
         var segundos: Int? = null
         val dec = DecimalFormat("#,###.00")
         var preu = 1.5 //preu per kilometre
-        var preuTotal: Double?=null
         var preuInciServei = 2.5
 
         var resposta = crud.getRutaCotxe(start, end)
@@ -152,7 +212,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                 preuTotal = ((it.properties.summary.distance/1000) * preu)+preuInciServei
                 layout_bottom_sheet.findViewById<TextView>(R.id.preuTotal).setText(dec.format(preuTotal).toString()+" €")
             }
-            layout_bottom_sheet.findViewById<TextView>(R.id.carrerOrigenSheet).setText(rutaOrigen?.address_line1+ ", " +rutaOrigen?.city )
+            layout_bottom_sheet.findViewById<TextView>(R.id.carrerOrigenSheet).setText(rutaOrigen?.address_line1+ ", " +rutaOrigen?.city)
             layout_bottom_sheet.findViewById<TextView>(R.id.carrerDestiSheet).setText(rutaEscollida?.address_line1+ ", " +rutaEscollida?.city )
             drawRoute(map!!, coordenada!!)
         } else {
