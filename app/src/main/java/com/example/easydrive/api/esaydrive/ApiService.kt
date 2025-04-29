@@ -80,4 +80,7 @@ interface ApiService {
     @POST("/api/usuari_login")
     suspend fun loginUsuari(@Body loginRequest: LoginRequest): Response<Usuari>
 
+    @GET("/api/usuari-pagaments/{id_usuari}")
+    suspend fun getDadesPagamentByUsuari(@Path("id_usuari") id_usuari: String) : Response<DadesPagament>
+
 }

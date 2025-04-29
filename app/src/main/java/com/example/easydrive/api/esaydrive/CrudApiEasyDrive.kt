@@ -2,6 +2,7 @@ package com.example.easydrive.api.esaydrive
 
 import android.util.Log
 import com.example.easydrive.dades.Cotxe
+import com.example.easydrive.dades.DadesPagament
 import com.example.easydrive.dades.LoginRequest
 import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Usuari
@@ -152,6 +153,22 @@ class CrudApiEasyDrive() : CoroutineScope {
             val job = launch {
                 val loginData = LoginRequest(email, password)
                 resposta = getRetrofit().create(ApiService::class.java).loginUsuari(loginData)
+            }
+            job.join()
+        }
+
+        return if (resposta?.isSuccessful == true) {
+            resposta!!.body()
+        } else {
+            null
+        }
+    }
+
+    fun getDadesPagament(idUser: String): DadesPagament?{
+        var resposta: Response<DadesPagament>? = null
+        runBlocking {
+            val job = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getDadesPagamentByUsuari(idUser)
             }
             job.join()
         }
