@@ -21,6 +21,8 @@ import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.Zona
 import com.example.easydrive.databinding.ActivityRegistre2Binding
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import java.io.File
 import java.io.FileOutputStream
@@ -63,61 +65,121 @@ class Registre2 : AppCompatActivity() {
         }
 
         binding.tieDataNeixR2.setOnClickListener {
-            val datePicker: MaterialDatePicker<Long> =
-                MaterialDatePicker.Builder.datePicker()
-                    .setSelection(ara())
-                    .setTitleText("Escull la data").build()
+            val constraints = CalendarConstraints.Builder()
+                .setValidator(DateValidatorPointBackward.now())
+                .build()
+
+            val datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Selecciona la teva data de naixement")
+                .setCalendarConstraints(constraints)
+                .build()
+
             datePicker.show(supportFragmentManager, "DATE_PICKER")
 
-            datePicker.addOnPositiveButtonClickListener {
-                val sdfBD = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            datePicker.addOnPositiveButtonClickListener { selection ->
+                val selectedDate = Date(selection)
                 val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val date = Date(it)
-                binding.tieDataNeixR2.setText(sdf.format(date))
-                usuari?.dataNaixement = sdfBD.format(date)
+                val sdfBD = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+                // Mostrar la fecha en el campo, aunque sea inválida
+                binding.tieDataNeixR2.setText(sdf.format(selectedDate))
+
+                // Guardar la fecha en el objeto (a validar después)
+                usuari?.dataNaixement = sdfBD.format(selectedDate)
+
+                // Limpiar posibles errores antiguos
+                binding.tieDataNeixR2.error = null
             }
         }
 
 
         binding.btnSeguent.setOnClickListener {
-            if (!binding.tieNomR2.text.isNullOrBlank() && !binding.tieCognomR2.text.isNullOrBlank() && !binding.tieDniR2.text.isNullOrBlank() && !binding.tieDataNeixR2.text.isNullOrBlank()){
+            val sdfBD = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val dateStr = usuari?.dataNaixement
 
+            if (dateStr.isNullOrEmpty()) {
+                binding.tieDataNeixR2.error = "Has d’introduir una data"
+                return@setOnClickListener
+            }
+
+            val birthDate = sdfBD.parse(dateStr)
+            val today = Calendar.getInstance()
+            val birthCal = Calendar.getInstance().apply { time = birthDate!! }
+
+            var age = today.get(Calendar.YEAR) - birthCal.get(Calendar.YEAR)
+            if (today.get(Calendar.DAY_OF_YEAR) < birthCal.get(Calendar.DAY_OF_YEAR)) {
+                age--
+            }
+
+            if (age < 18) {
+                Toast.makeText(this, "Has de ser major d’edat", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
+            binding.tieDataNeixR2.error = null
+
+            var valid = true
+
+            if (binding.tieNomR2.text.isNullOrBlank()) {
+                binding.tieNomR2.error = "Aquest camp és obligatori"
+                valid = false
+            } else binding.tieNomR2.error = null
+
+            if (binding.tieCognomR2.text.isNullOrBlank()) {
+                binding.tieCognomR2.error = "Aquest camp és obligatori"
+                valid = false
+            } else binding.tieCognomR2.error = null
+
+            if (binding.tieDniR2.text.isNullOrBlank()) {
+                binding.tieDniR2.error = "Aquest camp és obligatori"
+                valid = false
+            } else binding.tieDniR2.error = null
+
+            if (binding.tieDataNeixR2.text.isNullOrBlank()) {
+                binding.tieDataNeixR2.error = "Aquest camp és obligatori"
+                valid = false
+            }
+
+            if (zonaEscollida == null) {
+                Toast.makeText(this, "Has d’escollir una zona", Toast.LENGTH_LONG).show()
+                valid = false
+            }
+
+            if (valid) {
                 usuari?.nom = binding.tieNomR2.text.toString()
                 usuari?.cognom = binding.tieCognomR2.text.toString()
                 usuari?.dni = binding.tieDniR2.text.toString()
                 usuari?.idZona = zonaEscollida?.id
-                when(usuari?.rol){
-                    true ->{
-                        addTaxista()
-                    }
-                    false ->{
-                        addUsuari()
-                    }
-                    else -> {
-                        addUsuari()
-                    }
+
+                when (usuari?.rol) {
+                    true -> addTaxista()
+                    false -> addUsuari()
+                    else -> addUsuari()
                 }
-            } else{
-                Toast.makeText(this, "Algun camp està null", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "Omple els camps correctament", Toast.LENGTH_LONG).show()
             }
         }
 
-        /*resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK){
-                var imageUri = result.data?.data
-                ruta = getRealPathFromUri(imageUri)
-                Log.d("ruta launcher", ruta.toString())
-
-            }
-        }*/
         resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK){
-                val imageUri = result.data?.data
-                //ruta = imageUri?.let { comprimirImagen(it) } // ← Esto es un String
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                val imageUri = result.data!!.data
+
+                binding.imagePreview.setImageURI(imageUri)
+                binding.imagePreview.visibility = View.VISIBLE
+
+                // Mostrar el texto de confirmación
+                binding.textInfoPujada.text = "Foto pujada!"
+
+                // Guardar la ruta comprimida en el usuari
                 usuari?.fotoPerfil = imageUri?.let { comprimirImagen(it) }
+
                 Log.d("ruta comprimida", usuari?.fotoPerfil.toString())
+            } else {
+                binding.textInfoPujada.text = "Cap imatge seleccionada"
             }
         }
+
 
         // Luego, en el setOnClickListener, solo lanzas el intent
         binding.btnPujada.setOnClickListener {
@@ -185,24 +247,6 @@ class Registre2 : AppCompatActivity() {
         Log.d("ruta prova", ruta.toString())
         Log.d("usuari prova", usuari.toString())
         startActivity(intent)
-    }
-
-    fun ara(): Long {
-        val calendar = Calendar.getInstance()
-        return calendar.timeInMillis
-    }
-
-    fun getRealPathFromUri(contentUri: Uri?): String? {
-        var cursor: Cursor? = null
-        return try {
-            val proj = arrayOf(MediaStore.Images.Media.DATA)
-            cursor = this.getContentResolver().query(contentUri!!, proj, null, null, null)
-            val column_index: Int = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-            cursor!!.moveToFirst()
-            cursor.getString(column_index)
-        } finally {
-            cursor?.close()
-        }
     }
 
     fun comprimirImagen(uri: Uri): String? {

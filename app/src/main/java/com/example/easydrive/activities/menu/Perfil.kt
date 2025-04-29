@@ -22,6 +22,8 @@ class Perfil : AppCompatActivity() {
             insets
         }
 
+        binding.tvBenvinguda.setText("El teu perfil, ${user?.nom}!")
+
         binding.tieNom.setText(user?.nom)
         binding.tieCognom.setText(user?.cognom)
         binding.tieDataNaix.setText(user?.dataNaixement)
