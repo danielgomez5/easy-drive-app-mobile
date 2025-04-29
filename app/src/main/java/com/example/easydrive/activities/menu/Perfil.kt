@@ -22,12 +22,11 @@ class Perfil : AppCompatActivity() {
             insets
         }
 
-        binding.tvNom.text = user?.nom ?: "Nom no disponible"
-        binding.tvCognom.text = user?.cognom ?: "Cognom no disponible"
-        binding.tvDni.text = user?.dni ?: "DNI no disponible"
-        binding.tvEmail.text = user?.email ?: "Email no disponible"
-        binding.tvTelefon.text = user?.telefon ?: "Telèfon no disponible"
-        binding.tvDataNeix.text = user?.dataNaixement ?: "Data de naixement no disponible"
+        binding.tieNom.setText(user?.nom)
+        binding.tieCognom.setText(user?.cognom)
+        binding.tieDataNaix.setText(user?.dataNaixement)
+        binding.tieEmail.setText(user?.email)
+        binding.tieTelefon.setText(user?.telefon)
 
     }
 }
