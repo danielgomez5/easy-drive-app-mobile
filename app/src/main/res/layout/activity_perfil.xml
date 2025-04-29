@@ -49,7 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="16dp">
 
                 <TextView
                     android:id="@+id/tvDni"
@@ -57,27 +57,30 @@
                     android:layout_height="wrap_content"
                     android:text="DNI: 12345678X"
                     android:textSize="18sp"
-                    android:paddingBottom="25dp" />
+                    android:layout_marginBottom="16dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingBottom="25dp">
-                    <TextView
-                        android:id="@+id/tvNom"
+                    android:layout_marginBottom="16dp">
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Nom de l'usuari"
-                        android:textSize="18sp"/>
-                    <ImageButton
-                        android:id="@+id/btnEditNom"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/baseline_edit_24"
-                        android:background="@android:color/transparent"/>
+                        android:hint="Nom de l'usuari"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:endIconDrawable="@drawable/baseline_edit_24"
+                        app:endIconMode="custom"
+                        >
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/tie_nom"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Nom de l'usuari"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
                 <LinearLayout
@@ -85,20 +88,21 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingBottom="25dp">
-                    <TextView
-                        android:id="@+id/tvCognom"
-                        android:layout_width="0dp"
+                    android:layout_marginBottom="16dp">
+                    <com.google.android.material.textfield.TextInputLayout                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Cognom de l'usuari"
-                        android:textSize="18sp"/>
-                    <ImageButton
-                        android:id="@+id/btnEditCognom"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/baseline_edit_24"
-                        android:background="@android:color/transparent"/>
+                        android:hint="Cognom de l'usuari"
+                        app:endIconDrawable="@drawable/baseline_edit_24"
+                        app:endIconMode="custom"
+                        >
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/tie_cognom"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Cognom de l'usuari"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
                 <LinearLayout
@@ -106,20 +110,21 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingBottom="25dp">
-                    <TextView
-                        android:id="@+id/tvDataNeix"
-                        android:layout_width="0dp"
+                    android:layout_marginBottom="16dp">
+                    <com.google.android.material.textfield.TextInputLayout                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="01/01/1990"
-                        android:textSize="18sp"/>
-                    <ImageButton
-                        android:id="@+id/btnEditDataNeix"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/baseline_calendar_month_24"
-                        android:background="@android:color/transparent"/>
+                        android:hint="Data de naixement"
+                        app:endIconDrawable="@drawable/baseline_calendar_month_24"
+                        app:endIconMode="custom"
+                        >
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/tie_dataNaix"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="01/01/1990"
+                            android:inputType="date" />
+                    </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
                 <LinearLayout
@@ -127,20 +132,21 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingBottom="25dp">
-                    <TextView
-                        android:id="@+id/tvEmail"
-                        android:layout_width="0dp"
+                    android:layout_marginBottom="16dp">
+                    <com.google.android.material.textfield.TextInputLayout                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="usuari@email.com"
-                        android:textSize="18sp"/>
-                    <ImageButton
-                        android:id="@+id/btnEditEmail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/baseline_edit_24"
-                        android:background="@android:color/transparent"/>
+                        android:hint="Correu electrònic"
+                        app:endIconDrawable="@drawable/baseline_edit_24"
+                        app:endIconMode="custom"
+                        >
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/tie_email"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="usuari@email.com"
+                            android:inputType="textEmailAddress" />
+                    </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
                 <LinearLayout
@@ -148,20 +154,24 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingBottom="25dp">
-                    <TextView
-                        android:id="@+id/tvTelefon"
+                    android:layout_marginBottom="16dp">
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="+34 600 123 456"
-                        android:textSize="18sp"/>
-                    <ImageButton
-                        android:id="@+id/btnEditTelefon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/baseline_edit_24"
-                        android:background="@android:color/transparent"/>
+                        android:hint="Telèfon"
+                        app:endIconDrawable="@drawable/baseline_edit_24"
+                        app:endIconMode="custom"
+                        >
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/tie_telefon"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="+34 600 123 456"
+                            android:inputType="phone" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -203,8 +213,6 @@
                             android:inputType="textPassword" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
-
-
 
                 <Button
                     android:id="@+id/btnLogout"
