@@ -24,6 +24,7 @@ import com.example.easydrive.activities.interficie_usuari.MapaRutaUsuari
 import com.example.easydrive.adaptadors.AdaptadorRVDestins
 import com.example.easydrive.api.geoapify.CrudGeo
 import com.example.easydrive.dades.rutaEscollida
+import com.example.easydrive.dades.rutaOrigen
 import com.example.easydrive.databinding.FragmentHomeUsuariBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -55,8 +56,6 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
         binding.btnBuscar.setOnClickListener {
             if (rutaEscollida!= null){
-                /*val intent = Intent(requireContext(), MapaRutaUsuari::class.java)
-                startActivity(intent)*/
                 startActivity(Intent(requireContext(), MapaRutaUsuari::class.java))
             }
         }
@@ -77,7 +76,7 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         }
 
         map?.isMyLocationEnabled = true // Este muestra el icono azul de ubicación
-
+        val crudGeo = CrudGeo(requireContext())
         fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
                 val ubicacio = LatLng(location.latitude, location.longitude)
@@ -86,6 +85,8 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
                     2000,
                     null
                 )
+                rutaOrigen = crudGeo.getLocationByLatLon(ubicacio.latitude.toString(), ubicacio.longitude.toString())
+
             } else {
                 Toast.makeText(requireContext(), "No s'ha pogut obtenir la ubicació", Toast.LENGTH_SHORT).show()
             }

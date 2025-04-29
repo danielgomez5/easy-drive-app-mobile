@@ -1,6 +1,7 @@
 package com.example.easydrive.api.esaydrive
 
 import com.example.easydrive.dades.Cotxe
+import com.example.easydrive.dades.DadesPagament
 import com.example.easydrive.dades.LoginRequest
 import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Usuari
@@ -29,13 +30,16 @@ interface ApiService {
     @POST("/api/usuari-cotxe")
     suspend fun assignarCotxeAUsuari(@Body relacio: UsuariCotxeDTO?): Response<Missatge>
 
-    @Multipart
+    @POST("/api/usuari-pagament")
+    suspend fun afegirPagament(@Body pagament: DadesPagament): Response<Missatge>
+
+    /*@Multipart
     @POST("/api/usuari")
     suspend fun insertUser2(
         @Part("usuari") usuari: RequestBody,
         @Part fotoPerfil: MultipartBody.Part?,
         @Part fotoCarnet: MultipartBody.Part?
-    ): Response<Missatge>
+    ): Response<Missatge>*/
 
     //Puts
     @Multipart

@@ -33,11 +33,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/carrerOrigenSheet"
                 android:text="Origen:"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:id="@+id/carrerOrigenSheet"
                 android:layout_marginStart="5dp"
                 android:hint="calleee"/>
         </LinearLayout>
@@ -134,7 +134,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/tie_numTarjeta"
+                android:id="@+id/tiet_numTarjeta"
                 android:inputType="text"
                 android:maxLines="1"
                 android:singleLine="true"
@@ -155,7 +155,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:id="@+id/tie_Caducitat"
+                    android:id="@+id/tiet_Caducitat"
                     android:inputType="text"
                     android:maxLines="1"
                     android:singleLine="true"
@@ -173,7 +173,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:id="@+id/tie_cvv"
+                    android:id="@+id/tiet_cvv"
                     android:inputType="text"
                     android:maxLines="1"
                     android:singleLine="true"
@@ -183,6 +183,7 @@
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/guardarTarjeta"
             android:text="Desar targeta"/>
 
     </LinearLayout>
@@ -203,6 +204,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/preuTotal"
             android:textSize="26dp"
             android:hint="68.58€"/>
     </LinearLayout>
@@ -210,6 +212,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
+        android:id="@+id/pagar"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="20dp"
         android:text="Pagar i Reservar"

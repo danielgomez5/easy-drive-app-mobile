@@ -56,20 +56,23 @@ class CrudGeo (val context: Context) : CoroutineScope {
         }
     }
 
-    fun getLocationByLatLon(latitut: String, longitud: String): List<GeoapifyDades> {
+    fun getLocationByLatLon(latitut: String, longitud: String): GeoapifyDades? {
         var resposta: Response<GeoapifyResponse>? = null
         runBlocking {
             val cor = launch {
-                resposta = getRetrofit().create(ApiServiceGeo::class.java).buscarDestiLatLon(latitut,longitud, apiKey)
+                resposta = getRetrofit()
+                    .create(ApiServiceGeo::class.java)
+                    .buscarDestiLatLon(latitut, longitud, apiKey)
             }
             cor.join()
         }
 
         return if (resposta!!.isSuccessful) {
-            resposta!!.body()?.results!!
+            resposta!!.body()?.results?.firstOrNull()
         } else {
-            emptyList()
+            null
         }
     }
+
 
 }
