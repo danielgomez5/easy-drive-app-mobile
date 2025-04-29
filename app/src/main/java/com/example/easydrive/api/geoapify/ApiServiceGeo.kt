@@ -13,4 +13,11 @@ interface ApiServiceGeo {
         @Query("text") text: String,
         @Query("apiKey") apiKey: String
     ): Response<GeoapifyResponse>
+
+    @GET("v1/geocode/reverse?format=json&limit=100")
+    suspend fun buscarDestiLatLon(
+        @Query("lat") lat: String,
+        @Query("lon") lon: String,
+        @Query("apiKey") apiKey: String
+    ): Response<GeoapifyResponse>
 }
