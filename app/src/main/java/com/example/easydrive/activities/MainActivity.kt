@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -38,7 +39,6 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         val crud = CrudApiEasyDrive()
-        // Aquí sería donde puedes agregar el código para los permisos
         if (comprovaPermisLectura()) {
             permis_lectura = true
         } else {
@@ -63,40 +63,55 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnLogin.setOnClickListener {
-            if (!binding.tieCorreuLogin.text.isNullOrBlank() && !binding.tieContrsenyaLogin.text.isNullOrBlank()) {
-                val usuari = crud.loginUsuari(
-                    binding.tieCorreuLogin.text.toString(),
-                    binding.tieContrsenyaLogin.text.toString()
-                )
+            val email = binding.tieCorreuLogin.text.toString().trim()
+            val password = binding.tieContrsenyaLogin.text.toString().trim()
+
+            var isValid = true
+
+            if (email.isEmpty()) {
+                binding.til1Card.error = "El correu és obligatori"
+                isValid = false
+            } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                binding.til1Card.error = "Introdueix un correu vàlid"
+                isValid = false
+            } else {
+                binding.til1Card.error = null
+            }
+
+            if (password.isEmpty()) {
+                binding.til2Card.error = "La contrasenya és obligatòria"
+                isValid = false
+            } else if (password.length < 6) {
+                binding.til2Card.error = "La contrasenya ha de tenir almenys 6 caràcters"
+                isValid = false
+            } else {
+                binding.til2Card.error = null
+            }
+
+            if (isValid) {
+                val usuari = crud.loginUsuari(email, password)
                 if (usuari != null) {
-                    when (usuari?.rol) {
+                    when (usuari.rol) {
                         false -> {
                             val intent = Intent(this, IniciUsuari::class.java)
                             intent.putExtra("user", usuari)
                             startActivity(intent)
                         }
-
                         true -> {
                             val intent = Intent(this, IniciTaxista::class.java)
                             intent.putExtra("user", usuari)
                             startActivity(intent)
                         }
-
                         else -> {
-                            Toast.makeText(
-                                this,
-                                "El usuari no està registrat en la aplicació",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            Toast.makeText(this, "El usuari no està registrat en la aplicació", Toast.LENGTH_LONG).show()
                         }
                     }
-                }else{
-                    Toast.makeText(this, "No hi ha cap registre, profavore registrat", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, "No hi ha cap usuari registrat, siusplau registra't", Toast.LENGTH_LONG).show()
                 }
-            } else {
-                Toast.makeText(this, "N'hi ha un camp vuit", Toast.LENGTH_LONG).show()
             }
         }
+
     }
 
     fun comprovaPermisLectura(): Boolean {

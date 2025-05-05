@@ -62,21 +62,43 @@ class Registre3 : AppCompatActivity() {
         }
 
         binding.crearCompte.setOnClickListener {
-            if (!binding.tieContrasenyaR3.text.isNullOrBlank() || !binding.tieRepeteixContraR3.text.isNullOrBlank()) {
-                if (binding.tieContrasenyaR3.text.toString() == binding.tieRepeteixContraR3.text.toString()) {
-                    usuari?.passwordHash = binding.tieContrasenyaR3.text.toString()
-                    val crud = CrudApiEasyDrive()
-                    Log.d("crear cuenta", usuari.toString())
-                    Log.d("2 if", "")
+            val pass = binding.tieContrasenyaR3.text.toString()
+            val confirmPass = binding.tieRepeteixContraR3.text.toString()
+            val acceptat = binding.checkAccept.isChecked
 
-                    if (usuari?.rol == true) {
-                        addTaxista(crud)
-                    } else {
-                        addUsuari(crud)
-                    }
+            var valid = true
+
+            if (pass.length < 6) {
+                binding.til1CardR3.error = "La contrasenya ha de tenir com a mínim 6 caràcters"
+                valid = false
+            } else {
+                binding.til1CardR3.error = null
+            }
+
+            if (pass != confirmPass) {
+                binding.til2CardR3.error = "Les contrasenyes no coincideixen"
+                valid = false
+            } else {
+                binding.til2CardR3.error = null
+            }
+
+            if (!acceptat) {
+                Toast.makeText(this, "Has d'acceptar la política de privacitat", Toast.LENGTH_SHORT).show()
+                valid = false
+            }
+
+            if (valid) {
+                usuari?.passwordHash = pass
+                val crud = CrudApiEasyDrive()
+
+                if (usuari?.rol == true) {
+                    addTaxista(crud)
+                } else {
+                    addUsuari(crud)
                 }
             }
         }
+
     }
 
     private fun addUsuari(crud: CrudApiEasyDrive) {

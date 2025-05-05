@@ -9,6 +9,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
@@ -36,23 +37,25 @@ class RegistreCotxe : AppCompatActivity() {
     private var cotxe: Cotxe? = null
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
     //private lateinit var openDocumentLauncher: ActivityResultLauncher<Intent>
-
+    private lateinit var textDocAdjuntat: TextView
     private val openDocumentLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
             Log.d("RegixtreCotxe", "URI seleccionada: $uri")
-
-                //arxiuTecnic = getRealPathFromUri(uri)
             arxiuTecnic = getFileFromUri(uri)
-                cotxe?.fotoFitxaTecnica = arxiuTecnic.toString()
-                Log.d("arxiuTecnic launcher", arxiuTecnic.toString())
-        }
+            cotxe?.fotoFitxaTecnica = arxiuTecnic.toString()
+            Log.d("arxiuTecnic launcher", arxiuTecnic.toString())
 
+            if (uri != null) {
+                textDocAdjuntat.visibility = View.VISIBLE
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityRegistreCotxeBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        textDocAdjuntat = findViewById(R.id.textDocAdjuntat)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -68,21 +71,73 @@ class RegistreCotxe : AppCompatActivity() {
         }
         cotxe = Cotxe(null,null,null,null,null,null,null,null,null, null)
         binding.btnSeguent.setOnClickListener {
-            if (!binding.tieMarcaRC.text.isNullOrBlank() && !binding.tieModelRC.text.isNullOrBlank() && !binding.tieMatriculaRC.text.isNullOrBlank()
-                && !binding.tieAnyRC.text.isNullOrBlank() && !binding.actvTipusRC.text.isNullOrBlank() && !binding.tieColorRC.text.isNullOrBlank() && !binding.actvCapacitatRC.text.isNullOrBlank()
-            ) {
-                cotxe?.matricula = binding.tieMatriculaRC.text.toString()
-                cotxe?.marca = binding.tieMarcaRC.text.toString()
-                cotxe?.model = binding.tieModelRC.text.toString()
-                cotxe?.any = binding.tieAnyRC.text.toString()
-                cotxe?.tipus = binding.actvTipusRC.text.toString()
-                cotxe?.color = binding.tieColorRC.text.toString()
-                cotxe?.capacitat = binding.actvCapacitatRC.text.toString().toInt()
+            val marca = binding.tieMarcaRC.text.toString()
+            val model = binding.tieModelRC.text.toString()
+            val matricula = binding.tieMatriculaRC.text.toString()
+            val any = binding.tieAnyRC.text.toString()
+            val tipus = binding.actvTipusRC.text.toString()
+            val capacitat = binding.actvCapacitatRC.text.toString()
+            val color = binding.tieColorRC.text.toString()
+
+            var isValid = true
+
+            if (marca.isBlank()) {
+                binding.til1CardRC.error = "Camp obligatori"
+                isValid = false
+            } else binding.til1CardRC.error = null
+
+            if (model.isBlank()) {
+                binding.til2CardRC.error = "Camp obligatori"
+                isValid = false
+            } else binding.til2CardRC.error = null
+
+            if (matricula.isBlank()) {
+                binding.til3CardRC.error = "Camp obligatori"
+                isValid = false
+            } else binding.til3CardRC.error = null
+
+            if (any.isBlank()) {
+                binding.til4CardRC.error = "Camp obligatori"
+                isValid = false
+            } else binding.til4CardRC.error = null
+
+            if (tipus.isBlank()) {
+                binding.til5CardRC.error = "Camp obligatori"
+                isValid = false
+            } else binding.til5CardRC.error = null
+
+            if (capacitat.isBlank()) {
+                binding.til5CardRCCapacitat.error = "Camp obligatori"
+                isValid = false
+            } else binding.til5CardRCCapacitat.error = null
+
+            if (color.isBlank()) {
+                binding.til6CardRC.error = "Camp obligatori"
+                isValid = false
+            } else binding.til6CardRC.error = null
+
+            if (usuari?.fotoCarnet.isNullOrBlank()) {
+                Toast.makeText(this, "Has de pujar una foto del carnet", Toast.LENGTH_LONG).show()
+                isValid = false
+            }
+
+            if (cotxe?.fotoFitxaTecnica.isNullOrBlank()) {
+                Toast.makeText(this, "Has de pujar la documentació tècnica", Toast.LENGTH_LONG).show()
+                isValid = false
+            }
+
+            if (isValid) {
+                cotxe?.matricula = matricula
+                cotxe?.marca = marca
+                cotxe?.model = model
+                cotxe?.any = any
+                cotxe?.tipus = tipus
+                cotxe?.color = color
+                cotxe?.capacitat = capacitat.toInt()
                 intentRegistre3()
-            } else {
-                Toast.makeText(this, "Algun camp està vuit", Toast.LENGTH_LONG).show()
             }
         }
+
 
         binding.btnPujar1RC.setOnClickListener {
             val galeria = Intent(
@@ -95,15 +150,19 @@ class RegistreCotxe : AppCompatActivity() {
             }
             resultLauncher.launch(galeria) // Lanza el intent usando el resultLauncher registrado
         }
-        resultLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == RESULT_OK){
-                    val imageUri = result.data?.data
-                    //ruta = imageUri?.let { comprimirImagen(it) } // ← Esto es un String
-                    usuari?.fotoCarnet = imageUri?.let { comprimirImagen(it) }
-                    Log.d("ruta comprimida", usuari?.fotoCarnet.toString())
+        resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK){
+                val imageUri = result.data?.data
+                usuari?.fotoCarnet = imageUri?.let { comprimirImagen(it) }
+
+                if (imageUri != null) {
+                    binding.imagePreview1.setImageURI(imageUri)
+                    binding.imagePreview1.visibility = View.VISIBLE
                 }
+                Log.d("ruta comprimida", usuari?.fotoCarnet.toString())
             }
+        }
+
 
         binding.btnPujar2RC.setOnClickListener {
             /*val fitxer = Intent(Intent.ACTION_GET_CONTENT).apply {
@@ -113,16 +172,6 @@ class RegistreCotxe : AppCompatActivity() {
             //openDocumentLauncher.launch(arrayOf("application/octet-stream", "text/plain"))
             openDocumentLauncher.launch(arrayOf("application/pdf"))
         }
-
-        /*resultLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    val fileUri = result.data?.data
-                    arxiuTecnic = getRealPathFromUri(fileUri)
-                    Log.d("arxiuTecnic launcher", arxiuTecnic.toString())
-                }
-            }*/
-
 
     }
 
@@ -171,7 +220,6 @@ class RegistreCotxe : AppCompatActivity() {
 
             // Comprobamos si la ruta existe
             val filePath = cursor.getString(column_index)
-            Log.d("getRealPathFromUri", "Ruta del archivo: $filePath")
             filePath
         } finally {
             cursor?.close()
@@ -189,24 +237,6 @@ class RegistreCotxe : AppCompatActivity() {
         return file.absolutePath
     }
 
-    /*fun getFileFromUri(uri: Uri?): File? {
-        if (uri == null) return null
-
-        val inputStream = this.getContentResolver().openInputStream(uri) ?: return null
-        val file = File(this.cacheDir)
-
-        return try {
-            file.outputStream().use { outputStream ->
-                inputStream.copyTo(outputStream)
-            }
-            file
-        } catch (e: IOException) {
-            e.printStackTrace()
-            null
-        } finally {
-            inputStream.close()
-        }
-    }*/
     fun getFileFromUri(uri: Uri?): File? {
         if (uri == null) return null
 
