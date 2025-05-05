@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:title="Home"
+        android:id="@+id/menuHome"
+        android:icon="@drawable/home_selector"
+        android:checked="true"
+        />
+    <item
         android:title="Perfil"
         android:id="@+id/menuPerfil"
         android:icon="@drawable/person_selector"

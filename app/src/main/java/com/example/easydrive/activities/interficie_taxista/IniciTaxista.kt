@@ -1,6 +1,7 @@
 package com.example.easydrive.activities.interficie_taxista
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -18,6 +19,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.example.easydrive.R
+import com.example.easydrive.activities.interficie_usuari.IniciUsuari
+import com.example.easydrive.activities.menu.Ajuda
+import com.example.easydrive.activities.menu.Configuracio
+import com.example.easydrive.activities.menu.HistorialViatges
+import com.example.easydrive.activities.menu.Perfil
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.user
 import com.example.easydrive.databinding.ActivityIniciTaxistaBinding
@@ -122,8 +128,20 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         item.setChecked(true)
         when(item.itemId){
+            R.id.menuHome->{
+                startActivity(Intent(this, IniciUsuari::class.java))
+            }
             R.id.menuPerfil -> {
-                Toast.makeText(this,"hola",Toast.LENGTH_LONG).show()
+                startActivity(Intent(this, Perfil::class.java))
+            }
+            R.id.menuConfig ->{
+                startActivity(Intent(this, Configuracio::class.java))
+            }
+            R.id.menuHistorial ->{
+                startActivity(Intent(this, HistorialViatges::class.java))
+            }
+            R.id.menuContacte ->{
+                startActivity(Intent(this, Ajuda::class.java))
             }
 
         }

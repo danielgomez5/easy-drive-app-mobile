@@ -1,6 +1,7 @@
 package com.example.easydrive.fragments
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -11,18 +12,22 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.format.DateFormat.is24HourFormat
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.util.Pair
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_usuari.MapaRutaUsuari
 import com.example.easydrive.adaptadors.AdaptadorRVDestins
 import com.example.easydrive.api.geoapify.CrudGeo
+import com.example.easydrive.dades.dataViatge
 import com.example.easydrive.dades.rutaEscollida
 import com.example.easydrive.dades.rutaOrigen
 import com.example.easydrive.databinding.FragmentHomeUsuariBinding
@@ -34,11 +39,24 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
+import com.google.android.material.datepicker.DateValidatorPointForward
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
+import com.google.android.material.timepicker.TimeFormat
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class HomeUsuari : Fragment(), OnMapReadyCallback {
     private lateinit var binding: FragmentHomeUsuariBinding
     private var map: GoogleMap? = null
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private var reserva: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +74,12 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
         binding.btnBuscar.setOnClickListener {
             if (rutaEscollida!= null){
-                startActivity(Intent(requireContext(), MapaRutaUsuari::class.java))
+                if (reserva){
+                    dialogReserva()
+                }else{
+                    startActivity(Intent(requireContext(), MapaRutaUsuari::class.java))
+                }
+
             }
         }
         binding.buscaDesti.setOnClickListener {
@@ -67,15 +90,89 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
             if (isChecked){
                 when(checkedId){
                     R.id.btnDemanaAra ->{
-
+                        reserva = false
                     }
                     R.id.btnReserva ->{
+                        reserva = true
 
                     }
                 }
             }
         }
         return binding.root
+    }
+
+    private fun dialogReserva() {
+        val dialeg = Dialog(requireContext())
+        dialeg.setContentView(R.layout.dialog_reserva)
+        dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        //dialeg.window?.setWindowAnimations(R.style.animation)
+        dialeg.setCancelable(false)
+
+        dialeg.findViewById<TextInputEditText>(R.id.tie_dialogdate).setOnClickListener {
+            val constraints = CalendarConstraints.Builder()
+                .setValidator(DateValidatorPointForward.now())
+                .build()
+
+            val datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Selecciona la teva data de naixement")
+                .setCalendarConstraints(constraints)
+                .build()
+
+            datePicker.show(parentFragmentManager, "DATE_PICKER")
+
+            datePicker.addOnPositiveButtonClickListener { selection ->
+                val selectedDate = Date(selection)
+                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val sdfBD = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+                // Mostrar la fecha en el campo, aunque sea inválida
+                dialeg.findViewById<TextInputEditText>(R.id.tie_dialogdate).setText(sdf.format(selectedDate))
+
+                // Guardar la fecha en el objeto (a validar después)
+                dataViatge = sdfBD.format(selectedDate)
+
+                // Limpiar posibles errores antiguos
+                dialeg.findViewById<TextInputEditText>(R.id.tie_dialogdate).error = null
+            }
+
+        }
+        dialeg.findViewById<TextInputEditText>(R.id.tie_dialoghora).setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val hour = calendar.get(Calendar.HOUR_OF_DAY)
+            val minute = calendar.get(Calendar.MINUTE)
+
+            val isSystem24Hour = is24HourFormat(requireContext())
+            val clockFormat = if (isSystem24Hour) TimeFormat.CLOCK_24H else TimeFormat.CLOCK_12H
+
+            val picker =
+                MaterialTimePicker.Builder()
+                    .setTimeFormat(clockFormat)
+                    .setInputMode(INPUT_MODE_KEYBOARD)
+                    .setHour(hour)
+                    .setMinute(minute)
+                    .setTitleText("Selecciona una hora diferent")
+                    .build()
+
+            picker.show(parentFragmentManager, "TIME_PICKER")
+
+            picker.addOnPositiveButtonClickListener {
+                val hora = picker.hour
+                val minuto = picker.minute
+                dialeg.findViewById<TextInputEditText>(R.id.tie_dialoghora).setText("$hora:$minuto")
+            }
+
+        }
+
+        dialeg.findViewById<Button>(R.id.btnaceptarD).setOnClickListener {
+            startActivity(Intent(requireContext(), MapaRutaUsuari::class.java))
+            dialeg.dismiss()
+        }
+        dialeg.findViewById<Button>(R.id.btncancelarD).setOnClickListener {
+            dialeg.dismiss()
+        }
+
+        dialeg.show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

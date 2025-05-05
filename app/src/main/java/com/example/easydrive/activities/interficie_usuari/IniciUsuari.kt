@@ -18,6 +18,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.easydrive.R
+import com.example.easydrive.activities.menu.Ajuda
+import com.example.easydrive.activities.menu.Configuracio
+import com.example.easydrive.activities.menu.HistorialViatges
 import com.example.easydrive.activities.menu.Perfil
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.user
@@ -107,8 +110,20 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
 
         item.setChecked(true)
         when(item.itemId){
+            R.id.menuHome->{
+                startActivity(Intent(this, IniciUsuari::class.java))
+            }
             R.id.menuPerfil -> {
                 startActivity(Intent(this, Perfil::class.java))
+            }
+            R.id.menuConfig ->{
+                startActivity(Intent(this, Configuracio::class.java))
+            }
+            R.id.menuHistorial ->{
+                startActivity(Intent(this, HistorialViatges::class.java))
+            }
+            R.id.menuContacte ->{
+                startActivity(Intent(this, Ajuda::class.java))
             }
 
         }

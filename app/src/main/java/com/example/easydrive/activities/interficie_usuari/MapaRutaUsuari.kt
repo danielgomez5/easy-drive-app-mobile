@@ -23,6 +23,7 @@ import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.api.openroute.CrudOpenRoute
 import com.example.easydrive.dades.DadesPagament
 import com.example.easydrive.dades.Reserva
+import com.example.easydrive.dades.dataViatge
 import com.example.easydrive.dades.rutaEscollida
 import com.example.easydrive.dades.rutaOrigen
 import com.example.easydrive.dades.user
@@ -195,6 +196,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
             var crud = CrudApiEasyDrive()
 
             val sdfBD = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
             pagament = DadesPagament(null,null,null,null,null)
             if (layout_bottom_sheet.findViewById<CheckBox>(R.id.guardarTarjeta).isChecked){
                 val input = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_Caducitat).text.toString()
@@ -215,12 +217,16 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
             Log.d("Pagament", pagament.toString())
 
             val currentData = Date()
-            var reserva = Reserva(null, null,null,null,null,null,null)
+            var reserva = Reserva(null, null,null,null,null,null,null,null)
             reserva.preu = preuTotal!!
             reserva.origen = rutaOrigen?.address_line1+ ", " +rutaOrigen?.city
             reserva.desti = rutaEscollida?.address_line1+ ", " +rutaEscollida?.city
             reserva.dataReserva = sdfBD.format(currentData)
-            reserva.dataViatge = sdfBD.format(currentData)
+            if (dataViatge == null){
+                dataViatge = sdfBD.format(currentData)
+            }
+            reserva.dataViatge = dataViatge
+            reserva.idUsuari = user?.dni
             reserva.idEstat = 1
             Log.d("Reserva", reserva.toString())
 
