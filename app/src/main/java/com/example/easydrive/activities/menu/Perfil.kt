@@ -1,16 +1,22 @@
 package com.example.easydrive.activities.menu
 
+import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
+import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.easydrive.R
+import com.example.easydrive.activities.MainActivity
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.dades.ChangePasswordRequest
 import com.example.easydrive.dades.user
 import com.example.easydrive.databinding.ActivityPerfilBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class Perfil : AppCompatActivity() {
     private lateinit var binding: ActivityPerfilBinding
@@ -123,5 +129,33 @@ class Perfil : AppCompatActivity() {
 
             }
         }
+
+        binding.btnEliminar.setOnClickListener {
+            val dialog = MaterialAlertDialogBuilder(this)
+                .setIcon(this.getDrawable(R.drawable.baseline_auto_delete_24 ))
+                .setMessage("Aquesta opció serà irreversible i totes les teves dades es perdran.")
+                .setTitle("Estàs segur d'eliminar el compte?")
+                .setPositiveButton("Acceptar") { dialog, wich ->
+                    val crud = CrudApiEasyDrive()
+
+                    if (crud.delUser(user?.dni!!)){
+                        Toast.makeText(this, "Compte el·liminat permanentment", Toast.LENGTH_LONG).show()
+                        startActivity(Intent(this, MainActivity::class.java))
+                    }else{
+                        Toast.makeText(this, "Hi ha hagut un problema el·liminant el teu compte", Toast.LENGTH_LONG).show()
+                    }
+                }
+                .setNegativeButton("Cancel·lar") { dialog, wich -> }
+            dialog.show()
+        }
+
+        binding.btnLogout.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            user = null
+            Toast.makeText(this, "Sessió tancada", Toast.LENGTH_LONG).show()
+        }
+
     }
 }

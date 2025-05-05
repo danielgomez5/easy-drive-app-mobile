@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 } else {
-                    Toast.makeText(this, "No hi ha cap usuari registrat, siusplau registra't", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "La combinació no es correcta, torna a intentar-ho", Toast.LENGTH_LONG).show()
                 }
             }
         }
