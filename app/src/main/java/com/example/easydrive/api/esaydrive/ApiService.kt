@@ -1,5 +1,6 @@
 package com.example.easydrive.api.esaydrive
 
+import com.example.easydrive.dades.ChangePasswordRequest
 import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.DadesPagament
 import com.example.easydrive.dades.LoginRequest
@@ -18,6 +19,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -58,6 +60,13 @@ interface ApiService {
         @Path("id") id: String, @Part f_perfil: MultipartBody.Part?,
         @Part f_tecnica: MultipartBody.Part?
     ): Response<Missatge>
+
+    @PUT("/api/usuari/{id}")
+    suspend fun updateUser(@Path("id") id: String, @Body usuari: Usuari): Response<Missatge>
+
+    @PUT("/api/usuari/canvi-contrasenya/{id}")
+    suspend fun changePassword(@Path("id") id: String?, @Body request: ChangePasswordRequest): Response<String>
+
 
     @Multipart
     @PUT("/api/cotxe_ftecnic/{matricula}")

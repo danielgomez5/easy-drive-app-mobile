@@ -1,6 +1,7 @@
 package com.example.easydrive.api.esaydrive
 
 import android.util.Log
+import com.example.easydrive.dades.ChangePasswordRequest
 import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.DadesPagament
 import com.example.easydrive.dades.LoginRequest
@@ -303,4 +304,31 @@ class CrudApiEasyDrive() : CoroutineScope {
             return false
     }
 
+    fun updateUsuari(id: String?, usuari: Usuari): Boolean {
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).updateUser(id!!, usuari)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
+
+    fun changePassword(id: String?, request: ChangePasswordRequest): Boolean {
+        var resposta: Response<String>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).changePassword(id, request)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
 }

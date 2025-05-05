@@ -30,7 +30,9 @@
         android:layout_marginTop="20dp"
         android:textSize="36sp"
         android:layout_marginHorizontal="20dp"
-        android:text="Informació cotxe"/>
+        android:text="Informació cotxe"
+        android:textColor="?colorSecondary"
+        />
 
 
     <androidx.cardview.widget.CardView
@@ -176,16 +178,16 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Pujar foto carnet:"
+                        android:text="Foto carnet:"
                         android:layout_gravity="start|center"/>
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <ImageButton
+                        android:src="@drawable/baseline_file_upload_24"
+                        android:layout_width="80dp"
+                        android:layout_height="35dp"
                         android:id="@+id/btnPujar1RC"
                         android:layout_gravity="end"
-                        android:backgroundTint="?attr/colorSecondary"
-                        app:tint="?attr/colorOnSecondary"
-                        android:text="Pujar"
+                        app:tint="?attr/colorOnPrimary"
+                        android:background="@drawable/roundcorner"
                         />
                 </FrameLayout>
 
@@ -201,20 +203,22 @@
 
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    >
                     <TextView
                         android:layout_width="170dp"
                         android:layout_height="wrap_content"
-                        android:text="Pujar documentació tècnica:"
+                        android:text="Documentació tècnica:"
                         android:layout_gravity="start|center"/>
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <ImageButton
+                        android:src="@drawable/baseline_upload_file_24"
+                        android:layout_width="80dp"
+                        android:layout_height="35dp"
                         android:layout_gravity="end"
                         android:id="@+id/btnPujar2RC"
-                        android:backgroundTint="?attr/colorSecondary"
-                        app:tint="?attr/colorOnSecondary"
-                        android:text="Pujar"/>
+                        app:tint="?attr/colorOnPrimary"
+                        android:background="@drawable/roundcorner" />
                 </FrameLayout>
                 <TextView
                     android:id="@+id/textDocAdjuntat"
@@ -239,8 +243,8 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="55dp"
         android:layout_marginBottom="25dp"
-        android:backgroundTint="?attr/colorSecondary"
-        app:tint="?attr/colorOnSecondary"
+        app:tint="?attr/colorOnPrimary"
+        android:background="@drawable/roundcorner"
         app:icon="@drawable/baseline_arrow_forward_24"
         app:iconGravity="textEnd"/>
 

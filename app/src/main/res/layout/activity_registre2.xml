@@ -30,7 +30,9 @@
             android:layout_marginTop="20dp"
             android:textSize="36sp"
             android:layout_marginHorizontal="20dp"
-            android:text="Informació personal"/>
+            android:text="Informació personal"
+            android:textColor="?colorSecondary"
+            />
 
 
         <androidx.cardview.widget.CardView
@@ -245,8 +247,8 @@
                     android:textAllCaps="false"
                     android:paddingHorizontal="24dp"
                     android:paddingVertical="12dp"
-                    app:tint="?attr/colorOnSecondary"
-                    android:backgroundTint="?attr/colorSecondary" />
+                    app:tint="?attr/colorOnPrimary"
+                    android:backgroundTint="?attr/colorPrimary" />
 
                 <TextView
                     android:id="@+id/textInfoPujada"
@@ -383,8 +385,8 @@
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="70dp"
             android:layout_marginBottom="25dp"
-            app:tint="?attr/colorOnSecondary"
-            android:backgroundTint="?attr/colorSecondary"
+            app:tint="?attr/colorOnPrimary"
+            android:backgroundTint="?attr/colorPrimary"
             app:icon="@drawable/baseline_arrow_forward_24"
             app:iconGravity="textEnd"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
