@@ -63,34 +63,29 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
             buscaDesti()
         }
 
+        binding.toggleButton.addOnButtonCheckedListener{group, checkedId, isChecked ->
+            if (isChecked){
+                when(checkedId){
+                    R.id.btnDemanaAra ->{
+
+                    }
+                    R.id.btnReserva ->{
+
+                    }
+                }
+            }
+        }
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.toggleButton.check(binding.btnDemanaAra.id)
     }
 
     override fun onMapReady(googleMap: GoogleMap){
         map = googleMap
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Toast.makeText(requireContext(), "Permisos de ubicación no concedidos", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        map?.isMyLocationEnabled = true // Este muestra el icono azul de ubicación
-        val crudGeo = CrudGeo(requireContext())
-        fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
-            if (location != null) {
-                val ubicacio = LatLng(location.latitude, location.longitude)
-                map?.animateCamera(
-                    CameraUpdateFactory.newLatLngZoom(ubicacio, 15f),
-                    2000,
-                    null
-                )
-                rutaOrigen = crudGeo.getLocationByLatLon(ubicacio.latitude.toString(), ubicacio.longitude.toString())
-
-            } else {
-                Toast.makeText(requireContext(), "No s'ha pogut obtenir la ubicació", Toast.LENGTH_SHORT).show()
-            }
-        }
+        carregarUbicacio()
     }
 
     private fun buscaDesti() {
@@ -102,6 +97,29 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         binding.rcv.layoutManager = LinearLayoutManager(requireContext())
 
     }
+
+    fun carregarUbicacio() {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(requireContext(), "Permisos no concedits", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        map?.isMyLocationEnabled = true
+        fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                val ubicacio = LatLng(location.latitude, location.longitude)
+                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(ubicacio, 15f))
+                rutaOrigen = CrudGeo(requireContext()).getLocationByLatLon(
+                    ubicacio.latitude.toString(),
+                    ubicacio.longitude.toString()
+                )
+            } else {
+                Toast.makeText(requireContext(), "Ubicació no disponible", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
 
 
 

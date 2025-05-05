@@ -142,6 +142,10 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         if (requestCode == REQUESTS_PERMISIONS) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 permisos = true
+                val fragment = supportFragmentManager.findFragmentById(R.id.fcv)
+                if (fragment is HomeUsuari) {
+                    fragment.carregarUbicacio()
+                }
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)

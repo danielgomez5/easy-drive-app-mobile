@@ -4,6 +4,7 @@ import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.DadesPagament
 import com.example.easydrive.dades.LoginRequest
 import com.example.easydrive.dades.Missatge
+import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.UsuariCotxeDTO
 import com.example.easydrive.dades.Zona
@@ -32,6 +33,9 @@ interface ApiService {
 
     @POST("/api/usuari-pagament")
     suspend fun afegirPagament(@Body pagament: DadesPagament): Response<Missatge>
+
+    @POST("/api/reserva")
+    suspend fun afegirReserva(@Body reserva: Reserva): Response<Missatge>
 
     /*@Multipart
     @POST("/api/usuari")

@@ -1,6 +1,7 @@
 package com.example.easydrive.activities.interficie_usuari
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -41,6 +42,7 @@ import com.google.android.material.textfield.TextInputEditText
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.div
@@ -59,7 +61,6 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
     var pagament: DadesPagament?=null
     var preuTotal: Double?=null
 
-    var crud :CrudApiEasyDrive? =null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +72,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        var crud = CrudApiEasyDrive()
         poly?.remove()
         binding.tieDestiMapausuari.setText(rutaEscollida?.address_line1 + ", " + rutaEscollida?.city)
         binding.tieOrigenMapausuari.setText(rutaOrigen?.address_line1+ ", " +rutaOrigen?.city )
@@ -84,13 +86,13 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
 
         binding.btnConfirmar.setOnClickListener {
             bottom_behavior.state = BottomSheetBehavior.STATE_EXPANDED
-            var dadespagament = crud?.getDadesPagament(user?.dni!!)
+            var dadespagament = crud.getDadesPagament(user?.dni!!)
             if (dadespagament != null){
                 layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_numTarjeta)
-                    .setText(dadespagament?.numero_tarjeta.toString())
+                    .setText(dadespagament.numeroTarjeta.toString())
 
                 layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_Caducitat)
-                    .setText(dadespagament?.data_expiracio.toString())
+                    .setText(dadespagament.dataExpiracio.toString())
 
             }
         }
@@ -101,7 +103,6 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
             private var isEditing = false
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable?) {
@@ -110,19 +111,50 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
 
                 s?.let {
                     val digits = it.toString().replace("[^\\d]".toRegex(), "")
-                    val formatted = when {
-                        digits.length >= 3 -> digits.substring(0, 2) + "/" + digits.substring(2.coerceAtMost(4))
-                        digits.length >= 1 -> digits
-                        else -> ""
+                    val builder = StringBuilder()
+
+                    // Validar mes
+                    if (digits.length >= 2) {
+                        val month = digits.substring(0, 2).toIntOrNull()
+                        if (month == null || month !in 1..12) {
+                            tietCaducitat.setText("")
+                            isEditing = false
+                            return
+                        }
+                        builder.append(String.format("%02d", month)).append("/")
+                    } else {
+                        builder.append(digits)
+                        isEditing = false
+                        return
                     }
 
-                    tietCaducitat.setText(formatted)
-                    tietCaducitat.setSelection(formatted.length)
+                    // Validar año solo si hay 2 dígitos
+                    if (digits.length >= 4) {
+                        val yearPart = digits.substring(2, 4)
+                        val year = yearPart.toIntOrNull()
+                        val currentYear = Calendar.getInstance().get(Calendar.YEAR) % 100
+
+                        if (year != null && year < currentYear) {
+                            tietCaducitat.setText("")
+                            isEditing = false
+                            return
+                        }
+
+                        builder.append(yearPart)
+                    } else if (digits.length > 2) {
+                        builder.append(digits.substring(2)) // Año incompleto, no validar todavía
+                    }
+
+                    tietCaducitat.setText(builder.toString())
+                    tietCaducitat.setSelection(builder.length.coerceAtMost(tietCaducitat.text?.length ?: 0))
                 }
 
                 isEditing = false
             }
         })
+
+
+
 
     }
 
@@ -160,24 +192,51 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
         }
 
         layout_bottom_sheet.findViewById<Button>(R.id.pagar).setOnClickListener {
-            if (layout_bottom_sheet.findViewById<CheckBox>(R.id.guardarTarjeta).isSelected){
-                pagament?.numero_tarjeta = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_numTarjeta).text.toString()
-                pagament?.data_expiracio = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_Caducitat).text.toString()
-                pagament?.id_usuari = user?.dni.toString()
-                pagament?.titular = user?.nom.toString()+" "+user?.cognom.toString()
-            }
-            Log.d("Reserva", pagament.toString())
+            var crud = CrudApiEasyDrive()
 
             val sdfBD = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            pagament = DadesPagament(null,null,null,null,null)
+            if (layout_bottom_sheet.findViewById<CheckBox>(R.id.guardarTarjeta).isChecked){
+                val input = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_Caducitat).text.toString()
+
+                val parts = input.split("/")
+                if (parts.size == 2) {
+                    val mes = parts[0].padStart(2, '0')
+                    val any = parts[1].padStart(2, '0')
+
+                    val dataFormatejada = "20$any-$mes-01"  // ejemplo: "2026-04-01"
+                    pagament?.dataExpiracio = dataFormatejada
+                }
+
+                pagament?.numeroTarjeta = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_numTarjeta).text.toString()
+                pagament?.idUsuari = user?.dni.toString()
+                pagament?.titular = user?.nom.toString()+" "+user?.cognom.toString()
+            }
+            Log.d("Pagament", pagament.toString())
+
             val currentData = Date()
-            var reserva: Reserva?=null
-            reserva?.preu = preuTotal!!
-            reserva?.origen = rutaOrigen?.address_line1+ ", " +rutaOrigen?.city
-            reserva?.desti = rutaEscollida?.address_line1+ ", " +rutaEscollida?.city
-            reserva?.data_reserva = sdfBD.format(currentData)
-            reserva?.data_viatge = sdfBD.format(currentData)
-            reserva?.id_estat = 1
+            var reserva = Reserva(null, null,null,null,null,null,null)
+            reserva.preu = preuTotal!!
+            reserva.origen = rutaOrigen?.address_line1+ ", " +rutaOrigen?.city
+            reserva.desti = rutaEscollida?.address_line1+ ", " +rutaEscollida?.city
+            reserva.dataReserva = sdfBD.format(currentData)
+            reserva.dataViatge = sdfBD.format(currentData)
+            reserva.idEstat = 1
             Log.d("Reserva", reserva.toString())
+
+            if (crud.insertDadesPagament(pagament!!)){
+                Log.d("Insert pagament", "s'ha fet")
+            }else{
+                Log.d("Insert pagament", "NOOO s'ha fet")
+            }
+
+            if (crud.insertReserves(reserva)){
+                Log.d("Insert reserva", "s'ha fet")
+            }else{
+                Log.d("Insert reserva", "NOOO s'ha fet")
+            }
+            startActivity(Intent(this, IniciUsuari::class.java))
+
         }
 
 

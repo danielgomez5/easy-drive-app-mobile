@@ -5,6 +5,7 @@ import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.DadesPagament
 import com.example.easydrive.dades.LoginRequest
 import com.example.easydrive.dades.Missatge
+import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.UsuariCotxeDTO
 import com.example.easydrive.dades.Zona
@@ -79,6 +80,34 @@ class CrudApiEasyDrive() : CoroutineScope {
         runBlocking {
             val cor = launch {
                 resposta = getRetrofit().create(ApiService::class.java).assignarCotxeAUsuari(relacioUsuariCotxe)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
+
+    fun insertDadesPagament(pagament: DadesPagament): Boolean{
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).afegirPagament(pagament)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
+
+    fun insertReserves(reserva: Reserva): Boolean{
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).afegirReserva(reserva)
             }
             cor.join()
         }
