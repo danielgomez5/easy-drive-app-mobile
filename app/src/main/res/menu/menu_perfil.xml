@@ -10,7 +10,7 @@
         android:title="Perfil"
         android:id="@+id/menuPerfil"
         android:icon="@drawable/person_selector"
-        android:checked="true"
+        android:checked="false"
         />
     <item
         android:title="Configuració"
