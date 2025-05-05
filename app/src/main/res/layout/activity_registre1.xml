@@ -25,9 +25,12 @@
         android:layout_height="wrap_content"
         android:id="@+id/textViewR1"
         app:layout_constraintTop_toBottomOf="@+id/imagebtnR1"
+        android:textColor="?colorSecondary"
         android:layout_marginTop="20dp"
         android:textSize="36sp"
         android:layout_marginHorizontal="20dp"
+
+        android:drawablePadding="8dp"
         android:text="Registra't"/>
 
     <com.google.android.material.button.MaterialButtonToggleGroup
@@ -45,7 +48,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Usuari" />
+            android:text="👤 Usuari" />
 
         <Button
             style="?attr/materialButtonOutlinedStyle"
@@ -53,7 +56,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Taxista" />
+            android:text="🚕 Taxista" />
 
     </com.google.android.material.button.MaterialButtonToggleGroup>
 

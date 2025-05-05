@@ -236,15 +236,16 @@
                     android:scaleType="centerCrop"
                     android:visibility="gone" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPujada"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Puja una foto"
+                    app:icon="@drawable/baseline_photo_camera_24"
                     android:textAllCaps="false"
                     android:paddingHorizontal="24dp"
                     android:paddingVertical="12dp"
-                    android:textColor="@android:color/white"
+                    app:tint="?attr/colorOnSecondary"
                     android:backgroundTint="?attr/colorSecondary" />
 
                 <TextView
@@ -382,6 +383,8 @@
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="70dp"
             android:layout_marginBottom="25dp"
+            app:tint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondary"
             app:icon="@drawable/baseline_arrow_forward_24"
             app:iconGravity="textEnd"/>
     </androidx.constraintlayout.widget.ConstraintLayout>

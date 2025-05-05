@@ -17,6 +17,8 @@
         app:layout_constraintStart_toStartOf="parent"
         android:src="@drawable/baseline_arrow_back_24"
         android:background="@drawable/roundcorner"
+        app:tint="?attr/colorOnSecondary"
+
         android:layout_marginTop="40dp"
         android:layout_marginStart="20dp"/>
 
@@ -79,6 +81,8 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:inputType="text"
+                    android:maxLength="7"
                     android:id="@+id/tie_matriculaRC"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -92,6 +96,8 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:inputType="number"
+                    android:maxLength="4"
                     android:id="@+id/tie_anyRC"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -177,9 +183,22 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/btnPujar1RC"
                         android:layout_gravity="end"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:tint="?attr/colorOnSecondary"
                         android:text="Pujar"
                         />
                 </FrameLayout>
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/imagePreview1"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="Preview Foto Carnet"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
+
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
@@ -193,9 +212,19 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
                         android:id="@+id/btnPujar2RC"
+                        android:backgroundTint="?attr/colorSecondary"
+                        app:tint="?attr/colorOnSecondary"
                         android:text="Pujar"/>
                 </FrameLayout>
-
+                <TextView
+                    android:id="@+id/textDocAdjuntat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Document adjuntat correctament"
+                    android:layout_gravity="start"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@android:color/holo_green_dark"
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -210,6 +239,8 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="55dp"
         android:layout_marginBottom="25dp"
+        android:backgroundTint="?attr/colorSecondary"
+        app:tint="?attr/colorOnSecondary"
         app:icon="@drawable/baseline_arrow_forward_24"
         app:iconGravity="textEnd"/>
 
