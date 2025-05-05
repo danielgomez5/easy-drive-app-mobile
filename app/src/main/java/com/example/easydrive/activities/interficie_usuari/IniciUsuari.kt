@@ -49,7 +49,6 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         if (user == null){
             user = intent.getSerializableExtra("user") as? Usuari
         }
-
         Log.d("Usuari", user.toString())
         //permisos
         if(comprovarPermisos()){
