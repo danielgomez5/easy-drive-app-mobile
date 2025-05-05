@@ -54,7 +54,9 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        user = intent.getSerializableExtra("user") as? Usuari
+        if (user == null){
+            user = intent.getSerializableExtra("user") as? Usuari
+        }
         Log.d("Usuari", user.toString())
         //permisos
         if(comprovarPermisos()){

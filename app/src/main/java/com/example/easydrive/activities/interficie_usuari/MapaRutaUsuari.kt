@@ -1,29 +1,39 @@
 package com.example.easydrive.activities.interficie_usuari
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.format.DateFormat.is24HourFormat
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.easydrive.R
+import com.example.easydrive.adaptadors.AdaptadorRVDestins
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
+import com.example.easydrive.api.geoapify.CrudGeo
 import com.example.easydrive.api.openroute.CrudOpenRoute
 import com.example.easydrive.dades.DadesPagament
 import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.dataViatge
+import com.example.easydrive.dades.rutaDesti
 import com.example.easydrive.dades.rutaEscollida
 import com.example.easydrive.dades.rutaOrigen
 import com.example.easydrive.dades.user
@@ -35,11 +45,19 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointForward
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
+import com.google.android.material.timepicker.TimeFormat
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -58,6 +76,9 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
     var map: GoogleMap? = null
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     var ubicacioActual: LatLng? = null
+    private var markerOrigen: Marker? = null
+    private var markerDesti: Marker? = null
+
 
     var pagament: DadesPagament?=null
     var preuTotal: Double?=null
@@ -74,9 +95,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
             insets
         }
         var crud = CrudApiEasyDrive()
-        poly?.remove()
-        binding.tieDestiMapausuari.setText(rutaEscollida?.address_line1 + ", " + rutaEscollida?.city)
-        binding.tieOrigenMapausuari.setText(rutaOrigen?.address_line1+ ", " +rutaOrigen?.city )
+        afegirText()
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapa) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -96,6 +115,13 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                     .setText(dadespagament.dataExpiracio.toString())
 
             }
+        }
+
+        binding.tieOrigenMapausuari.setOnClickListener {
+            dialogEditarRuta(true)
+        }
+        binding.tieDestiMapausuari.setOnClickListener {
+            dialogEditarRuta(false)
         }
 
         val tietCaducitat = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_Caducitat)
@@ -153,10 +179,70 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                 isEditing = false
             }
         })
+    }
+
+    private fun afegirText() {
+        poly?.remove()
+        binding.tieDestiMapausuari.setText(rutaDesti?.address_line1 + ", " + rutaDesti?.city)
+        binding.tieOrigenMapausuari.setText(rutaOrigen?.address_line1+ ", " +rutaOrigen?.city )
+    }
+
+    private fun dialogEditarRuta(idHint: Boolean) {
+        val dialeg = Dialog(this)
+        dialeg.setContentView(R.layout.dialog_escollirrutas)
+        dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        //dialeg.window?.setWindowAnimations(R.style.animation)
+        dialeg.setCancelable(false)
+
+        if (idHint){
+            dialeg.findViewById<TextInputLayout>(R.id.tilDialog).setHint("Ubicació Origen")
+        }else{
+            dialeg.findViewById<TextInputLayout>(R.id.tilDialog).setHint("Ubicació Destí")
+        }
+
+        var rcv = dialeg.findViewById<RecyclerView>(R.id.rcvDialog)
+        rcv.visibility = View.GONE
 
 
+        dialeg.findViewById<AppCompatImageButton>(R.id.buscaDestiD).setOnClickListener {
+            var textBuscar = dialeg.findViewById<TextInputEditText>(R.id.tie_rutas).text.toString()
+            if (textBuscar != null){
+                textBuscar.replace(" ","+")
+                val crudGeo = CrudGeo(this)
+                val listaCarrers = crudGeo.getLocationByName(textBuscar)
+                rcv.adapter = AdaptadorRVDestins(listaCarrers)
+                rcv.layoutManager = LinearLayoutManager(this)
+                rcv.visibility = View.VISIBLE
 
+            }
 
+        }
+
+        dialeg.findViewById<Button>(R.id.btnaceptarD).setOnClickListener {
+            if (idHint){
+                rutaOrigen = rutaEscollida
+            }else{
+                rutaDesti = rutaEscollida
+            }
+            afegirText()
+            markerDesti?.remove()
+            markerOrigen?.remove()
+            ubicacioActual = LatLng(rutaOrigen?.lat?.toDouble()!!, rutaOrigen?.lon?.toDouble()!!)
+            val ubiacioDesti = LatLng(rutaDesti?.lat?.toDouble()!!, rutaDesti?.lon?.toDouble()!!)
+            markerOrigen = map!!.addMarker(
+                MarkerOptions().position(ubicacioActual!!)
+            )
+            markerDesti = map!!.addMarker(
+                MarkerOptions().position(ubiacioDesti)
+            )
+            dibuixarRuta(ubicacioActual, ubiacioDesti)
+            dialeg.dismiss()
+        }
+        dialeg.findViewById<Button>(R.id.btncancelarD).setOnClickListener {
+            dialeg.dismiss()
+        }
+
+        dialeg.show()
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -182,9 +268,12 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                 null
             )
 
-            val ubiacioDesti: LatLng = LatLng(rutaEscollida?.lat?.toDouble()!!, rutaEscollida?.lon?.toDouble()!!)
+            val ubiacioDesti: LatLng = LatLng(rutaDesti?.lat?.toDouble()!!, rutaDesti?.lon?.toDouble()!!)
 
-            map!!.addMarker(
+            markerOrigen = map!!.addMarker(
+                MarkerOptions().position(ubicacioActual!!)
+            )
+            markerDesti = map!!.addMarker(
                 MarkerOptions().position(ubiacioDesti)
             )
             Log.d("ubicacioActual antes de la funcion", ubicacioActual.toString())
@@ -220,7 +309,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
             var reserva = Reserva(null, null,null,null,null,null,null,null)
             reserva.preu = preuTotal!!
             reserva.origen = rutaOrigen?.address_line1+ ", " +rutaOrigen?.city
-            reserva.desti = rutaEscollida?.address_line1+ ", " +rutaEscollida?.city
+            reserva.desti = rutaDesti?.address_line1+ ", " +rutaDesti?.city
             reserva.dataReserva = sdfBD.format(currentData)
             if (dataViatge == null){
                 dataViatge = sdfBD.format(currentData)
@@ -278,7 +367,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                 layout_bottom_sheet.findViewById<TextView>(R.id.preuTotal).setText(dec.format(preuTotal).toString()+" €")
             }
             layout_bottom_sheet.findViewById<TextView>(R.id.carrerOrigenSheet).setText(rutaOrigen?.address_line1+ ", " +rutaOrigen?.city)
-            layout_bottom_sheet.findViewById<TextView>(R.id.carrerDestiSheet).setText(rutaEscollida?.address_line1+ ", " +rutaEscollida?.city )
+            layout_bottom_sheet.findViewById<TextView>(R.id.carrerDestiSheet).setText(rutaDesti?.address_line1+ ", " +rutaDesti?.city )
             drawRoute(map!!, coordenada!!)
         } else {
             Log.d("resposta api", resposta.toString())

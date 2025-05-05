@@ -28,6 +28,7 @@ import com.example.easydrive.activities.interficie_usuari.MapaRutaUsuari
 import com.example.easydrive.adaptadors.AdaptadorRVDestins
 import com.example.easydrive.api.geoapify.CrudGeo
 import com.example.easydrive.dades.dataViatge
+import com.example.easydrive.dades.rutaDesti
 import com.example.easydrive.dades.rutaEscollida
 import com.example.easydrive.dades.rutaOrigen
 import com.example.easydrive.databinding.FragmentHomeUsuariBinding
@@ -74,6 +75,7 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
         binding.btnBuscar.setOnClickListener {
             if (rutaEscollida!= null){
+                rutaDesti = rutaEscollida
                 if (reserva){
                     dialogReserva()
                 }else{

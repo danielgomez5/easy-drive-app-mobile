@@ -24,11 +24,17 @@
                     android:layout_marginHorizontal="20dp"
                     android:layout_marginTop="20dp"
                     android:hint="Ubicació Origen"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:focusable="false"
+                    android:inputType="none"
+                    android:clickable="true">
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:id="@+id/tie_OrigenMapausuari"/>
+                        android:id="@+id/tie_OrigenMapausuari"
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:clickable="true"/>
                 </com.google.android.material.textfield.TextInputLayout>
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
@@ -36,11 +42,17 @@
                     android:layout_marginHorizontal="20dp"
                     android:layout_marginVertical="20dp"
                     android:hint="Ubicació Destí"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:focusable="false"
+                    android:inputType="none"
+                    android:clickable="true">
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:id="@+id/tie_DestiMapausuari"/>
+                        android:id="@+id/tie_DestiMapausuari"
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:clickable="true"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
             </LinearLayout>
