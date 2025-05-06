@@ -7,3 +7,4 @@ var rutaDesti: GeoapifyDades?=null
 
 //String
 var dataViatge: String?=null
+var horaViatge: String?=null

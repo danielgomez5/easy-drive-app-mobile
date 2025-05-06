@@ -28,6 +28,7 @@ import com.example.easydrive.activities.interficie_usuari.MapaRutaUsuari
 import com.example.easydrive.adaptadors.AdaptadorRVDestins
 import com.example.easydrive.api.geoapify.CrudGeo
 import com.example.easydrive.dades.dataViatge
+import com.example.easydrive.dades.horaViatge
 import com.example.easydrive.dades.rutaDesti
 import com.example.easydrive.dades.rutaEscollida
 import com.example.easydrive.dades.rutaOrigen
@@ -161,6 +162,7 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
             picker.addOnPositiveButtonClickListener {
                 val hora = picker.hour
                 val minuto = picker.minute
+                horaViatge = "$hora:$minuto:00"
                 dialeg.findViewById<TextInputEditText>(R.id.tie_dialoghora).setText("$hora:$minuto")
             }
 

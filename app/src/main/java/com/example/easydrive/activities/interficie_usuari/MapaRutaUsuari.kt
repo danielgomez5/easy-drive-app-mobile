@@ -33,6 +33,7 @@ import com.example.easydrive.api.openroute.CrudOpenRoute
 import com.example.easydrive.dades.DadesPagament
 import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.dataViatge
+import com.example.easydrive.dades.horaViatge
 import com.example.easydrive.dades.rutaDesti
 import com.example.easydrive.dades.rutaEscollida
 import com.example.easydrive.dades.rutaOrigen
@@ -306,7 +307,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
             Log.d("Pagament", pagament.toString())
 
             val currentData = Date()
-            var reserva = Reserva(null, null,null,null,null,null,null,null)
+            var reserva = Reserva(null, null,null,null,null,null,null,null,null)
             reserva.preu = preuTotal!!
             reserva.origen = rutaOrigen?.address_line1+ ", " +rutaOrigen?.city
             reserva.desti = rutaDesti?.address_line1+ ", " +rutaDesti?.city
@@ -314,6 +315,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
             if (dataViatge == null){
                 dataViatge = sdfBD.format(currentData)
             }
+            reserva.horaViatge = horaViatge
             reserva.dataViatge = dataViatge
             reserva.idUsuari = user?.dni
             reserva.idEstat = 1
