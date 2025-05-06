@@ -210,6 +210,17 @@ class CrudApiEasyDrive() : CoroutineScope {
         }
     }
 
+    fun getDispoTaxista(id: String): Boolean{
+        var resposta: Response<Boolean>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getDispoTaxista(id)
+            }
+            cor.join()
+        }
+        return resposta?.body() == true
+    }
+
     //Update
     fun updateUserFoto(id: String, rutaPerfil: String?): Boolean {
         val filePerfil = File(rutaPerfil)
@@ -323,6 +334,20 @@ class CrudApiEasyDrive() : CoroutineScope {
         runBlocking {
             val cor = launch {
                 resposta = getRetrofit().create(ApiService::class.java).changePassword(id, request)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
+
+    fun updateDispoTaxista(id: String, dispo: Boolean): Boolean{
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).updateDisponiblitat(id,dispo)
             }
             cor.join()
         }

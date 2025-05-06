@@ -24,6 +24,7 @@ import com.example.easydrive.activities.menu.Ajuda
 import com.example.easydrive.activities.menu.Configuracio
 import com.example.easydrive.activities.menu.HistorialViatges
 import com.example.easydrive.activities.menu.Perfil
+import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.user
 import com.example.easydrive.databinding.ActivityIniciTaxistaBinding
@@ -54,8 +55,11 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        val crud = CrudApiEasyDrive()
         if (user == null){
             user = intent.getSerializableExtra("user") as? Usuari
+            editarHeader()
+            afegirFoto()
         }
         Log.d("Usuari", user.toString())
         //permisos
@@ -67,6 +71,22 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }
         editarHeader()
         afegirFoto()
+        getDisponiblitat(crud)
+
+        binding.switchDisponiblitat.setOnCheckedChangeListener { _, isChecked ->
+            val dispo = isChecked
+            val idUsuari = user?.dni ?: return@setOnCheckedChangeListener
+
+                val success = crud.updateDispoTaxista(idUsuari, dispo)
+
+                    if (success) {
+                        Toast.makeText(this, "Disponibilitat actualitzada", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, "Error actualitzant disponibilitat", Toast.LENGTH_SHORT).show()
+                        binding.switchDisponiblitat.isChecked = !dispo
+                    }
+        }
+
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapa) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -79,6 +99,15 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             binding.main.openDrawer(GravityCompat.START)
         }
     }
+
+    private fun getDisponiblitat(crud: CrudApiEasyDrive) {
+        if (crud.getDispoTaxista(user?.dni!!)){
+            binding.switchDisponiblitat.isChecked = true
+        }else{
+            binding.switchDisponiblitat.isChecked = false
+        }
+    }
+
     override fun onMapReady(googleMap: GoogleMap){
         map = googleMap
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
