@@ -7,33 +7,34 @@
     android:layout_margin="10dp"
     app:cardElevation="10dp"
     >
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingVertical="10dp"
-        >
+        android:layout_height="match_parent"
+        android:paddingVertical="10dp">
         <TextView
-            android:layout_width="200dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:id="@+id/NomDesti"
             android:hint="Desti Final"
-            android:layout_marginStart="20dp"
-            android:layout_gravity="start|center"/>
-        <LinearLayout
-            android:layout_width="match_parent"
+            android:textSize="18sp"
+            android:layout_marginHorizontal= "20dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btn_borrar"/>
+        <ImageButton
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="end"
+            android:id="@+id/btn_borrar"
+            android:src="@drawable/baseline_close_24"
             android:layout_marginEnd="20dp"
-            android:orientation="horizontal">
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/btn_cancel"
-                android:text="Cancel·lar"
-                />
-        </LinearLayout>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:tint="@color/white"
+            android:backgroundTint="?colorError"
+            />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

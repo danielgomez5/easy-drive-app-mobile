@@ -1,22 +1,29 @@
 package com.example.easydrive.activities.interficie_taxista
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_usuari.IniciUsuari
@@ -24,8 +31,13 @@ import com.example.easydrive.activities.menu.Ajuda
 import com.example.easydrive.activities.menu.Configuracio
 import com.example.easydrive.activities.menu.HistorialViatges
 import com.example.easydrive.activities.menu.Perfil
+import com.example.easydrive.adaptadors.AdaptadorRVDestins
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
+import com.example.easydrive.api.geoapify.CrudGeo
 import com.example.easydrive.dades.Usuari
+import com.example.easydrive.dades.rutaDesti
+import com.example.easydrive.dades.rutaEscollida
+import com.example.easydrive.dades.rutaOrigen
 import com.example.easydrive.dades.user
 import com.example.easydrive.databinding.ActivityIniciTaxistaBinding
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -35,7 +47,11 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 
 class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnMapReadyCallback{
     private lateinit var binding: ActivityIniciTaxistaBinding
@@ -97,6 +113,9 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         binding.btnPerfil.setOnClickListener {
             binding.main.openDrawer(GravityCompat.START)
+        }
+        if (binding.switchDisponiblitat.isChecked){
+            //poner cuando llegue un reserva
         }
     }
 
@@ -190,6 +209,24 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }else{
             return false
         }
+    }
+
+    fun dialogRecollirClient(){
+        val dialeg = Dialog(this)
+        dialeg.setContentView(R.layout.dialog_escollirrutas)
+        dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        //dialeg.window?.setWindowAnimations(R.style.animation)
+        dialeg.setCancelable(false)
+
+        dialeg.findViewById<MaterialButton>(R.id.btnAcceptarD).setOnClickListener { // si acepta la reserva
+            dialeg.dismiss()
+        }
+
+        dialeg.findViewById<MaterialButton>(R.id.btnCancelarD).setOnClickListener {
+            dialeg.dismiss()
+        }
+
+        dialeg.show()
     }
 
     fun demanarPermisos(){

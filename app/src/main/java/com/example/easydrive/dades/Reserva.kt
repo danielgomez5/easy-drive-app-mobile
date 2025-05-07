@@ -9,5 +9,7 @@ data class Reserva(
     var preu : Double?,
     var idUsuari: String?,
     var idEstat: Int?,
-    var horaViatge: String?
+    var horaViatge: String?,
+    var viewType: Int = 0
+
 )

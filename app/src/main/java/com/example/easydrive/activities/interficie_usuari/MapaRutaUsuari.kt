@@ -382,7 +382,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
             reserva.horaViatge = horaViatge
             reserva.dataViatge = dataViatge
             reserva.idUsuari = user?.dni
-            reserva.idEstat = 1
+            reserva.idEstat = 2
             Log.d("Reserva", reserva.toString())
 
             if (crud.insertDadesPagament(pagament!!)){

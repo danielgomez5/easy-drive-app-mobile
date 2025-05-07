@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Destins guardats"
+        android:text="Destins pendents"
         android:id="@+id/textVG"
         android:layout_marginTop="80dp"
         android:layout_marginHorizontal="20dp"

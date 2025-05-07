@@ -78,6 +78,9 @@ interface ApiService {
     @PUT("/api/usuari-disponiblitat")
     suspend fun updateDisponiblitat(@Query("id") id: String, @Query("dispo") dispo: Boolean ): Response<Missatge>
 
+    @PUT("/api/reserva/{id}")
+    suspend fun updateReserva(@Path("id") id: String, @Body reserva: Reserva): Response<Missatge>
+
     //Gets
     @GET("/api/zones")
     suspend fun getZones(): Response<List<Zona>>
@@ -108,4 +111,7 @@ interface ApiService {
     //Dels
     @DELETE("api/usuari/del_all/{id_usuari}")
     suspend fun delUser(@Path("id_usuari") id_usuari: String): Response<Missatge>
+
+    @DELETE("/api/reserva/{id}")
+    suspend fun delReserva(@Path("id") id: String): Response<Missatge>
 }

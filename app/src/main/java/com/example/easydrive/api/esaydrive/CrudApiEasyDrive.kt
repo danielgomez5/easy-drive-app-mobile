@@ -372,6 +372,20 @@ class CrudApiEasyDrive() : CoroutineScope {
             return false
     }
 
+    fun changeEstatReserva(id: String, reserva: Reserva): Boolean{
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).updateReserva(id,reserva)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
+
     // Dels
 
     fun delUser(id: String): Boolean {
@@ -379,6 +393,20 @@ class CrudApiEasyDrive() : CoroutineScope {
         runBlocking {
             val cor = launch {
                 resposta = getRetrofit().create(ApiService::class.java).delUser(id)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
+
+    fun delReserva(id: String): Boolean{
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).delReserva(id)
             }
             cor.join()
         }
