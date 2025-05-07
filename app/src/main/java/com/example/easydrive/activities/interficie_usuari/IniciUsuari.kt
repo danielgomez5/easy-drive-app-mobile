@@ -168,5 +168,11 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        editarHeader()
+        afegirFoto()
+    }
 
 }

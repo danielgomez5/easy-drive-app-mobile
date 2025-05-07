@@ -168,10 +168,8 @@ class Registre2 : AppCompatActivity() {
                 binding.imagePreview.setImageURI(imageUri)
                 binding.imagePreview.visibility = View.VISIBLE
 
-                // Mostrar el texto de confirmación
                 binding.textInfoPujada.text = "Foto pujada!"
 
-                // Guardar la ruta comprimida en el usuari
                 usuari?.fotoPerfil = imageUri?.let { comprimirImagen(it) }
 
                 Log.d("ruta comprimida", usuari?.fotoPerfil.toString())

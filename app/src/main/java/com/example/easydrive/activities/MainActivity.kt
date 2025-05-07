@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.util.Patterns
+import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_taxista.IniciTaxista
 import com.example.easydrive.activities.interficie_usuari.IniciUsuari
@@ -20,6 +23,9 @@ import com.example.easydrive.activities.registre.Registre1
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -89,28 +95,53 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (isValid) {
-                val usuari = crud.loginUsuari(email, password)
-                if (usuari != null) {
-                    when (usuari.rol) {
-                        false -> {
-                            val intent = Intent(this, IniciUsuari::class.java)
-                            intent.putExtra("user", usuari)
-                            startActivity(intent)
-                        }
-                        true -> {
-                            val intent = Intent(this, IniciTaxista::class.java)
-                            intent.putExtra("user", usuari)
-                            startActivity(intent)
-                        }
-                        else -> {
-                            Toast.makeText(this, "El usuari no està registrat en la aplicació", Toast.LENGTH_LONG).show()
-                        }
+                binding.loadingOverlay.visibility = View.VISIBLE
+                binding.progressBar.visibility = View.VISIBLE
+                window.setFlags(
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                )
+
+                lifecycleScope.launch {
+                    val usuari = withContext(Dispatchers.IO) {
+                        crud.loginUsuari(email, password)
                     }
-                } else {
-                    Toast.makeText(this, "La combinació no es correcta, torna a intentar-ho", Toast.LENGTH_LONG).show()
+
+                    binding.loadingOverlay.visibility = View.GONE
+                    binding.progressBar.visibility = View.GONE
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+
+                    if (usuari != null) {
+                        when (usuari.rol) {
+                            false -> {
+                                val intent = Intent(this@MainActivity, IniciUsuari::class.java)
+                                intent.putExtra("user", usuari)
+                                startActivity(intent)
+                            }
+                            true -> {
+                                val intent = Intent(this@MainActivity, IniciTaxista::class.java)
+                                intent.putExtra("user", usuari)
+                                startActivity(intent)
+                            }
+                            null -> {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "El usuari no està registrat en la aplicació",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "La combinació no es correcta, torna a intentar-ho",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
         }
+
 
     }
 
