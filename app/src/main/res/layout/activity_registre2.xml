@@ -341,7 +341,7 @@
                         <AutoCompleteTextView
                             android:layout_width="match_parent"
                             android:layout_height="60dp"
-                            android:id="@+id/actv_tipusRC"
+                            android:id="@+id/actv_hIniciR2"
                             android:inputType="text"
                             android:focusable="false"
                             android:maxLines="1"
@@ -362,7 +362,7 @@
                         <AutoCompleteTextView
                             android:layout_width="match_parent"
                             android:layout_height="60dp"
-                            android:id="@+id/actv_capacitatRC"
+                            android:id="@+id/actv_hFinalR2"
                             android:inputType="text"
                             android:focusable="false"
                             android:maxLines="1"

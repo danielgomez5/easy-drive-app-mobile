@@ -48,6 +48,8 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
 
         if (user == null){
             user = intent.getSerializableExtra("user") as? Usuari
+            editarHeader()
+            afegirFoto()
         }
         Log.d("Usuari", user.toString())
         //permisos

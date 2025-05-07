@@ -25,7 +25,6 @@ import retrofit2.http.Query
 interface ApiService {
 
     //Posts
-
     @POST("/api/usuari")
     suspend fun insertUser(@Body usuari: Usuari): Response<Missatge>
 
@@ -69,13 +68,15 @@ interface ApiService {
     @PUT("/api/usuari/canvi-contrasenya/{id}")
     suspend fun changePassword(@Path("id") id: String?, @Body request: ChangePasswordRequest): Response<String>
 
-
     @Multipart
     @PUT("/api/cotxe_ftecnic/{matricula}")
     suspend fun updateCotxeFTecnic(@Path("matricula") matricula: String, @Part f_tecnic: MultipartBody.Part?): Response<Missatge>
 
     @PUT("/api/zona_habilitada/{id}")
     suspend fun updateZonaCuberta(@Path("id") id: String) : Response<Missatge>
+
+    @PUT("/api/usuari-disponiblitat")
+    suspend fun updateDisponiblitat(@Query("id") id: String, @Query("dispo") dispo: Boolean ): Response<Missatge>
 
     //Gets
     @GET("/api/zones")
@@ -97,6 +98,9 @@ interface ApiService {
 
     @GET("/api/usuari-pagaments/{id_usuari}")
     suspend fun getDadesPagamentByUsuari(@Path("id_usuari") id_usuari: String) : Response<DadesPagament>
+
+    @GET("/api/disponiblitat-taxista/{id}")
+    suspend fun getDispoTaxista(@Path("id") id: String) : Response<Boolean>
 
     //Dels
     @DELETE("api/usuari/del_all/{id_usuari}")

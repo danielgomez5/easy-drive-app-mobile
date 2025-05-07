@@ -59,6 +59,7 @@ class Registre2 : AppCompatActivity() {
         }
 
         carregaComboBox()
+        carregaDisponibilitat()
 
         binding.imagebtnR1.setOnClickListener {
             startActivity(Intent(this, Registre1::class.java))
@@ -152,7 +153,11 @@ class Registre2 : AppCompatActivity() {
                 usuari?.idZona = zonaEscollida?.id
 
                 when (usuari?.rol) {
-                    true -> addTaxista()
+                    true -> {
+                        usuari?.horari = binding.actvDIniciR2.text.toString()+"-"+binding.actvDFinalR2.text.toString()+";"+binding.actvHIniciR2.text.toString()+"-"+binding.actvHFinalR2.text.toString()
+                        usuari?.diponibiliat = false
+                        addTaxista()
+                    }
                     false -> addUsuari()
                     else -> addUsuari()
                 }
@@ -256,4 +261,26 @@ class Registre2 : AppCompatActivity() {
         outputStream.close()
         return file.absolutePath
     }
+    private fun carregaDisponibilitat() {
+        val dies = listOf("Dilluns", "Dimarts", "Dimecres", "Dijous", "Divendres", "Dissabte", "Diumenge")
+        val hores = mutableListOf<String>()
+
+        for (hora in 0..23) {
+            hores.add(String.format("%02d:00", hora))
+            hores.add(String.format("%02d:30", hora))
+        }
+
+        val adapterDies = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, dies)
+        val adapterHores = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, hores)
+
+        // Dia i hora d'inici
+
+        binding.actvDIniciR2.setAdapter(adapterDies)
+        binding.actvHIniciR2.setAdapter(adapterHores)
+
+        // Dia i hora de fi
+        binding.actvDFinalR2.setAdapter(adapterDies)
+        binding.actvHFinalR2.setAdapter(adapterHores)
+    }
+
 }
