@@ -348,6 +348,7 @@ class CrudApiEasyDrive() : CoroutineScope {
         runBlocking {
             val cor = launch {
                 resposta = getRetrofit().create(ApiService::class.java).changePassword(id, request)
+                resposta = getRetrofit().create(ApiService::class.java).changePassword(id, request)
             }
             cor.join()
         }

@@ -82,13 +82,9 @@ class Registre2 : AppCompatActivity() {
                 val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val sdfBD = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-                // Mostrar la fecha en el campo, aunque sea inválida
                 binding.tieDataNeixR2.setText(sdf.format(selectedDate))
-
-                // Guardar la fecha en el objeto (a validar después)
                 usuari?.dataNaixement = sdfBD.format(selectedDate)
 
-                // Limpiar posibles errores antiguos
                 binding.tieDataNeixR2.error = null
             }
         }

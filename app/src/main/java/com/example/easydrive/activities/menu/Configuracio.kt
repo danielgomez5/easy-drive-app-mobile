@@ -28,23 +28,24 @@ class Configuracio : AppCompatActivity() {
         val prefs = getSharedPreferences("configuracio", MODE_PRIVATE)
         val editor = prefs.edit()
 
-// Leer modo guardado
         val modeOscur = prefs.getBoolean("mode_oscuro", false)
         binding.switchMode.isChecked = modeOscur
 
-// Aplicar modo al iniciar
         AppCompatDelegate.setDefaultNightMode(
             if (modeOscur) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         )
 
         binding.switchMode.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
-            // Guardar y aplicar el modo
             editor.putBoolean("mode_oscuro", isChecked)
             editor.apply()
 
             AppCompatDelegate.setDefaultNightMode(
                 if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
             )
+        }
+
+        binding.imagebtnR1.setOnClickListener {
+            finish()
         }
 
         val adapter = IdiomaAdapter(this, listIdiomes)

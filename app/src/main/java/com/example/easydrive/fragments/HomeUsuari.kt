@@ -18,8 +18,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.app.ActivityCompat
 import androidx.core.util.Pair
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -45,6 +48,7 @@ import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
@@ -55,6 +59,7 @@ import java.util.Date
 import java.util.Locale
 
 class HomeUsuari : Fragment(), OnMapReadyCallback {
+    private var cercaRealitzada = false
     private lateinit var binding: FragmentHomeUsuariBinding
     private var map: GoogleMap? = null
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
@@ -82,7 +87,11 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
                 }else{
                     startActivity(Intent(requireContext(), MapaRutaUsuari::class.java))
                 }
-
+            }else{
+                val snack = Snackbar.make(binding.homeUsuariLayout, "Has d'escollir un destí per continuar!", Snackbar.LENGTH_LONG)
+                    .setBackgroundTint(resources.getColor(R.color.md_theme_secondary, null))
+                    .setTextColor(resources.getColor(R.color.md_theme_onSecondary, null))
+                    .show()
             }
         }
         binding.buscaDesti.setOnClickListener {
@@ -118,7 +127,7 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
                 .build()
 
             val datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText("Selecciona la teva data de naixement")
+                .setTitleText("Selecciona la data de reserva")
                 .setCalendarConstraints(constraints)
                 .build()
 
@@ -190,14 +199,38 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
     }
 
     private fun buscaDesti() {
+        ocultarTeclat()
+        cercaRealitzada = true
         var textBuscar = binding.tieDestiFragmentHU.text.toString()
-        textBuscar.replace(" ","+")
+        textBuscar = textBuscar.replace(" ", "+")
+
         val crudGeo = CrudGeo(requireContext())
         val listaCarrers = crudGeo.getLocationByName(textBuscar)
-        binding.rcv.adapter = AdaptadorRVDestins(listaCarrers)
-        binding.rcv.layoutManager = LinearLayoutManager(requireContext())
 
+        if (listaCarrers.isNotEmpty()) {
+            binding.rcv.visibility = View.VISIBLE
+            binding.llEmptyState.visibility = View.GONE
+            binding.tvResultats.visibility = View.VISIBLE
+            binding.rcv.adapter = AdaptadorRVDestins(listaCarrers)
+            binding.rcv.layoutManager = LinearLayoutManager(requireContext())
+        } else {
+            binding.rcv.visibility = View.GONE
+            binding.llEmptyState.visibility = View.VISIBLE
+            binding.tvResultats.visibility = View.GONE
+            if (cercaRealitzada) {
+                rutaEscollida = null
+                binding.ivEmptyImage.setImageResource(R.drawable.no_results)
+                binding.tvEmptyText.text = "Epa, sembla que no tenim disponibilitat en aquesta zona..."
+            } else {
+                binding.ivEmptyImage.setImageResource(R.drawable.car)
+                binding.tvEmptyText.text = "Planeja el teu proper viatge!"
+            }
+        }
+
+
+        expandirRecyclerView()
     }
+
 
     fun carregarUbicacio() {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -221,7 +254,40 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         }
     }
 
+    private fun ocultarTeclat() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.tieDestiFragmentHU.windowToken, 0)
+    }
 
+    private fun expandirRecyclerView() {
+        val constraintSet = ConstraintSet()
+        val constraintLayout = binding.root as ConstraintLayout
+        constraintSet.clone(constraintLayout)
 
+        // Reduïm l'altura del mapa
+        val heightInPx = (100 * resources.displayMetrics.density).toInt()
+        constraintSet.constrainHeight(R.id.mapa, heightInPx)
 
+        // Posem les constraints de la card sota el mapa redimensionat
+        constraintSet.connect(
+            R.id.cardHomeUsuari,
+            ConstraintSet.TOP,
+            R.id.mapa,
+            ConstraintSet.BOTTOM
+        )
+
+        constraintSet.connect(
+            R.id.cardHomeUsuari,
+            ConstraintSet.BOTTOM,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.BOTTOM
+        )
+
+        constraintSet.applyTo(constraintLayout)
+
+        // Augmentem l'altura del rv amb els carrers
+        val params = binding.rcv.layoutParams
+        params.height = (300 * resources.displayMetrics.density).toInt()
+        binding.rcv.layoutParams = params
+    }
 }

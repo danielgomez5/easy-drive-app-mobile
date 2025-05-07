@@ -2,6 +2,7 @@ package com.example.easydrive.activities.interficie_usuari
 
 import android.Manifest
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -12,14 +13,19 @@ import android.text.format.DateFormat.is24HourFormat
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -54,6 +60,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -192,38 +199,93 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
         val dialeg = Dialog(this)
         dialeg.setContentView(R.layout.dialog_escollirrutas)
         dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        //dialeg.window?.setWindowAnimations(R.style.animation)
         dialeg.setCancelable(false)
 
-        if (idHint){
-            dialeg.findViewById<TextInputLayout>(R.id.tilDialog).setHint("Ubicació Origen")
-        }else{
-            dialeg.findViewById<TextInputLayout>(R.id.tilDialog).setHint("Ubicació Destí")
+        // Cambiar el hint según el idHint
+        if (idHint) {
+            dialeg.findViewById<TextInputLayout>(R.id.tilDialog).setHint("Ubicació d'origen")
+        } else {
+            dialeg.findViewById<TextInputLayout>(R.id.tilDialog).setHint("Ubicació de destí")
         }
 
-        var rcv = dialeg.findViewById<RecyclerView>(R.id.rcvDialog)
-        rcv.visibility = View.GONE
+        val rcv = dialeg.findViewById<RecyclerView>(R.id.rcvDialog)
+        val frameLayout = dialeg.findViewById<FrameLayout>(R.id.frameLayoutResults)
+        val emptyState = dialeg.findViewById<LinearLayout>(R.id.ll_emptyState)
 
+        rcv.visibility = View.GONE
+        emptyState.visibility = View.GONE
 
         dialeg.findViewById<AppCompatImageButton>(R.id.buscaDestiD).setOnClickListener {
-            var textBuscar = dialeg.findViewById<TextInputEditText>(R.id.tie_rutas).text.toString()
-            if (textBuscar != null){
-                textBuscar.replace(" ","+")
+            val textBuscar = dialeg.findViewById<TextInputEditText>(R.id.tie_rutas).text.toString()
+
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(dialeg.currentFocus?.windowToken, 0)
+
+            if (textBuscar.isNotBlank()) {
+                val consulta = textBuscar.replace(" ", "+")
                 val crudGeo = CrudGeo(this)
-                val listaCarrers = crudGeo.getLocationByName(textBuscar)
-                rcv.adapter = AdaptadorRVDestins(listaCarrers)
-                rcv.layoutManager = LinearLayoutManager(this)
-                rcv.visibility = View.VISIBLE
+                val listaCarrers = crudGeo.getLocationByName(consulta)
 
+                if (listaCarrers.isNotEmpty()) {
+                    val rcv = dialeg.findViewById<RecyclerView>(R.id.rcvDialog)
+                    val emptyState = dialeg.findViewById<LinearLayout>(R.id.ll_emptyState)
+                    rcv.adapter = AdaptadorRVDestins(listaCarrers)
+                    rcv.layoutManager = LinearLayoutManager(this)
+                    rcv.visibility = View.VISIBLE
+                    emptyState.visibility = View.GONE
+
+                    val constraintSet = ConstraintSet()
+                    val constraintLayout = dialeg.findViewById<ConstraintLayout>(R.id.dialogCL)
+                    constraintSet.clone(constraintLayout)
+
+                    constraintSet.connect(
+                        R.id.frameLayoutResults,
+                        ConstraintSet.TOP,
+                        R.id.tilDialog,
+                        ConstraintSet.BOTTOM
+                    )
+                    constraintSet.connect(
+                        R.id.frameLayoutResults,
+                        ConstraintSet.BOTTOM,
+                        R.id.btncancelarD,
+                        ConstraintSet.TOP
+                    )
+
+                    constraintSet.applyTo(constraintLayout)
+
+                    val rvParams = rcv.layoutParams
+                    rvParams.height = (450 * resources.displayMetrics.density).toInt()
+                    rcv.layoutParams = rvParams
+
+                    dialeg.window?.setLayout(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+
+                } else {
+                    rcv.visibility = View.GONE
+                    emptyState.visibility = View.VISIBLE
+                    rutaEscollida = null
+                }
             }
-
         }
 
+
+
+
+
         dialeg.findViewById<Button>(R.id.btnaceptarD).setOnClickListener {
-            if (idHint){
-                rutaOrigen = rutaEscollida
+            if (rutaEscollida!=null){
+                if (idHint) {
+                    rutaOrigen = rutaEscollida
+                } else {
+                    rutaDesti = rutaEscollida
+                }
             }else{
-                rutaDesti = rutaEscollida
+                val snack = Snackbar.make(binding.main, "Cap canvi detectat...", Snackbar.LENGTH_LONG)
+                    .setBackgroundTint(resources.getColor(R.color.md_theme_secondary, null))
+                    .setTextColor(resources.getColor(R.color.md_theme_onSecondary, null))
+                    .show()
             }
             afegirText()
             markerDesti?.remove()
@@ -239,12 +301,14 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
             dibuixarRuta(ubicacioActual, ubiacioDesti)
             dialeg.dismiss()
         }
+
         dialeg.findViewById<Button>(R.id.btncancelarD).setOnClickListener {
             dialeg.dismiss()
         }
 
         dialeg.show()
     }
+
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap

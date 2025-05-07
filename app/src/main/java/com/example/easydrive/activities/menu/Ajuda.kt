@@ -20,5 +20,9 @@ class Ajuda : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        binding.imagebtnR1.setOnClickListener {
+            finish()
+        }
     }
 }

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.easydrive.R
 import com.example.easydrive.dades.GeoapifyDades
@@ -30,11 +31,11 @@ class AdaptadorRVDestins(val llista: List<GeoapifyDades>) : RecyclerView.Adapter
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = llista[position]
-        holder.textCarrer.setText(item.address_line1.toString() + ",")
-        holder.textCiutat.setText(item.city.toString())
+        holder.textCarrer.setText(item.address_line1)
+        holder.textCiutat.setText(item.city)
 
         if (holder.adapterPosition == selectedPosition) {
-            holder.cards.setCardBackgroundColor(Color.GREEN)
+            holder.cards.setCardBackgroundColor(ContextCompat.getColor(holder.itemView.context, R.color.md_theme_secondaryContainer))
         } else {
             holder.cards.setCardBackgroundColor(Color.WHITE)
         }

@@ -39,7 +39,7 @@ data class Bbox(
 )
 
 data class Rank(
-    val confidence: Int,
+    val confidence: Double,
     val confidence_street_level: Int,
     val importance: Double,
     val match_type: String,
