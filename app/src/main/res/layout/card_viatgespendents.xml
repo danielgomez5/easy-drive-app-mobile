@@ -14,8 +14,9 @@
         android:paddingVertical="10dp"
         >
         <TextView
-            android:layout_width="150dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
+            android:id="@+id/NomDesti"
             android:hint="Desti Final"
             android:layout_marginStart="20dp"
             android:layout_gravity="start|center"/>
@@ -28,14 +29,8 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/btnAnarAraDesti"
-                android:text="Pujar"
-                />
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/btnReservarDesti"
-                android:text="Pujar"
+                android:id="@+id/btn_cancel"
+                android:text="Cancel·lar"
                 />
         </LinearLayout>
 

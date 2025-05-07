@@ -59,7 +59,7 @@
                 app:layout_constraintTop_toTopOf="@id/tvIdioma"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="@id/tvIdioma"
-                android:layout_marginEnd="20dp"/>
+                android:layout_marginEnd="10dp"/>
 
             <!-- Modo claro/oscuro -->
             <TextView
@@ -79,7 +79,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="@id/tvMode"
-                android:layout_marginEnd="55dp"
+                android:layout_marginEnd="35dp"
                 app:layout_constraintBottom_toBottomOf="@id/tvMode"
                 app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
