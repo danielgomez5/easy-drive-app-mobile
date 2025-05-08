@@ -4,7 +4,7 @@
         android:title="Home"
         android:id="@+id/menuHome"
         android:icon="@drawable/home_selector"
-        android:checked="true"
+        android:checked="false"
         />
     <item
         android:title="Perfil"
