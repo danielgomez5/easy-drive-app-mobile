@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
@@ -19,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.os.postDelayed
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -34,6 +37,7 @@ import com.example.easydrive.activities.menu.Perfil
 import com.example.easydrive.adaptadors.AdaptadorRVDestins
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.api.geoapify.CrudGeo
+import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.rutaDesti
 import com.example.easydrive.dades.rutaEscollida
@@ -52,6 +56,9 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnMapReadyCallback{
     private lateinit var binding: ActivityIniciTaxistaBinding
@@ -60,6 +67,8 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     var permisos = false
     var map: GoogleMap? = null
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
+    var controlRecollirClients: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +98,23 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         afegirFoto()
         getDisponiblitat(crud)
 
+        val handler = Handler(Looper.getMainLooper())
+        val intervalMillis: Long = 10000 // cada 10 segundos
+
+        val checkReservesRunnable = object : Runnable {
+            override fun run() {
+                comprovarNousViatges()
+                handler.postDelayed(this, intervalMillis)
+            }
+        }
+
+// Solo iniciar si está disponible
+        if (binding.switchDisponiblitat.isChecked) {
+            controlRecollirClients = true
+            handler.post(checkReservesRunnable)
+        }
+
+
         binding.switchDisponiblitat.setOnCheckedChangeListener { _, isChecked ->
             val dispo = isChecked
             val idUsuari = user?.dni ?: return@setOnCheckedChangeListener
@@ -97,6 +123,11 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
                     if (success) {
                         Toast.makeText(this, "Disponibilitat actualitzada", Toast.LENGTH_SHORT).show()
+                        if (dispo) {
+                            handler.post(checkReservesRunnable)
+                        } else {
+                            handler.removeCallbacks(checkReservesRunnable)
+                        }
                     } else {
                         Toast.makeText(this, "Error actualitzant disponibilitat", Toast.LENGTH_SHORT).show()
                         binding.switchDisponiblitat.isChecked = !dispo
@@ -199,6 +230,52 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         binding.main.closeDrawer(GravityCompat.START)
         return true
     }
+    fun dialogRecollirClient(){
+        controlRecollirClients = false
+        val dialeg = Dialog(this)
+        dialeg.setContentView(R.layout.dialog_recollirclient)
+        dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        //dialeg.window?.setWindowAnimations(R.style.animation)
+        dialeg.setCancelable(false)
+
+        dialeg.findViewById<MaterialButton>(R.id.btnAcceptarD).setOnClickListener { // si acepta la reserva
+            controlRecollirClients = false
+            dialeg.dismiss()
+        }
+
+        dialeg.findViewById<MaterialButton>(R.id.btnCancelarD).setOnClickListener {
+            controlRecollirClients = true
+            dialeg.dismiss()
+        }
+
+        dialeg.show()
+    }
+
+    fun comprovarNousViatges(){
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val hoy = sdf.parse(sdf.format(Date()))
+
+        val crud = CrudApiEasyDrive()
+        val pendents = crud.getReservesPendents()
+        val novaPendents = mutableListOf<Reserva>()
+
+        Log.d("pendents", pendents.toString())
+        pendents?.forEach { p ->
+            val dataReserva = p.dataViatge?.let { sdf.parse(it) }
+            if ( dataReserva != null && dataReserva == hoy) {
+                novaPendents.add(p)
+            }
+        }
+
+        if (novaPendents.isNotEmpty()){
+            Log.d("novaPendents",novaPendents.toString())
+            if (controlRecollirClients){
+                runOnUiThread {
+                    dialogRecollirClient()
+                }
+            }
+        }
+    }
 
     //Permissos necessari de la app
     fun comprovarPermisos() : Boolean{
@@ -209,24 +286,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }else{
             return false
         }
-    }
-
-    fun dialogRecollirClient(){
-        val dialeg = Dialog(this)
-        dialeg.setContentView(R.layout.dialog_escollirrutas)
-        dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        //dialeg.window?.setWindowAnimations(R.style.animation)
-        dialeg.setCancelable(false)
-
-        dialeg.findViewById<MaterialButton>(R.id.btnAcceptarD).setOnClickListener { // si acepta la reserva
-            dialeg.dismiss()
-        }
-
-        dialeg.findViewById<MaterialButton>(R.id.btnCancelarD).setOnClickListener {
-            dialeg.dismiss()
-        }
-
-        dialeg.show()
     }
 
     fun demanarPermisos(){

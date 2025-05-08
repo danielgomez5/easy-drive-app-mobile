@@ -9,5 +9,8 @@ var rutaDesti: GeoapifyDades?=null
 var dataViatge: String?=null
 var horaViatge: String?=null
 
+//Booleans
+var reservaAcceptada: Boolean?=null
+
 //Viatge
 var viatja : Viatja?=null

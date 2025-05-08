@@ -9,6 +9,7 @@ import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.UsuariCotxeDTO
+import com.example.easydrive.dades.Viatja
 import com.example.easydrive.dades.Zona
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
@@ -233,6 +234,35 @@ class CrudApiEasyDrive() : CoroutineScope {
             return resposta!!.body()
         else
             return null
+    }
+
+    fun getReservesPendents(): MutableList<Reserva>?{
+        var resposta: Response<MutableList<Reserva>>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getReservesPendents()
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return resposta!!.body()
+        else
+            return null
+    }
+
+    fun getAllViatgesByUsuari(id:String): List<Viatja>?{
+        var resposta: Response<List<Viatja>>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getAllViatgesByUser(id)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return resposta!!.body()
+        else
+            return null
+
     }
 
     //Update

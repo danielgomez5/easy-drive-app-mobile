@@ -8,6 +8,7 @@ import com.example.easydrive.dades.Missatge
 import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.UsuariCotxeDTO
+import com.example.easydrive.dades.Viatja
 import com.example.easydrive.dades.Zona
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -107,6 +108,12 @@ interface ApiService {
 
     @GET("/api/reserves-usuari/{id_usuari}")
     suspend fun getReservesByUsuari(@Path("id_usuari") id_usuari:String) : Response<MutableList<Reserva>>
+
+    @GET("/api/reserves-pendents")
+    suspend fun getReservesPendents() : Response<MutableList<Reserva>>
+
+    @GET("/api/viatges-usuari/{id_usuari}")
+    suspend fun getAllViatgesByUser(@Path("id_usuari") id_usuari:String): Response<List<Viatja>> // es si les reserves estan confirmades
 
     //Dels
     @DELETE("api/usuari/del_all/{id_usuari}")
