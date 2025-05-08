@@ -77,6 +77,21 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
             }
         }
 
+        val selectedFragment = intent.getIntExtra("SELECTED_FRAGMENT", R.id.menuInici)
+        val mostrarSnackbar = intent.getBooleanExtra("MOSTRAR_SNACKBAR", false)
+
+        val fragment = if (selectedFragment == R.id.menuDestinsGuardats) {
+            ViatgesGuardats().apply {
+                arguments = Bundle().apply {
+                    putBoolean("MOSTRAR_SNACKBAR", mostrarSnackbar)
+                }
+            }
+        } else {
+            HomeUsuari()
+        }
+
+        canviaFragment(fragment)
+        binding.bnv.selectedItemId = selectedFragment
 
     }
 

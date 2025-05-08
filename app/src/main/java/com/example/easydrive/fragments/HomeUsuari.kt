@@ -25,6 +25,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.app.ActivityCompat
 import androidx.core.util.Pair
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_usuari.MapaRutaUsuari
@@ -53,6 +54,9 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
 import com.google.android.material.timepicker.TimeFormat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -204,32 +208,46 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         var textBuscar = binding.tieDestiFragmentHU.text.toString()
         textBuscar = textBuscar.replace(" ", "+")
 
-        val crudGeo = CrudGeo(requireContext())
-        val listaCarrers = crudGeo.getLocationByName(textBuscar)
+        binding.progressBar.visibility = View.VISIBLE
+        binding.rcv.visibility = View.GONE
+        binding.llEmptyState.visibility = View.GONE
+        binding.tvResultats.visibility = View.GONE
 
-        if (listaCarrers.isNotEmpty()) {
-            binding.rcv.visibility = View.VISIBLE
-            binding.llEmptyState.visibility = View.GONE
-            binding.tvResultats.visibility = View.VISIBLE
-            binding.rcv.adapter = AdaptadorRVDestins(listaCarrers)
-            binding.rcv.layoutManager = LinearLayoutManager(requireContext())
-        } else {
-            binding.rcv.visibility = View.GONE
-            binding.llEmptyState.visibility = View.VISIBLE
-            binding.tvResultats.visibility = View.GONE
-            if (cercaRealitzada) {
-                rutaEscollida = null
-                binding.ivEmptyImage.setImageResource(R.drawable.no_results)
-                binding.tvEmptyText.text = "Epa, sembla que no tenim disponibilitat en aquesta zona..."
-            } else {
-                binding.ivEmptyImage.setImageResource(R.drawable.car)
-                binding.tvEmptyText.text = "Planeja el teu proper viatge!"
+        lifecycleScope.launch {
+            val crudGeo = CrudGeo(requireContext())
+
+            // Ejecutar en segundo plano
+            val listaCarrers = withContext(Dispatchers.IO) {
+                crudGeo.getLocationByName(textBuscar)
             }
+
+            // Volvemos al hilo principal
+            binding.progressBar.visibility = View.GONE
+
+            if (listaCarrers.isNotEmpty()) {
+                binding.rcv.visibility = View.VISIBLE
+                binding.llEmptyState.visibility = View.GONE
+                binding.tvResultats.visibility = View.VISIBLE
+                binding.rcv.adapter = AdaptadorRVDestins(listaCarrers)
+                binding.rcv.layoutManager = LinearLayoutManager(requireContext())
+            } else {
+                binding.rcv.visibility = View.GONE
+                binding.llEmptyState.visibility = View.VISIBLE
+                binding.tvResultats.visibility = View.GONE
+                if (cercaRealitzada) {
+                    rutaEscollida = null
+                    binding.ivEmptyImage.setImageResource(R.drawable.no_results)
+                    binding.tvEmptyText.text = "Epa, sembla que no tenim disponibilitat en aquesta zona..."
+                } else {
+                    binding.ivEmptyImage.setImageResource(R.drawable.car)
+                    binding.tvEmptyText.text = "Planeja el teu proper viatge!"
+                }
+            }
+
+            expandirRecyclerView()
         }
-
-
-        expandirRecyclerView()
     }
+
 
 
     fun carregarUbicacio() {

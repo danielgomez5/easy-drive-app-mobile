@@ -23,6 +23,7 @@ import com.example.easydrive.activities.registre.Registre1
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.databinding.ActivityMainBinding
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -104,7 +105,11 @@ class MainActivity : AppCompatActivity() {
 
                 lifecycleScope.launch {
                     val usuari = withContext(Dispatchers.IO) {
-                        crud.loginUsuari(email, password)
+                        try {
+                            crud.loginUsuari(email, password)
+                        } catch (e: Exception) {
+                            null
+                        }
                     }
 
                     binding.loadingOverlay.visibility = View.GONE
@@ -132,14 +137,15 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     } else {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "La combinació no es correcta, torna a intentar-ho",
-                            Toast.LENGTH_LONG
+                        Snackbar.make(
+                            binding.root,
+                            "Hi ha hagut un problema desconegut, disculpi les molèsties",
+                            Snackbar.LENGTH_LONG
                         ).show()
                     }
                 }
             }
+
         }
 
 

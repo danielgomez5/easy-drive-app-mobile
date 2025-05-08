@@ -7,7 +7,7 @@
         android:checked="true"
         />
     <item
-        android:title="Destins guardats"
+        android:title="Reserves pendents"
         android:id="@+id/menuDestinsGuardats"
         android:icon="@drawable/route_selector"
         android:checked="false"

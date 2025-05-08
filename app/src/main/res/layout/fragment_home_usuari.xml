@@ -107,6 +107,15 @@
                     android:visibility="gone"
                     />
 
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:layout_marginTop="16dp"
+                    />
+
                 <LinearLayout
                     android:id="@+id/ll_emptyState"
                     android:layout_width="match_parent"

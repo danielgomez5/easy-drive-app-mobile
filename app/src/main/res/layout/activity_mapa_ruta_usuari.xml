@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.interficie_usuari.MapaRutaUsuari">
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -54,9 +55,9 @@
                         android:focusable="false"
                         android:clickable="true"/>
                 </com.google.android.material.textfield.TextInputLayout>
-
             </LinearLayout>
         </androidx.cardview.widget.CardView>
+
         <fragment
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -72,10 +73,34 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_margin="20dp"
             android:text="Confirmar"/>
+
+        <View
+            android:id="@+id/loadingOverlay"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#88000000"
+            android:visibility="gone"
+            android:elevation="18dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:elevation="19dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <include
         layout="@layout/bottomsheet_inter_usuari"
         android:id="@+id/layout_bottom_sheet"/>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

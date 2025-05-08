@@ -1,7 +1,9 @@
 package com.example.easydrive.adaptadors
 
+import android.app.AlertDialog
 import android.app.Dialog
 import android.graphics.Color
+import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +12,7 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +28,8 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import java.text.SimpleDateFormat
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class AdapterViatgesPendents(val llista: MutableList<Reserva>) :
@@ -59,22 +64,36 @@ class AdapterViatgesPendents(val llista: MutableList<Reserva>) :
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = llista[position]
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val sdfEuro = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val fechaFormateada = sdfEuro.format(sdf.parse(item.dataViatge))
+        val horaFormateada = try {
+            LocalTime.parse(item.horaViatge).format(DateTimeFormatter.ofPattern("HH:mm"))
+        } catch (e: Exception) {
+            item.horaViatge ?: ""
+        }
+
 
         when (holder) {
             is CompactViewHolder -> {
                 holder.destiFinal.text = item.desti
                 holder.cancel.setOnClickListener {
-                    val crud = CrudApiEasyDrive()
-                    item.idEstat = 4
-                    if (crud.changeEstatReserva(item.id.toString(), item)) {
-                        cancelarReserva(item)
-                        Toast.makeText(holder.vista.context, "S'ha cancel·lat la reserva correctament", Toast.LENGTH_LONG).show()
-                    }
+                    AlertDialog.Builder(holder.vista.context)
+                        .setTitle("Confirmació")
+                        .setMessage("Estàs segur que vols cancel·lar aquesta reserva?")
+                        .setPositiveButton("Sí") { _, _ ->
+                            val crud = CrudApiEasyDrive()
+                            item.idEstat = 4
+                            if (crud.changeEstatReserva(item.id.toString(), item)) {
+                                cancelarReserva(item)
+                                Toast.makeText(holder.vista.context, "S'ha cancel·lat la reserva correctament", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                        .setNegativeButton("No", null)
+                        .show()
                 }
 
                 holder.vista.setOnClickListener {
@@ -84,21 +103,30 @@ class AdapterViatgesPendents(val llista: MutableList<Reserva>) :
                 }
             }
 
+
             is ExpandedViewHolder -> {
                 holder.textDesti.text = "${item.desti}"
                 holder.origen.text = "Origen: ${item.origen}"
-                holder.dataViatge.text = "Data Viatge: $fechaFormateada"
-                holder.hora.text = "Hora: ${item.horaViatge}"
+                holder.dataViatge.text = "Data de viatge: $fechaFormateada"
+                holder.hora.text = "Hora: ${horaFormateada}"
                 holder.preu.text = "Preu: ${String.format("%.2f €", item.preu ?: 0.0)}"
 
                 holder.cancel.setOnClickListener {
-                    val crud = CrudApiEasyDrive()
-                    item.idEstat = 4
-                    if (crud.changeEstatReserva(item.id.toString(), item)) {
-                        cancelarReserva(item)
-                        Toast.makeText(holder.vista.context, "S'ha cancel·lat la reserva correctament", Toast.LENGTH_LONG).show()
-                    }
+                    AlertDialog.Builder(holder.vista.context)
+                        .setTitle("Confirmació")
+                        .setMessage("Estàs segur que vols cancel·lar aquesta reserva?")
+                        .setPositiveButton("Sí") { _, _ ->
+                            val crud = CrudApiEasyDrive()
+                            item.idEstat = 4
+                            if (crud.changeEstatReserva(item.id.toString(), item)) {
+                                cancelarReserva(item)
+                                Toast.makeText(holder.vista.context, "S'ha cancel·lat la reserva correctament", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                        .setNegativeButton("No", null)
+                        .show()
                 }
+
 
                 holder.vista.setOnClickListener {
                     llista.forEach { it.viewType = 0 }

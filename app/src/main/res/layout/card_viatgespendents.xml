@@ -1,40 +1,41 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardCornerRadius="20dp"
-    android:layout_margin="10dp"
-    app:cardElevation="10dp"
-    >
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="10dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp">
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingVertical="10dp">
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
         <TextView
+            android:id="@+id/NomDesti"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:id="@+id/NomDesti"
-            android:hint="Desti Final"
+            android:text="Destí final"
             android:textSize="18sp"
-            android:layout_marginHorizontal= "20dp"
-            app:layout_constraintTop_toTopOf="parent"
+            android:textStyle="bold"
+            android:textColor="?colorPrimary"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/btn_borrar"/>
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btn_borrar"
-            android:src="@drawable/baseline_close_24"
-            android:layout_marginEnd="20dp"
+            app:layout_constraintEnd_toStartOf="@+id/btn_borrar"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btn_borrar"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/baseline_close_24"
+            android:backgroundTint="?attr/colorError"
+            app:tint="@android:color/white"
+            android:background="@drawable/rounded_icon_bg"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:tint="@color/white"
-            android:backgroundTint="?colorError"
-            />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </androidx.cardview.widget.CardView>

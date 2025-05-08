@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -19,9 +20,11 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -29,6 +32,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.easydrive.R
@@ -66,9 +70,15 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
 import com.google.android.material.timepicker.TimeFormat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.sql.Time
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -196,6 +206,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun dialogEditarRuta(idHint: Boolean) {
+        rutaEscollida = null
         val dialeg = Dialog(this)
         dialeg.setContentView(R.layout.dialog_escollirrutas)
         dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -223,55 +234,51 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
 
             if (textBuscar.isNotBlank()) {
                 val consulta = textBuscar.replace(" ", "+")
-                val crudGeo = CrudGeo(this)
-                val listaCarrers = crudGeo.getLocationByName(consulta)
+                val progressBar = dialeg.findViewById<ProgressBar>(R.id.progressBarDialog)
+                val rcv = dialeg.findViewById<RecyclerView>(R.id.rcvDialog)
+                val emptyState = dialeg.findViewById<LinearLayout>(R.id.ll_emptyState)
+                val constraintLayout = dialeg.findViewById<ConstraintLayout>(R.id.dialogCL)
 
-                if (listaCarrers.isNotEmpty()) {
-                    val rcv = dialeg.findViewById<RecyclerView>(R.id.rcvDialog)
-                    val emptyState = dialeg.findViewById<LinearLayout>(R.id.ll_emptyState)
-                    rcv.adapter = AdaptadorRVDestins(listaCarrers)
-                    rcv.layoutManager = LinearLayoutManager(this)
-                    rcv.visibility = View.VISIBLE
-                    emptyState.visibility = View.GONE
+                progressBar.visibility = View.VISIBLE
+                rcv.visibility = View.GONE
+                emptyState.visibility = View.GONE
 
-                    val constraintSet = ConstraintSet()
-                    val constraintLayout = dialeg.findViewById<ConstraintLayout>(R.id.dialogCL)
-                    constraintSet.clone(constraintLayout)
+                lifecycleScope.launch {
+                    val crudGeo = CrudGeo(this@MapaRutaUsuari)
+                    val listaCarrers = withContext(Dispatchers.IO) {
+                        crudGeo.getLocationByName(consulta)
+                    }
 
-                    constraintSet.connect(
-                        R.id.frameLayoutResults,
-                        ConstraintSet.TOP,
-                        R.id.tilDialog,
-                        ConstraintSet.BOTTOM
-                    )
-                    constraintSet.connect(
-                        R.id.frameLayoutResults,
-                        ConstraintSet.BOTTOM,
-                        R.id.btncancelarD,
-                        ConstraintSet.TOP
-                    )
+                    progressBar.visibility = View.GONE
 
-                    constraintSet.applyTo(constraintLayout)
+                    if (listaCarrers.isNotEmpty()) {
+                        rcv.adapter = AdaptadorRVDestins(listaCarrers)
+                        rcv.layoutManager = LinearLayoutManager(this@MapaRutaUsuari)
+                        rcv.visibility = View.VISIBLE
+                        emptyState.visibility = View.GONE
 
-                    val rvParams = rcv.layoutParams
-                    rvParams.height = (450 * resources.displayMetrics.density).toInt()
-                    rcv.layoutParams = rvParams
+                        val constraintSet = ConstraintSet().apply {
+                            clone(constraintLayout)
+                            connect(R.id.frameLayoutResults, ConstraintSet.TOP, R.id.tilDialog, ConstraintSet.BOTTOM)
+                            connect(R.id.frameLayoutResults, ConstraintSet.BOTTOM, R.id.btncancelarD, ConstraintSet.TOP)
+                            applyTo(constraintLayout)
+                        }
 
-                    dialeg.window?.setLayout(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                    )
+                        rcv.layoutParams.height = (450 * resources.displayMetrics.density).toInt()
+                        rcv.requestLayout()
 
-                } else {
-                    rcv.visibility = View.GONE
-                    emptyState.visibility = View.VISIBLE
-                    rutaEscollida = null
+                        dialeg.window?.setLayout(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        )
+                    } else {
+                        rcv.visibility = View.GONE
+                        emptyState.visibility = View.VISIBLE
+                        rutaEscollida = null
+                    }
                 }
             }
         }
-
-
-
 
 
         dialeg.findViewById<Button>(R.id.btnaceptarD).setOnClickListener {
@@ -310,10 +317,11 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
-        map?.isMyLocationEnabled = true // Este muestra el icono azul de ubicación
+        map?.isMyLocationEnabled = true
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -347,60 +355,72 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
         }
 
         layout_bottom_sheet.findViewById<Button>(R.id.pagar).setOnClickListener {
-            var crud = CrudApiEasyDrive()
+            bottom_behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-            val sdfBD = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            binding.loadingOverlay.visibility = View.VISIBLE
+            binding.progressBar.visibility = View.VISIBLE
 
-            pagament = DadesPagament(null,null,null,null,null)
-            if (layout_bottom_sheet.findViewById<CheckBox>(R.id.guardarTarjeta).isChecked){
-                val input = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_Caducitat).text.toString()
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            )
 
-                val parts = input.split("/")
-                if (parts.size == 2) {
-                    val mes = parts[0].padStart(2, '0')
-                    val any = parts[1].padStart(2, '0')
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    val crud = CrudApiEasyDrive()
+                    val sdfBD = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-                    val dataFormatejada = "20$any-$mes-01"  // ejemplo: "2026-04-01"
-                    pagament?.dataExpiracio = dataFormatejada
+                    pagament = DadesPagament(null, null, null, null, null)
+                    if (layout_bottom_sheet.findViewById<CheckBox>(R.id.guardarTarjeta).isChecked) {
+                        val input = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_Caducitat).text.toString()
+                        val parts = input.split("/")
+                        if (parts.size == 2) {
+                            val mes = parts[0].padStart(2, '0')
+                            val any = parts[1].padStart(2, '0')
+                            val dataFormatejada = "20$any-$mes-01"
+                            pagament?.dataExpiracio = dataFormatejada
+                        }
+
+                        pagament?.numeroTarjeta = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_numTarjeta).text.toString()
+                        pagament?.idUsuari = user?.dni.toString()
+                        pagament?.titular = user?.nom + " " + user?.cognom
+                    }
+
+                    val currentData = Date()
+                    val reserva = Reserva(null, null, null, null, null, null, null, null, null)
+                    reserva.preu = preuTotal!!
+                    reserva.origen = rutaOrigen?.address_line1 + ", " + rutaOrigen?.city
+                    reserva.desti = rutaDesti?.address_line1 + ", " + rutaDesti?.city
+                    reserva.dataReserva = sdfBD.format(currentData)
+                    if (dataViatge == null) {
+                        dataViatge = sdfBD.format(currentData)
+                    }
+                    if (horaViatge == null) {
+                        val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+                        horaViatge = LocalTime.now().format(formatter).toString()
+                    }
+
+                    reserva.horaViatge = horaViatge
+                    reserva.dataViatge = dataViatge
+                    reserva.idUsuari = user?.dni
+                    reserva.idEstat = 2
+
+                    crud.insertDadesPagament(pagament!!)
+                    crud.insertReserves(reserva)
                 }
 
-                pagament?.numeroTarjeta = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_numTarjeta).text.toString()
-                pagament?.idUsuari = user?.dni.toString()
-                pagament?.titular = user?.nom.toString()+" "+user?.cognom.toString()
-            }
-            Log.d("Pagament", pagament.toString())
+                binding.loadingOverlay.visibility = View.GONE
+                binding.progressBar.visibility = View.GONE
+                window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
 
-            val currentData = Date()
-            var reserva = Reserva(null, null,null,null,null,null,null,null,null)
-            reserva.preu = preuTotal!!
-            reserva.origen = rutaOrigen?.address_line1+ ", " +rutaOrigen?.city
-            reserva.desti = rutaDesti?.address_line1+ ", " +rutaDesti?.city
-            reserva.dataReserva = sdfBD.format(currentData)
-            if (dataViatge == null){
-                dataViatge = sdfBD.format(currentData)
-            }
-            reserva.horaViatge = horaViatge
-            reserva.dataViatge = dataViatge
-            reserva.idUsuari = user?.dni
-            reserva.idEstat = 2
-            Log.d("Reserva", reserva.toString())
+                val intent = Intent(this@MapaRutaUsuari, IniciUsuari::class.java)
+                intent.putExtra("SELECTED_FRAGMENT", R.id.menuDestinsGuardats)
+                intent.putExtra("MOSTRAR_SNACKBAR", true)
+                startActivity(intent)
 
-            if (crud.insertDadesPagament(pagament!!)){
-                Log.d("Insert pagament", "s'ha fet")
-            }else{
-                Log.d("Insert pagament", "NOOO s'ha fet")
-            }
 
-            if (crud.insertReserves(reserva)){
-                Log.d("Insert reserva", "s'ha fet")
-            }else{
-                Log.d("Insert reserva", "NOOO s'ha fet")
             }
-            startActivity(Intent(this, IniciUsuari::class.java))
-
         }
-
-
     }
 
     private fun dibuixarRuta(ubicacioActual: LatLng?, ubicacioDesti: LatLng) {
@@ -440,7 +460,6 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
             Toast.makeText(this, "No hi ha resposta", Toast.LENGTH_LONG)
         }
     }
-
 
     private fun drawRoute(gMap: GoogleMap, coordenades: List<List<Double>>) {
         val polylineOptions = PolylineOptions()
