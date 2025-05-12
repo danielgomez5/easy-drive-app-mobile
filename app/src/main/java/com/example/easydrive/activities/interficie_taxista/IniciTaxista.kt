@@ -4,8 +4,6 @@ import android.Manifest
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
@@ -14,24 +12,18 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.postDelayed
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_usuari.IniciUsuari
@@ -39,18 +31,15 @@ import com.example.easydrive.activities.menu.Ajuda
 import com.example.easydrive.activities.menu.Configuracio
 import com.example.easydrive.activities.menu.HistorialViatges
 import com.example.easydrive.activities.menu.Perfil
-import com.example.easydrive.adaptadors.AdaptadorRVDestins
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.api.geoapify.CrudGeo
 import com.example.easydrive.api.openroute.CrudOpenRoute
 import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.GeoapifyDades
 import com.example.easydrive.dades.Reserva
+import com.example.easydrive.dades.Step
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.Viatja
-import com.example.easydrive.dades.rutaDesti
-import com.example.easydrive.dades.rutaEscollida
-import com.example.easydrive.dades.rutaOrigen
 import com.example.easydrive.dades.user
 import com.example.easydrive.databinding.ActivityIniciTaxistaBinding
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -63,13 +52,11 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -89,24 +76,27 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     var poly: Polyline? = null
     var map: GoogleMap? = null
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    var coordenadesViatgeClient: List<List<Double>>? = null
+    var instruccio : List<Step>? = null
 
     var controlRecollirClients: Boolean = false
     var rutaDelViajeMostrada = false
 
     var ubiClient: LatLng?=null
     var destiClient : LatLng?=null
+    private var marcadorSimulacio: Marker? = null
 
     val novaPendents = mutableListOf<Reserva>()
     var reservaXEdit : Reserva?=null
     var viatja : Viatja?=null
     var cotxe : Cotxe?=null
     var cotxesByTaxi : List<Cotxe>?=null
+    var destFinal: String?=null
 
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var checkReservesRunnable: Runnable
 
     private var isRequestInProgress = false
-    //val crud = CrudApiEasyDrive()
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
@@ -229,6 +219,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }
 
         binding.cardInfoClient.visibility = View.GONE
+        binding.simulacio.visibility = View.GONE
 
         binding.switchDisponiblitat.setOnCheckedChangeListener { _, isChecked ->
             val dispo = isChecked
@@ -263,15 +254,8 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             binding.main.openDrawer(GravityCompat.START)
         }
 
-        /*cotxesByTaxi = crud.getAllCotxesByUsuari(user?.dni!!)
-        if (cotxesByTaxi?.size == 1){
-            cotxe = cotxesByTaxi?.first()
-        } else{
-            //metodo dialog para escoger el coche
-        }*/
-
         binding.simulacio.setOnClickListener {
-
+            simulacioRutaArribarDesti()
         }
     }
 
@@ -409,12 +393,19 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 ) {
                     return@setOnClickListener
                 }
+                cotxesByTaxi = crud.getAllCotxesByUsuari(user?.dni!!)
+                if (cotxesByTaxi?.size == 1){
+                    cotxe = cotxesByTaxi?.first()
+                } else{
+                    //metodo dialog para escoger el coche
+                }
                 tracarRutaFinsClient(reservaXEdit!!, client!!)
                 dialeg.dismiss()
             } else{
                 Log.d("ya lo han confirmado", "pues eso")
             }
             dialeg.dismiss()
+
 
         }
 
@@ -534,8 +525,8 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun tracarRutaFinsClient(reserva: Reserva, client: Usuari) {
-        //startCheckingReserva()
         binding.cardInfoClient.visibility = View.VISIBLE
+        binding.simulacio.visibility = View.VISIBLE
         val crud = CrudOpenRoute(this)
 
         ubiClient = ubicacioLatLagByText(reserva.origen.toString()) // esto funciona
@@ -570,6 +561,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 binding.arribada.setText("Arribada en ${horas.toString()}:${minutos.toString()}:${segundos.toString()} per recollir client")
                 binding.nomClient.setText(client.nom + " " + client.cognom)
             }
+
             drawRoute(map!!, coordenada!!)
         } else {
             Log.d("resposta api", resposta.toString())
@@ -606,11 +598,10 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         val crud = CrudOpenRoute(this)
         val start = ubiOrg.longitude.toString() + "," + ubiOrg.latitude.toString()
         val end = ubiDest.longitude.toString() + "," + ubiDest.latitude.toString()
-
+        destFinal = end
         Log.d("start", start.toString())
         Log.d("end", end.toString())
 
-        var coordenada: List<List<Double>>? = null
         var horas: Int? = null
         var minutos: Int? = null
         var segundos: Int? = null
@@ -620,11 +611,14 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         var resposta = crud.getRutaCotxe(start, end)
         if (resposta != null) {
             resposta.features.map {
-                coordenada = it.geometry.coordinates
+                coordenadesViatgeClient = it.geometry.coordinates
                 horas = (it.properties.summary.duration.toInt() / 3600)
                 minutos = ((it.properties.summary.duration.toInt()-horas!!*3600)/60)
                 segundos = it.properties.summary.duration.toInt()-(horas!!*3600+minutos!!*60)
                 viatja?.distancia = dec.format(it.properties.summary.distance/1000).toFloat()
+                it.properties.segments.map {
+                    instruccio = it.steps
+                }
             }
             val crud = CrudApiEasyDrive()
 
@@ -644,7 +638,47 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             else
                 Log.d("update cotxe", "incorrecte")
 
-            drawRoute(map!!, coordenada!!)
+            drawRoute(map!!, coordenadesViatgeClient!!)
+            //simulacioRutaArribarDesti()
+
+        } else {
+            Log.d("resposta api", resposta.toString())
+            Toast.makeText(this, "No hi ha resposta", Toast.LENGTH_LONG)
+        }
+    }
+
+    private fun simulacioRutaArribarDesti() {
+        poly?.remove()
+        marcadorSimulacio?.remove()
+
+        val crud = CrudOpenRoute(this)
+        coordenadesViatgeClient?.forEach { coord ->
+
+          val start = coord.toString()
+
+        }
+
+        var horas: Int? = null
+        var minutos: Int? = null
+        var segundos: Int? = null
+        val dec = DecimalFormat("#,###.00")
+
+
+        var resposta = crud.getRutaCotxe("", destFinal!!)
+        if (resposta != null) {
+            resposta.features.map {
+                coordenadesViatgeClient = it.geometry.coordinates
+                horas = (it.properties.summary.duration.toInt() / 3600)
+                minutos = ((it.properties.summary.duration.toInt()-horas!!*3600)/60)
+                segundos = it.properties.summary.duration.toInt()-(horas!!*3600+minutos!!*60)
+                viatja?.distancia = dec.format(it.properties.summary.distance/1000).toFloat()
+                it.properties.segments.map {
+                    instruccio = it.steps
+                }
+            }
+
+            drawRoute(map!!, coordenadesViatgeClient!!)
+            //simulacioRutaArribarDesti()
 
         } else {
             Log.d("resposta api", resposta.toString())
