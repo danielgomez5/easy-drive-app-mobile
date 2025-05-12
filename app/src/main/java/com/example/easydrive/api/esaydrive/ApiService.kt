@@ -118,6 +118,9 @@ interface ApiService {
     @GET("/api/usuari/{id}")
     suspend fun getUserById(@Path("id") id: String): Response<Usuari>
 
+    @GET("/api/reserva/{id}")
+    suspend fun getReservaById(@Path("id") id: String): Response<Reserva>
+
     //Dels
     @DELETE("api/usuari/del_all/{id_usuari}")
     suspend fun delUser(@Path("id_usuari") id_usuari: String): Response<Missatge>

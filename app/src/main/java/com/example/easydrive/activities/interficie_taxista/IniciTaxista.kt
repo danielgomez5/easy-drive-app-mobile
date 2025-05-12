@@ -26,6 +26,7 @@ import androidx.core.os.postDelayed
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -64,6 +65,9 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -87,6 +91,14 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     var ubiClient: LatLng?=null
     var destiClient : LatLng?=null
+
+    var reservaXEdit : Reserva?=null
+
+    private val handler = Handler(Looper.getMainLooper())
+    private lateinit var checkReservaRunnable: Runnable
+
+    private var isRequestInProgress = false
+
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
@@ -143,7 +155,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         getDisponiblitat(crud)
 
         val handler = Handler(Looper.getMainLooper())
-        val intervalMillis: Long = 10000 // cada 10 segundos
+        val intervalMillis: Long = 20000 // cada 10 segundos
 
         val checkReservesRunnable = object : Runnable {
             override fun run() {
@@ -163,20 +175,22 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         binding.switchDisponiblitat.setOnCheckedChangeListener { _, isChecked ->
             val dispo = isChecked
             val idUsuari = user?.dni ?: return@setOnCheckedChangeListener
-
+            try {
                 val success = crud.updateDispoTaxista(idUsuari, dispo)
+                if (success) {
+                    Toast.makeText(this, "Disponibilitat actualitzada", Toast.LENGTH_SHORT).show()
+                    if (dispo) handler.post(checkReservesRunnable)
+                    else handler.removeCallbacks(checkReservesRunnable)
+                } else {
+                    Toast.makeText(this, "Error actualitzant disponibilitat", Toast.LENGTH_SHORT).show()
+                    binding.switchDisponiblitat.isChecked = !dispo
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this, "No s'ha pogut connectar amb el servidor", Toast.LENGTH_LONG).show()
+                Log.e("updateDispoTaxista", "Error de connexió", e)
+                binding.switchDisponiblitat.isChecked = !dispo
+            }
 
-                    if (success) {
-                        Toast.makeText(this, "Disponibilitat actualitzada", Toast.LENGTH_SHORT).show()
-                        if (dispo) {
-                            handler.post(checkReservesRunnable)
-                        } else {
-                            handler.removeCallbacks(checkReservesRunnable)
-                        }
-                    } else {
-                        Toast.makeText(this, "Error actualitzant disponibilitat", Toast.LENGTH_SHORT).show()
-                        binding.switchDisponiblitat.isChecked = !dispo
-                    }
         }
 
 
@@ -190,11 +204,20 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         binding.btnPerfil.setOnClickListener {
             binding.main.openDrawer(GravityCompat.START)
         }
-        if (binding.switchDisponiblitat.isChecked){
-            //poner cuando llegue un reserva
-        }
 
-
+        /*if (reservaXEdit!=null){
+            lifecycleScope.launch(Dispatchers.IO) {
+                val reserva = crud.getResevraById(reservaXEdit?.id.toString())
+                withContext(Dispatchers.Main) {
+                    if (reserva != null && reserva.idEstat != 4) {
+                        // continuar
+                        Log.d("Reserva", "Reserva activa: ${reserva.idEstat}")
+                    } else {
+                        Toast.makeText(this@IniciTaxista, "La reserva fue cancelada", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }*/
 
     }
 
@@ -289,30 +312,30 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         dialeg.findViewById<MaterialButton>(R.id.btnAcceptarD).setOnClickListener { // si acepta la reserva
             controlRecollirClients = false
-            val reservaXEdit = novaPendents.first()
+            reservaXEdit = novaPendents.first()
             val crud = CrudApiEasyDrive()
-            reservaXEdit.idEstat = 1
-            crud.changeEstatReserva(reservaXEdit.id.toString(), reservaXEdit)
-            val client = crud.getUsuariById(reservaXEdit.idUsuari.toString())
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return@setOnClickListener
+            if(getReservaNoConfirmada(crud, reservaXEdit!!)){
+                reservaXEdit?.idEstat = 1
+                crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
+                val client = crud.getUsuariById(reservaXEdit?.idUsuari.toString())
+
+                if (ActivityCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return@setOnClickListener
+                }
+                tracarRutaFinsClient(reservaXEdit!!, client!!)
+                dialeg.dismiss()
+            } else{
+                Log.d("ya lo han confirmado", "pues eso")
             }
-            tracarRutaFinsClient(reservaXEdit, client!!)
             dialeg.dismiss()
+
         }
 
         dialeg.findViewById<MaterialButton>(R.id.btnCancelarD).setOnClickListener {
@@ -323,29 +346,75 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         dialeg.show()
     }
 
-    fun comprovarNousViatges(){
-        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val hoy = sdf.parse(sdf.format(Date()))
+    fun getReservaNoConfirmada(crud : CrudApiEasyDrive, reserva: Reserva): Boolean{
+        val reserva = crud.getResevraById(reserva?.id.toString())
+        Log.d("getReservaNoConfirmada", reserva.toString())
+        if (reserva?.idEstat == 2)
+            return true
+        else
+            return false
+    }
 
-        val crud = CrudApiEasyDrive()
-        val pendents = crud.getReservesPendents()
+    fun comprovarNousViatges() {
+        if (isRequestInProgress) return
+        isRequestInProgress = true
 
+        try {
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val hoy = sdf.parse(sdf.format(Date()))
 
-        Log.d("pendents", pendents.toString())
-        pendents?.forEach { p ->
-            val dataReserva = p.dataViatge?.let { sdf.parse(it) }
-            if ( dataReserva != null && dataReserva == hoy) {
-                novaPendents.add(p)
-            }
-        }
+            val crud = CrudApiEasyDrive()
+            val pendents = crud.getReservesPendents()
 
-        if (novaPendents.isNotEmpty()){
-            Log.d("novaPendents",novaPendents.toString())
-            if (controlRecollirClients){
-                runOnUiThread {
-                    dialogRecollirClient()
+            Log.d("pendents", pendents.toString())
+
+            pendents?.forEach { p ->
+                val dataReserva = p.dataViatge?.let { sdf.parse(it) }
+                if (dataReserva != null && dataReserva == hoy) {
+                    novaPendents.add(p)
                 }
             }
+
+            if (novaPendents.isNotEmpty()) {
+                Log.d("novaPendents", novaPendents.toString())
+                if (controlRecollirClients) {
+                    runOnUiThread {
+                        dialogRecollirClient()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("API_ERROR", "Error obtenint reserves: ${e.message}")
+        } finally {
+            isRequestInProgress = false
+        }
+    }
+
+
+    private fun startCheckingReserva() {
+        val crud = CrudApiEasyDrive()
+        if (reservaXEdit != null) {
+            checkReservaRunnable = object : Runnable {
+                override fun run() {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val reserva = crud.getResevraById(reservaXEdit!!.id.toString())
+                        withContext(Dispatchers.Main) {
+                            if (reserva != null && reserva.idEstat != 4) {
+                                Log.d("Reserva", "Reserva activa: ${reserva.idEstat}")
+                                // Puedes trazar la ruta o seguir con la lógica
+                                handler.postDelayed(this as Runnable, 10000) // vuelve a comprobar en 5 segundos
+                            } else {
+                                Toast.makeText(this@IniciTaxista, "La reserva fue cancelada", Toast.LENGTH_LONG).show()
+                                Log.d("Reserva", "Reserva cancelada o no encontrada")
+                                // Detener el handler
+                                handler.removeCallbacks(this as Runnable)
+                            }
+                        }
+                    }
+                }
+            }
+
+            handler.post(checkReservaRunnable) // Inicia la primera comprobación
         }
     }
 
@@ -363,11 +432,12 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun tracarRutaFinsClient(reserva: Reserva, client: Usuari) {
+        startCheckingReserva()
         binding.cardInfoClient.visibility = View.VISIBLE
         val crud = CrudOpenRoute(this)
 
-        ubiClient = ubicacioLatLagByText(reserva) // esto funciona
-        destiClient = ubicacioLatLagByText(reserva)
+        ubiClient = ubicacioLatLagByText(reserva.origen.toString()) // esto funciona
+        destiClient = ubicacioLatLagByText(reserva.desti.toString())
 
         val locationRequest = LocationRequest.create().apply {
             interval = 10000
@@ -404,15 +474,15 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }
     }
 
-    fun ubicacioLatLagByText(reserva: Reserva): LatLng?{
+    fun ubicacioLatLagByText(reserva: String): LatLng?{
         val crudGeo = CrudGeo(this)
-        val llocClient = reserva.origen?.replace (" ","+")
+        val llocClient = reserva?.replace (" ","+")
         val ubiGeo = crudGeo.getLocationByName(llocClient!!)
 
         var ubiClientGeo : GeoapifyDades?=null
         ubiGeo.forEach { ubi ->
             val text = "${ubi.address_line1}, ${ubi.city}"
-            if (text.equals(reserva.origen)){
+            if (text.equals(reserva)){
                 ubiClientGeo = ubi
             }
 
@@ -423,9 +493,12 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     fun trazarRutaViaje() {
         binding.cardInfoClient.visibility = View.INVISIBLE
+        poly?.remove()
 
         val ubiOrg = LatLng(ubiClient!!.latitude,ubiClient!!.longitude)
+        Log.d("UbiOrg", ubiOrg.toString())
         val ubiDest = LatLng(destiClient!!.latitude,destiClient!!.longitude)
+        Log.d("UbiDest", ubiDest.toString())
 
         val crud = CrudOpenRoute(this)
         val start = ubiOrg.longitude.toString() + "," + ubiOrg.latitude.toString()
