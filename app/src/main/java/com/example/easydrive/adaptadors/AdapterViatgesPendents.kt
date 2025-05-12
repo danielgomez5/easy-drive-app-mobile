@@ -32,7 +32,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class AdapterViatgesPendents(val llista: MutableList<Reserva>) :
+class AdapterViatgesPendents(val llista: MutableList<Reserva>, private val onListChanged: (Boolean) -> Unit) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     class CompactViewHolder(val vista: View) : RecyclerView.ViewHolder(vista) {
@@ -142,5 +142,6 @@ class AdapterViatgesPendents(val llista: MutableList<Reserva>) :
     private fun cancelarReserva(item: Reserva) {
         llista.remove(item)
         notifyDataSetChanged()
+        onListChanged(llista.isEmpty())
     }
 }

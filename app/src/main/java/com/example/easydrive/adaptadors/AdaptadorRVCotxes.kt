@@ -9,9 +9,10 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.easydrive.R
+import com.example.easydrive.dades.Reserva
 
 
-class AdaptadorRVCotxes(val llista: List<Cotxe>) : RecyclerView.Adapter<AdaptadorRVCotxes.ViewHolder>() {
+class AdaptadorRVCotxes(val llista: MutableList<Cotxe>, private val onListChanged: (Boolean) -> Unit) : RecyclerView.Adapter<AdaptadorRVCotxes.ViewHolder>() {
     class ViewHolder(val vista: View) : RecyclerView.ViewHolder(vista) {
         val tvMatricula: TextView = vista.findViewById(R.id.tvMatricula)
         val tvMarcaModel: TextView = vista.findViewById(R.id.tvMarcaModel)
@@ -38,6 +39,13 @@ class AdaptadorRVCotxes(val llista: List<Cotxe>) : RecyclerView.Adapter<Adaptado
         holder.tvAny.text = "Any: ${item.any}"
         holder.tvTipusCapacitat.text = "Tipus: ${item.tipus} | Capacitat: ${item.capacitat}"
         holder.tvColor.text = "Color: ${item.color}"
-        holder.tvHores.text = "Hores conduïdes: ${item.horesTreballades}"
+        holder.tvHores.text = "Hores conduïdes: ${item.horesTreballades ?: "0"}"
+
+    }
+
+    private fun eliminaCotxe(item: Cotxe) {
+        llista.remove(item)
+        notifyDataSetChanged()
+        onListChanged(llista.isEmpty())
     }
 }

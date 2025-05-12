@@ -72,9 +72,16 @@ class ViatgesGuardats : Fragment() { //Al final son reserves/viatges pendents
         }
         Log.d("carregar reserva", listaViatges.toString())
 
-        binding.rcvViatgesPendents.adapter = AdapterViatgesPendents(listaViatges)
-        binding.rcvViatgesPendents.layoutManager = LinearLayoutManager(requireContext())
+
+        if (listaViatges.isNullOrEmpty()){
+            binding.llEmptyState.visibility = View.VISIBLE
+        }else{
+            binding.llEmptyState.visibility = View.GONE
+            binding.rcvViatgesPendents.adapter = AdapterViatgesPendents(listaViatges) { isEmpty ->
+                binding.llEmptyState.visibility = if (isEmpty) View.VISIBLE else View.GONE
+            }
+            binding.rcvViatgesPendents.layoutManager = LinearLayoutManager(requireContext())
+        }
+
     }
-
-
 }

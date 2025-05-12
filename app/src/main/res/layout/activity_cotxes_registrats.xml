@@ -39,8 +39,8 @@
 
             <ImageView
                 android:id="@+id/iconTitle"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:src="@drawable/baseline_directions_car_24"
                 android:layout_marginEnd="8dp"
                 app:tint="?colorSecondary" />
@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:text="Cotxes registrats"
                 android:textColor="?colorSecondary"
-                android:textSize="28sp"
+                android:textSize="32sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -66,6 +66,37 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="16dp"/>
+
+        <LinearLayout
+            android:id="@+id/ll_emptyState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="16dp"
+            >
+
+            <ImageView
+                android:id="@+id/iv_emptyImage"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:src="@drawable/cars_icon"
+                app:tint="?colorPrimary"
+                android:contentDescription="Cotxes not found" />
+
+            <TextView
+                android:id="@+id/tv_emptyText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No tens cap cotxe registrat, inscribeix'ne el primer!"
+                android:textSize="18sp"
+                android:textStyle="bold|italic"
+                android:textAlignment="center"
+                android:textColor="?colorSecondary"
+                android:layout_marginTop="16dp"
+                android:layout_gravity="center_horizontal"
+                />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

@@ -12,29 +12,26 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="90dp"
-        android:layout_marginHorizontal="24dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="20dp"
         app:layout_constraintStart_toStartOf="parent"
-        >
+        app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:src="@drawable/baseline_bookmark_24"
-            app:tint="?colorSecondary"
-            android:layout_marginEnd="12dp" />
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/btnPerfil"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="8dp" />
 
         <TextView
-            android:id="@+id/textVG"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Reserves pendents"
+            android:textColor="?colorSecondary"
             android:textSize="30sp"
-            android:textStyle="bold"
-            android:textColor="?colorSecondary" />
+            android:textStyle="bold" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -48,6 +45,38 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/ll_emptyState"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp"
+        android:visibility="gone"
+        >
+
+        <ImageView
+            android:id="@+id/iv_emptyImage"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/no_reservations"
+            app:tint="?colorPrimary"
+            android:contentDescription="Reserves not found" />
+
+        <TextView
+            android:id="@+id/tv_emptyText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No tens reserves pendents, planeja el teu proper viatge!"
+            android:textSize="18sp"
+            android:textStyle="bold|italic"
+            android:textAlignment="center"
+            android:textColor="?colorSecondary"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center_horizontal"
+            />
+    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
