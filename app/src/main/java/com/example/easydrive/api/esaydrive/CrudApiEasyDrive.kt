@@ -293,6 +293,34 @@ class CrudApiEasyDrive() : CoroutineScope {
             return null
     }
 
+    fun getAllCotxesByUsuari(id: String): List<Cotxe>?{
+        var resposta: Response<List<Cotxe>>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getCotxesTaxista(id)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return resposta!!.body()
+        else
+            return null
+    }
+
+    fun getCotxeByMatr(id: String) :Cotxe?{
+        var resposta: Response<Cotxe>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getCotxeByMatricula(id)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return resposta!!.body()
+        else
+            return null
+    }
+
     //Update
     fun updateUserFoto(id: String, rutaPerfil: String?): Boolean {
         val filePerfil = File(rutaPerfil)

@@ -46,6 +46,7 @@ import com.example.easydrive.api.openroute.CrudOpenRoute
 import com.example.easydrive.dades.GeoapifyDades
 import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.Usuari
+import com.example.easydrive.dades.Viatja
 import com.example.easydrive.dades.rutaDesti
 import com.example.easydrive.dades.rutaEscollida
 import com.example.easydrive.dades.rutaOrigen
@@ -96,6 +97,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     var destiClient : LatLng?=null
 
     var reservaXEdit : Reserva?=null
+    var viatja : Viatja?=null
 
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var checkReservesRunnable: Runnable
@@ -121,7 +123,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                     it.latitude, it.longitude,
                     distancia
                 )
-                if (distancia[0] < 50 && !rutaDelViajeMostrada) {
+                if (distancia[0] < 10 && !rutaDelViajeMostrada) {
                     rutaDelViajeMostrada = true
                     trazarRutaViaje()
                 }
@@ -143,6 +145,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             insets
         }
         val crud = CrudApiEasyDrive()
+        viatja = Viatja(null,null,null,null,null,null,null,null,null)
         if (user == null){
             user = intent.getSerializableExtra("user") as? Usuari
             editarHeader()
@@ -211,6 +214,9 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             binding.main.openDrawer(GravityCompat.START)
         }
 
+        binding.simulacio.setOnClickListener {
+
+        }
     }
 
     private fun getDisponiblitat(crud: CrudApiEasyDrive) {
@@ -552,6 +558,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         var minutos: Int? = null
         var segundos: Int? = null
 
+
         var resposta = crud.getRutaCotxe(start, end)
         if (resposta != null) {
             resposta.features.map {
@@ -560,6 +567,14 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 minutos = ((it.properties.summary.duration.toInt()-horas!!*3600)/60)
                 segundos = it.properties.summary.duration.toInt()-(horas!!*3600+minutos!!*60)
             }
+
+            viatja?.idTaxista = user?.dni
+            viatja?.distancia = 0.0f
+            viatja?.durada = 0
+            viatja?.idZona = user?.idZona
+            viatja?.idReserva = reservaXEdit?.id
+
+
             drawRoute(map!!, coordenada!!)
         } else {
             Log.d("resposta api", resposta.toString())
