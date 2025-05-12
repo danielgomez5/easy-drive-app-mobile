@@ -3,7 +3,7 @@ package com.example.easydrive.dades
 data class Viatja(
     var id: Int?,
     var durada: Int?,
-    var distancia: Float?,
+    var distancia: Double?,
     var valoracio: Float?,
     var comentari: String?,
     var idZona: Int?,
