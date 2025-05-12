@@ -95,7 +95,8 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     var reservaXEdit : Reserva?=null
 
     private val handler = Handler(Looper.getMainLooper())
-    private lateinit var checkReservaRunnable: Runnable
+    private lateinit var checkReservesRunnable: Runnable
+
 
     private var isRequestInProgress = false
 
@@ -111,16 +112,18 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
             // Verifica la distancia hasta el cliente
             val distancia = FloatArray(1)
-            Location.distanceBetween(
-                conductorLat, conductorLng,
-                ubiClient!!.latitude, ubiClient!!.longitude,
-                distancia
-            )
-
-            if (distancia[0] < 50 && !rutaDelViajeMostrada) {
-                rutaDelViajeMostrada = true  // Para que no se vuelva a ejecutar
-                trazarRutaViaje(/*ubiClient!!.latitude, ubiClient!!.longitude, destiClient!!.latitude, destiClient!!.longitude*/)
+            ubiClient?.let {
+                Location.distanceBetween(
+                    conductorLat, conductorLng,
+                    it.latitude, it.longitude,
+                    distancia
+                )
+                if (distancia[0] < 50 && !rutaDelViajeMostrada) {
+                    rutaDelViajeMostrada = true
+                    trazarRutaViaje()
+                }
             }
+
         }
     }
 
@@ -154,15 +157,15 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         afegirFoto()
         getDisponiblitat(crud)
 
-        val handler = Handler(Looper.getMainLooper())
         val intervalMillis: Long = 20000 // cada 10 segundos
 
-        val checkReservesRunnable = object : Runnable {
+        checkReservesRunnable = object : Runnable {
             override fun run() {
                 comprovarNousViatges()
                 handler.postDelayed(this, intervalMillis)
             }
         }
+
 
 // Solo iniciar si está disponible
         if (binding.switchDisponiblitat.isChecked) {
@@ -204,20 +207,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         binding.btnPerfil.setOnClickListener {
             binding.main.openDrawer(GravityCompat.START)
         }
-
-        /*if (reservaXEdit!=null){
-            lifecycleScope.launch(Dispatchers.IO) {
-                val reserva = crud.getResevraById(reservaXEdit?.id.toString())
-                withContext(Dispatchers.Main) {
-                    if (reserva != null && reserva.idEstat != 4) {
-                        // continuar
-                        Log.d("Reserva", "Reserva activa: ${reserva.idEstat}")
-                    } else {
-                        Toast.makeText(this@IniciTaxista, "La reserva fue cancelada", Toast.LENGTH_LONG).show()
-                    }
-                }
-            }
-        }*/
 
     }
 
@@ -313,6 +302,9 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         dialeg.findViewById<MaterialButton>(R.id.btnAcceptarD).setOnClickListener { // si acepta la reserva
             controlRecollirClients = false
             reservaXEdit = novaPendents.first()
+            handler.removeCallbacks(checkReservesRunnable) // Detenemos comprobación de nuevas reservas
+            startCheckingReserva() // Comenzamos a comprobar estado de la reserva activa
+
             val crud = CrudApiEasyDrive()
             if(getReservaNoConfirmada(crud, reservaXEdit!!)){
                 reservaXEdit?.idEstat = 1
@@ -359,62 +351,84 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         if (isRequestInProgress) return
         isRequestInProgress = true
 
-        try {
-            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val hoy = sdf.parse(sdf.format(Date()))
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val hoy = sdf.parse(sdf.format(Date()))
 
-            val crud = CrudApiEasyDrive()
-            val pendents = crud.getReservesPendents()
+                val crud = CrudApiEasyDrive()
+                val pendents = crud.getReservesPendents()
 
-            Log.d("pendents", pendents.toString())
-
-            pendents?.forEach { p ->
-                val dataReserva = p.dataViatge?.let { sdf.parse(it) }
-                if (dataReserva != null && dataReserva == hoy) {
-                    novaPendents.add(p)
+                pendents?.forEach { p ->
+                    val dataReserva = p.dataViatge?.let { sdf.parse(it) }
+                    if (dataReserva != null && dataReserva == hoy) {
+                        novaPendents.add(p)
+                    }
                 }
-            }
 
-            if (novaPendents.isNotEmpty()) {
-                Log.d("novaPendents", novaPendents.toString())
-                if (controlRecollirClients) {
-                    runOnUiThread {
+                if (novaPendents.isNotEmpty() && controlRecollirClients) {
+                    withContext(Dispatchers.Main) {
                         dialogRecollirClient()
                     }
                 }
+            } catch (e: Exception) {
+                Log.e("API_ERROR", "Error obtenint reserves: ${e.message}")
+            } finally {
+                isRequestInProgress = false
             }
-        } catch (e: Exception) {
-            Log.e("API_ERROR", "Error obtenint reserves: ${e.message}")
-        } finally {
-            isRequestInProgress = false
         }
     }
-
 
     private fun startCheckingReserva() {
         val crud = CrudApiEasyDrive()
         if (reservaXEdit != null) {
-            checkReservaRunnable = object : Runnable {
+            checkReservesRunnable = object : Runnable {
                 override fun run() {
-                    lifecycleScope.launch(Dispatchers.IO) {
+                    Thread {
                         val reserva = crud.getResevraById(reservaXEdit!!.id.toString())
-                        withContext(Dispatchers.Main) {
-                            if (reserva != null && reserva.idEstat != 4) {
-                                Log.d("Reserva", "Reserva activa: ${reserva.idEstat}")
-                                // Puedes trazar la ruta o seguir con la lógica
-                                handler.postDelayed(this as Runnable, 10000) // vuelve a comprobar en 5 segundos
-                            } else {
-                                Toast.makeText(this@IniciTaxista, "La reserva fue cancelada", Toast.LENGTH_LONG).show()
-                                Log.d("Reserva", "Reserva cancelada o no encontrada")
-                                // Detener el handler
-                                handler.removeCallbacks(this as Runnable)
+
+                        if (reserva != null) {
+                            Log.d("Reserva", "Estado actual: ${reserva.idEstat}")
+
+                            when (reserva.idEstat) {
+                                3 -> { // Realizat
+                                    poly?.remove()
+                                    binding.cardInfoClient.visibility = View.GONE
+                                    Handler(Looper.getMainLooper()).post {
+                                        Toast.makeText(
+                                            this@IniciTaxista,
+                                            "Viatge finalitzat",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                    handler.removeCallbacks(this)
+                                }
+                                4 -> { // Cancelat
+                                    poly?.remove()
+                                    binding.cardInfoClient.visibility = View.GONE
+                                    Handler(Looper.getMainLooper()).post {
+                                        Toast.makeText(
+                                            this@IniciTaxista,
+                                            "La reserva ha estat cancel·lada",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                    handler.removeCallbacks(this)
+                                }
+                                else -> {
+                                    // Seguir comprovant
+                                    handler.postDelayed(this, 10000)
+                                }
                             }
+                        } else {
+                            Log.d("Reserva", "Reserva no trobada")
+                            handler.removeCallbacks(this)
                         }
-                    }
+                    }.start()
                 }
             }
 
-            handler.post(checkReservaRunnable) // Inicia la primera comprobación
+            handler.post(checkReservesRunnable)
         }
     }
 
@@ -432,7 +446,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun tracarRutaFinsClient(reserva: Reserva, client: Usuari) {
-        startCheckingReserva()
+        //startCheckingReserva()
         binding.cardInfoClient.visibility = View.VISIBLE
         val crud = CrudOpenRoute(this)
 

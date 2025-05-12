@@ -129,8 +129,12 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                 layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_numTarjeta)
                     .setText(dadespagament.numeroTarjeta.toString())
 
+                val sdfInput = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())  // Formato de la fecha almacenada
+                val sdfOutput = SimpleDateFormat("MM/yy", Locale.getDefault())     // Formato que deseas mostrar
+                val date = sdfInput.parse(dadespagament.dataExpiracio.toString())
+                val formattedDate = sdfOutput.format(date)
                 layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_Caducitat)
-                    .setText(dadespagament.dataExpiracio.toString())
+                    .setText(formattedDate)
 
             }
         }
