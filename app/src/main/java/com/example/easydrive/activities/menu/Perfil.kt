@@ -309,9 +309,12 @@ class Perfil : AppCompatActivity() {
         if (user?.fotoPerfil!=null){
             Glide.with(this)
                 .load("http://172.16.24.115:7126/Photos/${File(user?.fotoPerfil).name}")
+                .error(R.drawable.add_pic)
                 .into(binding.imgPerfil)
 
             user?.fotoPerfil = File(user?.fotoPerfil).name
+        }else{
+            binding.imgPerfil.setImageResource(R.drawable.add_pic)
         }
     }
 }

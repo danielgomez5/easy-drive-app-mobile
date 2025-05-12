@@ -50,7 +50,7 @@ class CrudGeo (val context: Context) : CoroutineScope {
         }
 
         return if (resposta!!.isSuccessful) {
-            resposta!!.body()?.results!!
+            resposta!!.body()?.results?.filter { it.country == "Spain" } ?: emptyList()
         } else {
             emptyList()
         }
@@ -73,6 +73,4 @@ class CrudGeo (val context: Context) : CoroutineScope {
             null
         }
     }
-
-
 }

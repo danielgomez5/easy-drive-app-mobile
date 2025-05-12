@@ -4,6 +4,8 @@ import android.Manifest
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
@@ -26,6 +28,7 @@ import androidx.core.os.postDelayed
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -250,15 +253,25 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         nomUser.text = "${user?.nom} ${user?.cognom}"
         //posar imatge
         var fotoUser = headerView.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.fotoHeader)
+        try{
         Glide.with(this)
             .load("http://172.16.24.115:7126/Photos/${user?.fotoPerfil}")
+            .error(R.drawable.logo_easydrive)
             .into(fotoUser)
+        }catch (e: Exception){
+            fotoUser.setImageResource(R.drawable.logo_easydrive)
+        }
     }
 
     private fun afegirFoto() {
+        try{
         Glide.with(this)
             .load("http://172.16.24.115:7126/Photos/${user?.fotoPerfil}")
+            .error(R.drawable.logo_easydrive)
             .into(binding.btnPerfil)
+        }catch (e: Exception){
+            binding.btnPerfil.setImageResource(R.drawable.logo_easydrive)
+        }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -298,6 +311,19 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         //dialeg.window?.setWindowAnimations(R.style.animation)
         dialeg.setCancelable(false)
+
+        val reserva = novaPendents.first()
+
+        val tvOrigen = dialeg.findViewById<TextView>(R.id.tvOrigen)
+        val tvDesti = dialeg.findViewById<TextView>(R.id.tvDesti)
+        val tvDataHora = dialeg.findViewById<TextView>(R.id.tvDataHora)
+        val tvPreu = dialeg.findViewById<TextView>(R.id.tvPreu)
+
+        tvOrigen.text = "Origen: ${reserva.origen ?: "Desconegut"}"
+        tvDesti.text = "Desti: ${reserva.desti ?: "Desconegut"}"
+        tvDataHora.text = "Data i hora: ${reserva.dataViatge ?: ""} ${reserva.horaViatge ?: ""}"
+        tvPreu.text = "Preu: ${reserva.preu?.toString() ?: "No disponible"} €"
+
 
         dialeg.findViewById<MaterialButton>(R.id.btnAcceptarD).setOnClickListener { // si acepta la reserva
             controlRecollirClients = false
@@ -541,7 +567,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }
     }
 
-
     //Permissos necessari de la app
     fun comprovarPermisos() : Boolean{
         if(ContextCompat.checkSelfPermission(this,
@@ -572,5 +597,3 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }
-
-

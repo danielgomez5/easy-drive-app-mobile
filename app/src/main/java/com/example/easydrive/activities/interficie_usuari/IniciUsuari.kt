@@ -102,15 +102,27 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         nomUser.text = "${user?.nom} ${user?.cognom}"
         //posar imatge
         var fotoUser = headerView.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.fotoHeader)
+
+        try{
         Glide.with(this)
             .load("http://172.16.24.115:7126/Photos/${user?.fotoPerfil}")
+            .error(R.drawable.logo_easydrive)
             .into(fotoUser)
+        }catch (e: Exception){
+            fotoUser.setImageResource(R.drawable.logo_easydrive)
+        }
+
     }
 
     private fun afegirFoto() {
+        try {
         Glide.with(this)
             .load("http://172.16.24.115:7126/Photos/${user?.fotoPerfil}")
+            .error(R.drawable.logo_easydrive)
             .into(binding.btnPerfil)
+        }catch (e: Exception){
+            binding.btnPerfil.setImageResource(R.drawable.logo_easydrive)
+        }
     }
 
 
