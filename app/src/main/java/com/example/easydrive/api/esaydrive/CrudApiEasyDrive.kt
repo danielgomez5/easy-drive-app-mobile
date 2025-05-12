@@ -119,6 +119,20 @@ class CrudApiEasyDrive() : CoroutineScope {
             return false
     }
 
+    fun insertViatge(viatge: Viatja): Boolean{
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).afegirViatge(viatge)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
+
 
     //GET
     fun getComunitats(): List<String>? {
@@ -472,8 +486,36 @@ class CrudApiEasyDrive() : CoroutineScope {
             return false
     }
 
-    // Dels
+    fun updateViatge(id:String, viatge: Viatja): Boolean{
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).updateViatge(id,viatge)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
 
+    fun updateCotxe(id:String, cotxe: Cotxe): Boolean{
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).updateCotxe(id,cotxe)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
+
+
+    // Dels
     fun delUser(id: String): Boolean {
         var resposta: Response<Missatge>? = null
         runBlocking {

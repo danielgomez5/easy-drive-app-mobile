@@ -49,6 +49,9 @@ interface ApiService {
         @Part fotoCarnet: MultipartBody.Part?
     ): Response<Missatge>*/
 
+    @POST("/api/viatge")
+    suspend fun afegirViatge(@Body viatge: Viatja): Response<Missatge>
+
     //Puts
     @Multipart
     @PUT("/api/usuari_image/{id}")
@@ -81,6 +84,12 @@ interface ApiService {
 
     @PUT("/api/reserva/{id}")
     suspend fun updateReserva(@Path("id") id: String, @Body reserva: Reserva): Response<Missatge>
+
+    @PUT("/api/viatge/{id}")
+    suspend fun updateViatge(@Path("id") id: String, @Body viatge: Viatja): Response<Missatge>
+
+    @PUT("/api/cotxe/{id}")
+    suspend fun updateCotxe(@Path("id") id: String, @Body cotxe: Cotxe): Response<Missatge>
 
     //Gets
     @GET("/api/zones")
