@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp"
+    android:layout_marginTop="40dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvMatricula"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Matrícula: 1234ABC"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            android:textColor="?attr/colorPrimary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvMarcaModel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Marca i model: Seat Ibiza"
+            android:textSize="16sp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvAny"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Any: 2018"
+            android:textSize="16sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvTipusCapacitat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tipus: Berlina | Capacitat: 4"
+            android:textSize="16sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Color: Negre"
+            android:textSize="16sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvHores"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="Hores conduïdes: 500"
+            android:textSize="16sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginBottom="16dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/btnModificar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Modificar"
+                android:textSize="14sp"
+                android:layout_marginEnd="12dp"
+                android:backgroundTint="?attr/colorPrimary"
+                android:textColor="?colorOnPrimary"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="8dp" />
+
+            <Button
+                android:id="@+id/btnEliminar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Eliminar"
+                android:textSize="14sp"
+                android:textColor="?colorError"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="8dp"
+                android:backgroundTint="@android:color/transparent"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/outlined_button_red"
+                />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

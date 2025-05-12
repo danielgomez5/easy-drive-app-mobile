@@ -80,6 +80,7 @@ import java.util.Locale
 class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnMapReadyCallback{
     private lateinit var binding: ActivityIniciTaxistaBinding
     private lateinit var actionBarDrawerToggle: ActionBarDrawerToggle
+    private var menuVisible = false
     val REQUESTS_PERMISIONS = 1
     var permisos = false
 
@@ -170,6 +171,27 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 comprovarNousViatges()
                 handler.postDelayed(this, intervalMillis)
             }
+        }
+
+        val btnExpandMenu = binding.btnExpandMenu
+        val tvCotxes = binding.flCotxesRegistrats
+
+        btnExpandMenu.setOnClickListener {
+            menuVisible = !menuVisible
+            if (menuVisible) {
+                tvCotxes.visibility = View.VISIBLE
+                tvCotxes.alpha = 0f
+                tvCotxes.animate().alpha(1f).setDuration(200).start()
+            } else {
+                tvCotxes.animate().alpha(0f).setDuration(200).withEndAction {
+                    tvCotxes.visibility = View.GONE
+                }.start()
+            }
+        }
+
+        tvCotxes.setOnClickListener {
+            val intent = Intent(this, CotxesRegistrats::class.java)
+            startActivity(intent)
         }
 
 

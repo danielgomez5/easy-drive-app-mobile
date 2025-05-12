@@ -28,6 +28,70 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_margin="20dp"/>
+
+        <FrameLayout
+            android:id="@+id/btnExpandMenu"
+
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="20dp"
+            android:elevation="1dp"
+            android:layout_marginStart="20dp"
+            android:backgroundTint="?colorSecondaryContainer"
+            android:background="@drawable/bg_circle"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnPerfil">
+
+            <ImageView
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_gravity="center"
+                android:src="@drawable/car_plus"
+                app:tint="?colorOnSecondaryContainer"
+                android:contentDescription="Menú cotxes" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/flCotxesRegistrats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"
+            android:layout_marginStart="-16dp"
+            app:layout_constraintStart_toEndOf="@id/btnExpandMenu"
+            app:layout_constraintBottom_toBottomOf="@id/btnExpandMenu"
+            android:background="@drawable/bg_menu_text"
+            android:padding="8dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="17dp"
+                android:paddingEnd="4dp"
+                >
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/baseline_remove_red_eye_24"
+                    app:tint="?colorOnSecondaryContainer"
+                    android:layout_marginEnd="6dp" />
+
+                <TextView
+                    android:id="@+id/tvCotxesRegistrats"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cotxes registrats"
+                    android:textColor="?colorOnSecondaryContainer"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+
+
         <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
