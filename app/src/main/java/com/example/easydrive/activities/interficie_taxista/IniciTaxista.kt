@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
@@ -79,7 +80,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     var poly: Polyline? = null
     var map: GoogleMap? = null
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    var coordenadesViatgeClient: List<List<Double>>? = null
+    var coordenadesViatgeClient: MutableList<List<Double>>? = null
     var instruccio : List<Step>? = null
 
     var controlRecollirClients: Boolean = false
@@ -535,7 +536,10 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     }
 
     private fun drawRoute(gMap: GoogleMap, coordenades: List<List<Double>>) {
-        val polylineOptions = PolylineOptions()
+        poly?.remove()
+        val polylineOptions = PolylineOptions().color(Color.BLUE)        // Cambia el color si quieres
+            .width(10f)               // Grosor de la línea
+            .geodesic(true)
 
         coordenades.forEach {
             polylineOptions.add(LatLng(it[1], it[0]))
@@ -633,12 +637,11 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         var resposta = crud.getRutaCotxe(start, end)
         if (resposta != null) {
             resposta.features.map {
-                coordenadesViatgeClient = it.geometry.coordinates
+                coordenadesViatgeClient = it.geometry.coordinates as MutableList<List<Double>>?
                 horas = (it.properties.summary.duration.toInt() / 3600)
                 minutos = ((it.properties.summary.duration.toInt()-horas!!*3600)/60)
                 segundos = it.properties.summary.duration.toInt()-(horas!!*3600+minutos!!*60)
                 viatja?.distancia = (it.properties.summary.distance / 1000).toDouble()
-
                 it.properties.segments.map {
                     instruccio = it.steps
                 }
@@ -672,33 +675,40 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     private fun simulacioRutaArribarDesti() {
         poly?.remove()
-        //marcadorSimulacio?.remove()
-        drawRoute(map!!, coordenadesViatgeClient!!)
+        marcadorSimulacio?.remove()
+        binding.simulacio.visibility = View.GONE
 
-        val crud = CrudOpenRoute(this)
         if (coordenadesViatgeClient.isNullOrEmpty()) {
             Toast.makeText(this, "No hi ha coordenades de ruta", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Inicializa el marcador en la primera posición
-        val primerPunt = coordenadesViatgeClient!!.first()
+        // Asegúrate de trabajar con una lista mutable
+        val coordenades = coordenadesViatgeClient!!.toMutableList()
+
+        // Inicializa el marcador
+        val primerPunt = coordenades.first()
         val latLngInicial = LatLng(primerPunt[1], primerPunt[0])
-        marcadorSimulacio?.remove()
         marcadorSimulacio = map?.addMarker(MarkerOptions().position(latLngInicial).title("Simulació"))
 
-        // Lanza una coroutine
         CoroutineScope(Dispatchers.Default).launch {
-            for (punt in coordenadesViatgeClient!!) {
-                delay(1000) // Espera 1 segundo entre cada movimiento
+            while (coordenades.isNotEmpty()) {
+                val punt = coordenades.first()
+
                 withContext(Dispatchers.Main) {
+
                     val posicio = LatLng(punt[1], punt[0])
                     marcadorSimulacio?.position = posicio
                     map?.animateCamera(CameraUpdateFactory.newLatLng(posicio))
+                    drawRoute(map!!, coordenades)
                 }
+                coordenades.removeAt(0)
+
+                delay(1000)
             }
         }
     }
+
 
     //Permissos necessari de la app
     fun comprovarPermisos() : Boolean{
