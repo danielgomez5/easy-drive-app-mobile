@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
@@ -53,11 +54,14 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.DecimalFormat
@@ -76,7 +80,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     var poly: Polyline? = null
     var map: GoogleMap? = null
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    var coordenadesViatgeClient: List<List<Double>>? = null
+    var coordenadesViatgeClient: MutableList<List<Double>>? = null
     var instruccio : List<Step>? = null
 
     var controlRecollirClients: Boolean = false
@@ -92,6 +96,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     var cotxe : Cotxe?=null
     var cotxesByTaxi : List<Cotxe>?=null
     var destFinal: String?=null
+    var estat5 : Boolean =false
 
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var checkReservesRunnable: Runnable
@@ -115,8 +120,10 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                     it.latitude, it.longitude,
                     distancia
                 )
-                if (distancia[0] < 10 && !rutaDelViajeMostrada) {
+                if (distancia[0] < 50 && !rutaDelViajeMostrada) {
                     rutaDelViajeMostrada = true
+                    //reservaXEdit?.idEstat = 5
+                    estat5 = true
                     trazarRutaViaje()
                 }
             }
@@ -466,6 +473,9 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                     Thread {
                         val reserva = crud.getResevraById(reservaXEdit!!.id.toString())
 
+                        if (estat5){
+                            reserva?.idEstat = 5
+                        }
                         if (reserva != null) {
                             Log.d("Reserva", "Estado actual: ${reserva.idEstat}")
 
@@ -494,6 +504,20 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                                     }
                                     handler.removeCallbacks(this)
                                 }
+                                5 -> { // Realizat
+                                    //poly?.remove()
+                                    runOnUiThread {
+                                        binding.cardInfoClient.visibility = View.GONE
+                                    }
+                                    Handler(Looper.getMainLooper()).post {
+                                        Toast.makeText(
+                                            this@IniciTaxista,
+                                            "Viatge finalitzat",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                    handler.removeCallbacks(this)
+                                }
                                 else -> {
                                     // Seguir comprovant
                                     handler.postDelayed(this, 10000)
@@ -512,7 +536,10 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     }
 
     private fun drawRoute(gMap: GoogleMap, coordenades: List<List<Double>>) {
-        val polylineOptions = PolylineOptions()
+        poly?.remove()
+        val polylineOptions = PolylineOptions().color(Color.BLUE)        // Cambia el color si quieres
+            .width(10f)               // Grosor de la línea
+            .geodesic(true)
 
         coordenades.forEach {
             polylineOptions.add(LatLng(it[1], it[0]))
@@ -605,17 +632,16 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         var horas: Int? = null
         var minutos: Int? = null
         var segundos: Int? = null
-        val dec = DecimalFormat("#,###.00")
 
 
         var resposta = crud.getRutaCotxe(start, end)
         if (resposta != null) {
             resposta.features.map {
-                coordenadesViatgeClient = it.geometry.coordinates
+                coordenadesViatgeClient = it.geometry.coordinates as MutableList<List<Double>>?
                 horas = (it.properties.summary.duration.toInt() / 3600)
                 minutos = ((it.properties.summary.duration.toInt()-horas!!*3600)/60)
                 segundos = it.properties.summary.duration.toInt()-(horas!!*3600+minutos!!*60)
-                viatja?.distancia = dec.format(it.properties.summary.distance/1000).toFloat()
+                viatja?.distancia = (it.properties.summary.distance / 1000).toDouble()
                 it.properties.segments.map {
                     instruccio = it.steps
                 }
@@ -650,41 +676,39 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     private fun simulacioRutaArribarDesti() {
         poly?.remove()
         marcadorSimulacio?.remove()
+        binding.simulacio.visibility = View.GONE
 
-        val crud = CrudOpenRoute(this)
-        coordenadesViatgeClient?.forEach { coord ->
-
-          val start = coord.toString()
-
+        if (coordenadesViatgeClient.isNullOrEmpty()) {
+            Toast.makeText(this, "No hi ha coordenades de ruta", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        var horas: Int? = null
-        var minutos: Int? = null
-        var segundos: Int? = null
-        val dec = DecimalFormat("#,###.00")
+        // Asegúrate de trabajar con una lista mutable
+        val coordenades = coordenadesViatgeClient!!.toMutableList()
 
+        // Inicializa el marcador
+        val primerPunt = coordenades.first()
+        val latLngInicial = LatLng(primerPunt[1], primerPunt[0])
+        marcadorSimulacio = map?.addMarker(MarkerOptions().position(latLngInicial).title("Simulació"))
 
-        var resposta = crud.getRutaCotxe("", destFinal!!)
-        if (resposta != null) {
-            resposta.features.map {
-                coordenadesViatgeClient = it.geometry.coordinates
-                horas = (it.properties.summary.duration.toInt() / 3600)
-                minutos = ((it.properties.summary.duration.toInt()-horas!!*3600)/60)
-                segundos = it.properties.summary.duration.toInt()-(horas!!*3600+minutos!!*60)
-                viatja?.distancia = dec.format(it.properties.summary.distance/1000).toFloat()
-                it.properties.segments.map {
-                    instruccio = it.steps
+        CoroutineScope(Dispatchers.Default).launch {
+            while (coordenades.isNotEmpty()) {
+                val punt = coordenades.first()
+
+                withContext(Dispatchers.Main) {
+
+                    val posicio = LatLng(punt[1], punt[0])
+                    marcadorSimulacio?.position = posicio
+                    map?.animateCamera(CameraUpdateFactory.newLatLng(posicio))
+                    drawRoute(map!!, coordenades)
                 }
+                coordenades.removeAt(0)
+
+                delay(1000)
             }
-
-            drawRoute(map!!, coordenadesViatgeClient!!)
-            //simulacioRutaArribarDesti()
-
-        } else {
-            Log.d("resposta api", resposta.toString())
-            Toast.makeText(this, "No hi ha resposta", Toast.LENGTH_LONG)
         }
     }
+
 
     //Permissos necessari de la app
     fun comprovarPermisos() : Boolean{
