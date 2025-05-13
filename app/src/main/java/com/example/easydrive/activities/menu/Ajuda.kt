@@ -21,6 +21,7 @@ class Ajuda : AppCompatActivity() {
             insets
         }
 
+
         binding.imagebtnR1.setOnClickListener {
             finish()
         }

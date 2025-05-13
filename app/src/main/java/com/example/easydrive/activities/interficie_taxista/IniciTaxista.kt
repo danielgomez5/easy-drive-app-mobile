@@ -4,6 +4,9 @@ import android.Manifest
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -13,9 +16,12 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -52,6 +58,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
@@ -85,6 +92,8 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     var controlRecollirClients: Boolean = false
     var rutaDelViajeMostrada = false
+    var rutaAlDestiMostrada = false
+
 
     var ubiClient: LatLng?=null
     var destiClient : LatLng?=null
@@ -97,6 +106,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     var cotxesByTaxi : List<Cotxe>?=null
     var destFinal: String?=null
     var estat5 : Boolean =false
+    private var arribatAlDesti = false
 
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var checkReservesRunnable: Runnable
@@ -122,40 +132,39 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 )
                 if (distancia[0] < 50 && !rutaDelViajeMostrada) {
                     rutaDelViajeMostrada = true
-                    //reservaXEdit?.idEstat = 5
                     estat5 = true
                     trazarRutaViaje()
+
                 }
             }
 
         }
     }
 
-    /*private val locationCallbackArribadaDesti = object : LocationCallback() {
+    private val locationCallbackArribadaDesti = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
 
             val location = locationResult.lastLocation ?: return
-
             val conductorLat = location.latitude
             val conductorLng = location.longitude
 
-            // Verifica la distancia hasta el cliente
-            val distancia = FloatArray(1)
-            ubiClient?.let {
+            destiClient?.let {
+                val distancia = FloatArray(1)
                 Location.distanceBetween(
                     conductorLat, conductorLng,
                     it.latitude, it.longitude,
                     distancia
                 )
-                if (distancia[0] < 10 && !rutaDelViajeMostrada) {
-                    rutaDelViajeMostrada = true
-                    trazarRutaViaje()
+
+                if (distancia[0] < 30 && !rutaAlDestiMostrada && !arribatAlDesti) {
+                    arribatAlDesti = true  // Marca como "ya ha llegado"
+                    rutaAlDestiMostrada = true
+                    dialogArribadaDesti()
                 }
             }
-
         }
-    }*/
+    }
 
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
@@ -665,7 +674,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 Log.d("update cotxe", "incorrecte")
 
             drawRoute(map!!, coordenadesViatgeClient!!)
-            //simulacioRutaArribarDesti()
 
         } else {
             Log.d("resposta api", resposta.toString())
@@ -676,37 +684,95 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     private fun simulacioRutaArribarDesti() {
         poly?.remove()
         marcadorSimulacio?.remove()
-        binding.simulacio.visibility = View.GONE
 
         if (coordenadesViatgeClient.isNullOrEmpty()) {
             Toast.makeText(this, "No hi ha coordenades de ruta", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Asegúrate de trabajar con una lista mutable
         val coordenades = coordenadesViatgeClient!!.toMutableList()
+        val steps = instruccio ?: emptyList()
+        var indexPunt = 0
+        var indexStep = 0
 
-        // Inicializa el marcador
         val primerPunt = coordenades.first()
         val latLngInicial = LatLng(primerPunt[1], primerPunt[0])
-        marcadorSimulacio = map?.addMarker(MarkerOptions().position(latLngInicial).title("Simulació"))
+        val bitmap = getBitmapFromVectorDrawable(R.drawable.baseline_directions_car_24)
+
+        marcadorSimulacio = map?.addMarker(
+            MarkerOptions()
+                .position(latLngInicial)
+                .title("Simulació")
+                .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+        )
+
+
 
         CoroutineScope(Dispatchers.Default).launch {
             while (coordenades.isNotEmpty()) {
                 val punt = coordenades.first()
-
+                var duration : Double?=null
                 withContext(Dispatchers.Main) {
-
                     val posicio = LatLng(punt[1], punt[0])
+                    ubicacioActual = LatLng(punt[1], punt[0])
                     marcadorSimulacio?.position = posicio
                     map?.animateCamera(CameraUpdateFactory.newLatLng(posicio))
                     drawRoute(map!!, coordenades)
-                }
-                coordenades.removeAt(0)
 
+                    // Mostrar instrucción si estamos en un nuevo step
+                    if (indexStep < steps.size) {
+                        val currentStep = steps[indexStep]
+                        val (start, end) = currentStep.way_points
+
+                        duration = currentStep.duration
+                        if (indexPunt >= start && indexPunt <= end) {
+                            // Mostrar instrucción una vez
+                            mostrarInstruccio(currentStep.instruction, currentStep.name)
+                            indexStep++
+                        }
+                    }
+                }
+                duration!! *100
+                coordenades.removeAt(0)
+                indexPunt++
+                //delay((duration!! *100).toLong())
                 delay(1000)
             }
         }
+    }
+    private fun mostrarInstruccio(instruccio: String, carrer: String) {
+        binding.indicacions.visibility = View.VISIBLE
+        binding.txtInstruccio.text = instruccio
+        binding.txtCarrer.text = carrer
+    }
+
+    fun getBitmapFromVectorDrawable(@DrawableRes drawableId: Int): Bitmap {
+        val drawable = ContextCompat.getDrawable(this, drawableId) ?: return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
+    }
+
+
+    fun dialogArribadaDesti(){
+        val dialeg = Dialog(this)
+        dialeg.setContentView(R.layout.dialog_recollirclient)
+        dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        //dialeg.window?.setWindowAnimations(R.style.animation)
+        dialeg.setCancelable(false)
+        fusedLocationProviderClient.removeLocationUpdates(locationCallbackArribadaDesti)
+
+        dialeg.findViewById<ImageButton>(R.id.btnTanca).setOnClickListener {
+            dialeg.dismiss()
+        }
+
+        dialeg.show()
     }
 
 
