@@ -543,4 +543,18 @@ class CrudApiEasyDrive() : CoroutineScope {
         else
             return false
     }
+
+    fun delCotxe(id: String): Boolean{
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).delCotxe(id)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
 }

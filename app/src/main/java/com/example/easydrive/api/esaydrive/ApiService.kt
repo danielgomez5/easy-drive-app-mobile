@@ -142,4 +142,7 @@ interface ApiService {
 
     @DELETE("/api/reserva/{id}")
     suspend fun delReserva(@Path("id") id: String): Response<Missatge>
+
+    @DELETE("/api/cotxe/{id}")
+    suspend fun delCotxe(@Path("id") id: String): Response<Missatge>
 }
