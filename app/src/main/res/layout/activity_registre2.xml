@@ -244,11 +244,10 @@
                     android:layout_height="wrap_content"
                     android:text="Puja una foto"
                     app:icon="@drawable/baseline_photo_camera_24"
-                    android:textAllCaps="false"
                     android:paddingHorizontal="24dp"
                     android:paddingVertical="12dp"
-                    app:tint="?attr/colorOnPrimary"
-                    android:backgroundTint="?attr/colorPrimary" />
+                    android:textColor="?colorOnTertiary"
+                    android:backgroundTint="?attr/colorTertiary" />
 
                 <TextView
                     android:id="@+id/textInfoPujada"
@@ -256,7 +255,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:hint="Cap imatge seleccionada"
-                    android:textColor="@android:color/darker_gray"
+                    android:textColor="?colorPrimary"
                     android:textAlignment="center" />
 
             </LinearLayout>

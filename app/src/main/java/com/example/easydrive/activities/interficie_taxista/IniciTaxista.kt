@@ -31,6 +31,8 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_usuari.IniciUsuari
@@ -38,6 +40,8 @@ import com.example.easydrive.activities.menu.Ajuda
 import com.example.easydrive.activities.menu.Configuracio
 import com.example.easydrive.activities.menu.HistorialViatges
 import com.example.easydrive.activities.menu.Perfil
+import com.example.easydrive.adaptadors.AdaptadorEscollirCotxe
+import com.example.easydrive.adaptadors.AdaptadorRVDestins
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.api.geoapify.CrudGeo
 import com.example.easydrive.api.openroute.CrudOpenRoute
@@ -196,6 +200,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         editarHeader()
         afegirFoto()
         getDisponiblitat(crud)
+
 
         val intervalMillis: Long = 20000 // cada 10 segundos
 
@@ -410,13 +415,28 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                     return@setOnClickListener
                 }
                 cotxesByTaxi = crud.getAllCotxesByUsuari(user?.dni!!)
-                if (cotxesByTaxi?.size == 1){
+                Log.d("COTXES", "Total cotxes: ${cotxesByTaxi?.size}")
+                if (cotxesByTaxi?.size == 1) {
                     cotxe = cotxesByTaxi?.first()
-                } else{
-                    //metodo dialog para escoger el coche
+                    tracarRutaFinsClient(reservaXEdit!!, client!!)
+                    dialeg.dismiss()
+                } else {
+                    val dialegCotxe = Dialog(this)
+                    dialegCotxe.setContentView(R.layout.dialog_escollir_cotxe)
+                    dialegCotxe.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+                    val recyclerView = dialegCotxe.findViewById<RecyclerView>(R.id.recyclerViewCars)
+                    recyclerView.layoutManager = LinearLayoutManager(this)
+                    recyclerView.adapter = AdaptadorEscollirCotxe(cotxesByTaxi!!) { cotxeSeleccionat ->
+                        cotxe = cotxeSeleccionat
+                        dialegCotxe.dismiss()
+
+                        tracarRutaFinsClient(reservaXEdit!!, client!!)
+                        dialeg.dismiss()
+                    }
+
+                    dialegCotxe.show()
                 }
-                tracarRutaFinsClient(reservaXEdit!!, client!!)
-                dialeg.dismiss()
             } else{
                 Log.d("ya lo han confirmado", "pues eso")
             }

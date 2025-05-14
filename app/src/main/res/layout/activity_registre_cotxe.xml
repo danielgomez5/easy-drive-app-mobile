@@ -186,7 +186,8 @@
                         android:layout_height="35dp"
                         android:id="@+id/btnPujar1RC"
                         android:layout_gravity="end"
-                        app:tint="?attr/colorOnPrimary"
+                        android:backgroundTint="?colorTertiary"
+                        app:tint="?attr/colorOnTertiary"
                         android:background="@drawable/roundcorner"
                         />
                 </FrameLayout>
@@ -217,7 +218,8 @@
                         android:layout_height="35dp"
                         android:layout_gravity="end"
                         android:id="@+id/btnPujar2RC"
-                        app:tint="?attr/colorOnPrimary"
+                        android:backgroundTint="?colorTertiary"
+                        app:tint="?attr/colorOnTertiary"
                         android:background="@drawable/roundcorner" />
                 </FrameLayout>
                 <TextView
