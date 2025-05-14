@@ -10,8 +10,9 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.easydrive.R
 import com.example.easydrive.dades.Cotxe
+import com.example.easydrive.dades.cotxeSeleccionat
 
-class AdaptadorEscollirCotxe (val llista: List<Cotxe>, private val onCotxeSeleccionat: (Cotxe) -> Unit): RecyclerView.Adapter<AdaptadorEscollirCotxe.ViewHolder>(){
+class AdaptadorEscollirCotxe (val llista: List<Cotxe>): RecyclerView.Adapter<AdaptadorEscollirCotxe.ViewHolder>(){
     private var selectedPosition = -1
     class ViewHolder(val vista:View): RecyclerView.ViewHolder(vista) {
         val titol = vista.findViewById<TextView>(R.id.textTitol)
@@ -48,8 +49,8 @@ class AdaptadorEscollirCotxe (val llista: List<Cotxe>, private val onCotxeSelecc
 
             notifyItemChanged(anterior)
             notifyItemChanged(selectedPosition)
-            onCotxeSeleccionat(item)
-        }
 
+            cotxeSeleccionat = item
+        }
     }
 }

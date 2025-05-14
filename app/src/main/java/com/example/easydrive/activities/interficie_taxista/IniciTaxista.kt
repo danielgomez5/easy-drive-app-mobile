@@ -51,6 +51,7 @@ import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.Step
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.Viatja
+import com.example.easydrive.dades.cotxeSeleccionat
 import com.example.easydrive.dades.user
 import com.example.easydrive.databinding.ActivityIniciTaxistaBinding
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -425,7 +426,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                     return@setOnClickListener
                 }
                 cotxesByTaxi = crud.getAllCotxesByUsuari(user?.dni!!)
-                Log.d("COTXES", "Total cotxes: ${cotxesByTaxi?.size}")
                 if (cotxesByTaxi?.size == 1) {
                     cotxe = cotxesByTaxi?.first()
                     tracarRutaFinsClient(reservaXEdit!!, client!!)
@@ -436,13 +436,22 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                     dialegCotxe.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
                     val recyclerView = dialegCotxe.findViewById<RecyclerView>(R.id.recyclerViewCars)
-                    recyclerView.layoutManager = LinearLayoutManager(this)
-                    recyclerView.adapter = AdaptadorEscollirCotxe(cotxesByTaxi!!) { cotxeSeleccionat ->
-                        cotxe = cotxeSeleccionat
-                        dialegCotxe.dismiss()
+                    val btnAcceptarCotxe = dialegCotxe.findViewById<MaterialButton>(R.id.btnAcceptarCotxe)
 
-                        tracarRutaFinsClient(reservaXEdit!!, client!!)
-                        dialeg.dismiss()
+                    recyclerView.layoutManager = LinearLayoutManager(this)
+                    recyclerView.adapter = AdaptadorEscollirCotxe(cotxesByTaxi!!)
+
+
+                    btnAcceptarCotxe.setOnClickListener {
+                        Log.d("cotxeSele", "Total cotxes: ${cotxeSeleccionat.toString()}")
+                        if (cotxeSeleccionat != null) {
+                            cotxe = cotxeSeleccionat
+                            tracarRutaFinsClient(reservaXEdit!!, client!!)
+                            dialegCotxe.dismiss()
+                            dialeg.dismiss()
+                        } else {
+                            Toast.makeText(this, "Has de seleccionar un cotxe", Toast.LENGTH_SHORT).show()
+                        }
                     }
 
                     dialegCotxe.show()
