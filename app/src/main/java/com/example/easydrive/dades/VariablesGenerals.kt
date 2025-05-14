@@ -14,3 +14,6 @@ var reservaAcceptada: Boolean?=null
 
 //Viatge
 var viatja : Viatja?=null
+
+//coche
+var cotxeSeleccionat : Cotxe?=null
