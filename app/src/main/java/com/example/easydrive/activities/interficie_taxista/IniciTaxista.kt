@@ -79,6 +79,8 @@ import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.Double
+import kotlin.collections.List
 
 class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnMapReadyCallback{
     private lateinit var binding: ActivityIniciTaxistaBinding
@@ -263,10 +265,12 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         }
 
-
+        //Mapa
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapa) as SupportMapFragment
         mapFragment.getMapAsync(this)
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+
+        //Menu Lateral
         actionBarDrawerToggle = ActionBarDrawerToggle(this, binding.main, R.string.obert, R.string.tancat)
         binding.main.addDrawerListener(actionBarDrawerToggle)
         binding.navigator.setNavigationItemSelectedListener(this)
@@ -297,11 +301,17 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             return
         }
 
-        map?.isMyLocationEnabled = true // Este muestra el icono azul de ubicación
+        map?.isMyLocationEnabled = false // Este muestra el icono azul de ubicación
 
         fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
                 ubicacioActual = LatLng(location.latitude, location.longitude)
+                marcadorSimulacio = map?.addMarker(
+                    MarkerOptions()
+                        .position(ubicacioActual!!)
+                        .title("Simulació Ubi actual")
+                        .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap()))
+                )
                 map?.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(ubicacioActual!!, 15f),
                     2000,
@@ -593,7 +603,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             fastestInterval = 5000
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        //fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
 
         val start = ubicacioActual?.longitude.toString() + "," + ubicacioActual?.latitude.toString()
         val end = ubiClient?.longitude.toString() + "," + ubiClient?.latitude.toString()
@@ -601,16 +611,14 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         Log.d("start", start.toString())
         Log.d("end", end.toString())
 
-        var coordenada: List<List<Double>>? = null
         var horas: Int? = null
         var minutos: Int? = null
         var segundos: Int? = null
 
-
         var resposta = crud.getRutaCotxe(start, end)
         if (resposta != null) {
             resposta.features.map {
-                coordenada = it.geometry.coordinates
+                coordenadesViatgeClient = it.geometry.coordinates as MutableList<List<Double>>?
                 horas = (it.properties.summary.duration.toInt() / 3600)
                 minutos = ((it.properties.summary.duration.toInt()-horas!!*3600)/60)
                 segundos = it.properties.summary.duration.toInt()-(horas!!*3600+minutos!!*60)
@@ -618,10 +626,76 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 binding.nomClient.setText(client.nom + " " + client.cognom)
             }
 
-            drawRoute(map!!, coordenada!!)
+            drawRoute(map!!, coordenadesViatgeClient!!)
+            simularRuta()
+            //simulacioRutaArribarDesti()
         } else {
             Log.d("resposta api", resposta.toString())
             Toast.makeText(this, "No hi ha resposta", Toast.LENGTH_LONG)
+        }
+    }
+
+    fun simularRuta() {
+        poly?.remove()
+        marcadorSimulacio?.remove()
+
+        if (coordenadesViatgeClient.isNullOrEmpty()) {
+            Toast.makeText(this, "No hi ha coordenades de ruta", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val coordenades = coordenadesViatgeClient!!.toMutableList()
+
+        val handler = Handler(Looper.getMainLooper())
+        var indexPunt = 0
+        var indexStep = 0
+
+        val runnable = object : Runnable {
+            override fun run() {
+                if (coordenades.isEmpty()) return
+
+                val punt = coordenades.removeAt(0)
+                val posicio = LatLng(punt[1], punt[0])
+                ubicacioActual = posicio
+
+                if (marcadorSimulacio == null) {
+                    marcadorSimulacio = map?.addMarker(
+                        MarkerOptions()
+                            .position(posicio)
+                            .title("Simulació")
+                            .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap()))
+                    )
+                } else {
+                    marcadorSimulacio?.position = posicio
+                }
+
+                map?.animateCamera(CameraUpdateFactory.newLatLng(posicio))
+                drawRoute(map!!, coordenades)
+
+                verificarDistanciaDestiFinal(posicio)
+
+                indexPunt++
+                handler.postDelayed(this, 1000) // esperar 1 segundo entre puntos
+            }
+        }
+
+        handler.post(runnable)
+    }
+
+
+    fun verificarDistancia(posicionActual: LatLng) {
+        ubiClient?.let {
+            val distancia = FloatArray(1)
+            Location.distanceBetween(
+                posicionActual.latitude, posicionActual.longitude,
+                it.latitude, it.longitude,
+                distancia
+            )
+            if (distancia[0] < 50 && !rutaDelViajeMostrada) {
+                rutaDelViajeMostrada = true
+                estat5 = true
+                trazarRutaViaje() // Aquí ejecutas lo que toca al llegar
+            }
         }
     }
 
@@ -717,15 +791,13 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         val primerPunt = coordenades.first()
         val latLngInicial = LatLng(primerPunt[1], primerPunt[0])
-        val bitmap = getBitmapFromVectorDrawable(R.drawable.baseline_directions_car_24)
 
         marcadorSimulacio = map?.addMarker(
             MarkerOptions()
                 .position(latLngInicial)
                 .title("Simulació")
-                .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap()))
         )
-
 
 
         CoroutineScope(Dispatchers.Default).launch {
@@ -752,6 +824,9 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                         }
                     }
                 }
+
+                    verificarDistanciaDestiFinal(ubicacioActual!!)
+
                 duration!! *100
                 coordenades.removeAt(0)
                 indexPunt++
@@ -764,6 +839,27 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         binding.indicacions.visibility = View.VISIBLE
         binding.txtInstruccio.text = instruccio
         binding.txtCarrer.text = carrer
+    }
+
+    fun verificarDistanciaDestiFinal(posicionActual: LatLng) {
+        destiClient?.let {
+            val distancia = FloatArray(1)
+            Location.distanceBetween(
+                posicionActual.latitude, posicionActual.longitude,
+                it.latitude, it.longitude,
+                distancia
+            )
+
+            if (distancia[0] < 30 && !rutaAlDestiMostrada && !arribatAlDesti) {
+                arribatAlDesti = true  // Marca como "ya ha llegado"
+                rutaAlDestiMostrada = true
+                dialogArribadaDesti()
+            }
+        }
+    }
+
+    fun returnBitmap(): Bitmap{
+        return getBitmapFromVectorDrawable(R.drawable.baseline_directions_car_24)
     }
 
     fun getBitmapFromVectorDrawable(@DrawableRes drawableId: Int): Bitmap {
@@ -779,7 +875,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         return bitmap
     }
 
-
     fun dialogArribadaDesti(){
         val dialeg = Dialog(this)
         dialeg.setContentView(R.layout.dialog_recollirclient)
@@ -794,7 +889,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         dialeg.show()
     }
-
 
     //Permissos necessari de la app
     fun comprovarPermisos() : Boolean{
