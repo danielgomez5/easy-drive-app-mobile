@@ -120,60 +120,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     private var isRequestInProgress = false
 
-    private val locationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult) {
-            super.onLocationResult(locationResult)
-
-            val location = locationResult.lastLocation ?: return
-
-            val conductorLat = location.latitude
-            val conductorLng = location.longitude
-
-            // Verifica la distancia hasta el cliente
-            val distancia = FloatArray(1)
-            ubiClient?.let {
-                Location.distanceBetween(
-                    conductorLat, conductorLng,
-                    it.latitude, it.longitude,
-                    distancia
-                )
-                if (distancia[0] < 50 && !rutaDelViajeMostrada) {
-                    rutaDelViajeMostrada = true
-                    estat5 = true
-                    trazarRutaViaje()
-
-                }
-            }
-
-        }
-    }
-
-    private val locationCallbackArribadaDesti = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult) {
-            super.onLocationResult(locationResult)
-
-            val location = locationResult.lastLocation ?: return
-            val conductorLat = location.latitude
-            val conductorLng = location.longitude
-
-            destiClient?.let {
-                val distancia = FloatArray(1)
-                Location.distanceBetween(
-                    conductorLat, conductorLng,
-                    it.latitude, it.longitude,
-                    distancia
-                )
-
-                if (distancia[0] < 30 && !rutaAlDestiMostrada && !arribatAlDesti) {
-                    arribatAlDesti = true  // Marca como "ya ha llegado"
-                    rutaAlDestiMostrada = true
-                    dialogArribadaDesti()
-                }
-            }
-        }
-    }
-
-
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -642,8 +588,8 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     }
 
     fun simularRuta() {
-        poly?.remove()
-        marcadorSimulacio?.remove()
+        //poly?.remove()
+        //marcadorSimulacio?.remove()
 
         if (coordenadesViatgeClient.isNullOrEmpty()) {
             Toast.makeText(this, "No hi ha coordenades de ruta", Toast.LENGTH_SHORT).show()
@@ -654,12 +600,11 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         val handler = Handler(Looper.getMainLooper())
         var indexPunt = 0
-        var indexStep = 0
 
         val runnable = object : Runnable {
             override fun run() {
                 if (coordenades.isEmpty()) return
-
+                drawRoute(map!!, coordenades)
                 val punt = coordenades.removeAt(0)
                 val posicio = LatLng(punt[1], punt[0])
                 ubicacioActual = posicio
@@ -676,9 +621,8 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 }
 
                 map?.animateCamera(CameraUpdateFactory.newLatLng(posicio))
-                drawRoute(map!!, coordenades)
 
-                verificarDistanciaDestiFinal(posicio)
+                verificarDistancia(posicio)
 
                 indexPunt++
                 handler.postDelayed(this, 1000) // esperar 1 segundo entre puntos
@@ -697,7 +641,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 it.latitude, it.longitude,
                 distancia
             )
-            if (distancia[0] < 50 && !rutaDelViajeMostrada) {
+            if (distancia[0] < 30 && !rutaDelViajeMostrada) {
                 rutaDelViajeMostrada = true
                 estat5 = true
                 trazarRutaViaje() // Aquí ejecutas lo que toca al llegar
@@ -782,7 +726,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     }
 
     private fun simulacioRutaArribarDesti() {
-        poly?.remove()
         marcadorSimulacio?.remove()
 
         if (coordenadesViatgeClient.isNullOrEmpty()) {
@@ -804,7 +747,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 .title("Simulació")
                 .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap()))
         )
-
+        var final = false
 
         CoroutineScope(Dispatchers.Default).launch {
             while (coordenades.isNotEmpty()) {
@@ -828,10 +771,14 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                             mostrarInstruccio(currentStep.instruction, currentStep.name)
                             indexStep++
                         }
+                        if (currentStep.instruction.contains("Arrive")){
+                            final = true
+                        }
                     }
+                    //verificarDistanciaDestiFinal(ubicacioActual!!)
                 }
 
-                    verificarDistanciaDestiFinal(ubicacioActual!!)
+                //verificarDistanciaDestiFinal(ubicacioActual!!)
 
                 duration!! *100
                 coordenades.removeAt(0)
@@ -839,6 +786,20 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 //delay((duration!! *100).toLong())
                 delay(1000)
             }
+            withContext(Dispatchers.Main) {
+                if (final) {
+                    Log.d("SIMULACIO", "Arribat al destí, obrint diàleg")
+                    verificarDistanciaDestiFinal(ubicacioActual!!)
+                } else {
+                    Log.d("SIMULACIO", "No s'ha detectat pas final")
+                }
+            }
+        }
+
+
+        if (final){
+            //dialogArribadaDesti()
+            verificarDistanciaDestiFinal(ubicacioActual!!)
         }
     }
     private fun mostrarInstruccio(instruccio: String, carrer: String) {
@@ -856,10 +817,12 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 distancia
             )
 
-            if (distancia[0] < 30 && !rutaAlDestiMostrada && !arribatAlDesti) {
+            if (distancia[0] < 30  && !arribatAlDesti) {
                 arribatAlDesti = true  // Marca como "ya ha llegado"
-                rutaAlDestiMostrada = true
                 dialogArribadaDesti()
+                /*CoroutineScope(Dispatchers.Main).launch {
+                    dialogArribadaDesti()
+                }*/
             }
         }
     }
@@ -882,14 +845,15 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     }
 
     fun dialogArribadaDesti(){
-        val dialeg = Dialog(this)
-        dialeg.setContentView(R.layout.dialog_recollirclient)
+        val dialeg = Dialog(this@IniciTaxista)
+        dialeg.setContentView(R.layout.dialeg_ruta_finalitzada_taxi)
         dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         //dialeg.window?.setWindowAnimations(R.style.animation)
         dialeg.setCancelable(false)
-        fusedLocationProviderClient.removeLocationUpdates(locationCallbackArribadaDesti)
 
         dialeg.findViewById<ImageButton>(R.id.btnTanca).setOnClickListener {
+            reservaXEdit?.idEstat = 3
+            //poner un crud de updateReserva
             dialeg.dismiss()
         }
 
