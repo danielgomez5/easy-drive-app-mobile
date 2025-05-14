@@ -264,11 +264,11 @@ class CrudApiEasyDrive() : CoroutineScope {
             return null
     }
 
-    fun getAllViatgesByUsuari(id:String): List<Viatja>?{
-        var resposta: Response<List<Viatja>>? = null
+    fun getAllViatgesByUsuari(id_usuari:String): List<Viatja>?{
+        var resposta: Response<List<Viatja>?>? = null
         runBlocking {
             val cor = launch {
-                resposta = getRetrofit().create(ApiService::class.java).getAllViatgesByUser(id)
+                resposta = getRetrofit().create(ApiService::class.java).getAllViatgesByUser(id_usuari)
             }
             cor.join()
         }

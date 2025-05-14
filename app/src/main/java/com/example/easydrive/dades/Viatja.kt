@@ -10,4 +10,5 @@ data class Viatja(
     var idTaxista: String?,
     var idReserva: Int?,
     var idCotxe: String?,
+    var idReservaNavigation: Reserva?
 )

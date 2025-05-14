@@ -141,9 +141,6 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
 
         item.setChecked(true)
         when(item.itemId){
-            R.id.menuHome->{
-                startActivity(Intent(this, IniciUsuari::class.java))
-            }
             R.id.menuPerfil -> {
                 startActivity(Intent(this, Perfil::class.java))
             }

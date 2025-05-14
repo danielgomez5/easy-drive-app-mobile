@@ -1,11 +1,20 @@
 package com.example.easydrive.activities.menu
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.easydrive.R
+import com.example.easydrive.activities.interficie_usuari.IniciUsuari
+import com.example.easydrive.adaptadors.AdaptadorViatges
+import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
+import com.example.easydrive.dades.Viatja
+import com.example.easydrive.dades.user
 import com.example.easydrive.databinding.ActivityHistorialViatgesBinding
 
 class HistorialViatges : AppCompatActivity() {
@@ -20,5 +29,44 @@ class HistorialViatges : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        binding.imagebtnR1.setOnClickListener {
+            finish()
+        }
+
+        carregarViatges()
+    }
+
+    private fun carregarViatges() {
+        val crud = CrudApiEasyDrive()
+
+        try {
+            val viatges = crud.getAllViatgesByUsuari(user?.dni!!)
+            if (!viatges.isNullOrEmpty()) {
+                mostrarViatges(viatges)
+            } else {
+                mostrarEmptyState()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            mostrarEmptyState()
+        }
+    }
+
+    private fun mostrarEmptyState() {
+        binding.llEmptyState.visibility = View.VISIBLE
+        binding.rcvViatgesPendents.visibility = View.GONE
+
+        binding.makeAbook.setOnClickListener {
+            val intent = Intent(this, IniciUsuari::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun mostrarViatges(viatges: List<Viatja>) {
+        binding.rcvViatgesPendents.adapter = AdaptadorViatges(viatges)
+        binding.rcvViatgesPendents.layoutManager = LinearLayoutManager(this@HistorialViatges)
+        binding.rcvViatgesPendents.visibility = View.VISIBLE
+
+        binding.llEmptyState.visibility = View.GONE
     }
 }

@@ -122,7 +122,7 @@ interface ApiService {
     suspend fun getReservesPendents() : Response<MutableList<Reserva>>
 
     @GET("/api/viatges-usuari/{id_usuari}")
-    suspend fun getAllViatgesByUser(@Path("id_usuari") id_usuari:String): Response<List<Viatja>> // es si les reserves estan confirmades
+    suspend fun getAllViatgesByUser(@Path("id_usuari") id_usuari:String): Response<List<Viatja>?> // es si les reserves estan confirmades
 
     @GET("/api/usuari/{id}")
     suspend fun getUserById(@Path("id") id: String): Response<Usuari>

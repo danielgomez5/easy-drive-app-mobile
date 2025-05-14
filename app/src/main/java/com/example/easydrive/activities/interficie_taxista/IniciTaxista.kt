@@ -186,7 +186,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             insets
         }
         val crud = CrudApiEasyDrive()
-        viatja = Viatja(null,null,null,null,null,null,null,null,null)
+        viatja = Viatja(null,null,null,null,null,null,null,null,null, null)
         if (user == null){
             user = intent.getSerializableExtra("user") as? Usuari
             editarHeader()
@@ -360,9 +360,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         item.setChecked(true)
         when(item.itemId){
-            R.id.menuHome->{
-                startActivity(Intent(this, IniciUsuari::class.java))
-            }
             R.id.menuPerfil -> {
                 startActivity(Intent(this, Perfil::class.java))
             }

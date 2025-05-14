@@ -53,6 +53,7 @@ class Perfil : AppCompatActivity() {
         enableEditMode()
         binding.tvBenvinguda.setText("El teu perfil, ${user?.nom}!")
 
+        binding.tvDni.setText("DNI: ${user?.dni}")
         binding.tieNom.setText(user?.nom)
         binding.tieCognom.setText(user?.cognom)
         binding.tieDataNaix.setText(user?.dataNaixement)
