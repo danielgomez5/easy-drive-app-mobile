@@ -67,6 +67,21 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="16dp"/>
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabAddCar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="Afegir cotxe"
+            android:layout_margin="20dp"
+            app:srcCompat="@drawable/car_plus"
+            app:backgroundTint="?attr/colorPrimary"
+            app:tint="?attr/colorOnPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:elevation="6dp"
+            app:shapeAppearanceOverlay="@style/Widget.MaterialComponents.FloatingActionButton"/>
+
+
         <LinearLayout
             android:id="@+id/ll_emptyState"
             android:layout_width="match_parent"

@@ -30,7 +30,7 @@
         android:layout_marginTop="20dp"
         android:textSize="36sp"
         android:layout_marginHorizontal="20dp"
-        android:text="Informació cotxe"
+        android:text="Registra el teu cotxe!"
         android:textColor="?colorSecondary"
         />
 
@@ -176,6 +176,7 @@
                     android:layout_height="wrap_content"
                     >
                     <TextView
+                        android:id="@+id/tvFotoCarnet"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Foto carnet:"

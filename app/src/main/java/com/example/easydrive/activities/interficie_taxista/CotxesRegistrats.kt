@@ -1,5 +1,7 @@
 package com.example.easydrive.activities.interficie_taxista
 
+import android.app.Activity
+import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
@@ -15,6 +17,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.easydrive.R
+import com.example.easydrive.activities.registre.RegistreCotxe
 import com.example.easydrive.adaptadors.AdaptadorRVCotxes
 import com.example.easydrive.adaptadors.AdapterViatgesPendents
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
@@ -31,6 +34,7 @@ import java.util.Locale
 
 class CotxesRegistrats : AppCompatActivity() {
     private var selectedCotxe: Cotxe? = null
+    private lateinit var registreCotxeLauncher: ActivityResultLauncher<Intent>
     private lateinit var binding: ActivityCotxesRegistratsBinding
     private lateinit var openDocumentLauncher: ActivityResultLauncher<Array<String>>
     private var fileCallback: ((File?) -> Unit)? = null
@@ -50,6 +54,13 @@ class CotxesRegistrats : AppCompatActivity() {
             }
         }
 
+        registreCotxeLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == RESULT_OK) {
+                carregaCotxes()
+            }
+        }
 
         enableEdgeToEdge()
         binding = ActivityCotxesRegistratsBinding.inflate(layoutInflater)
@@ -60,7 +71,21 @@ class CotxesRegistrats : AppCompatActivity() {
             insets
         }
 
+
+
         carregaCotxes()
+
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
+
+        binding.fabAddCar.setOnClickListener {
+            val intent = Intent(this, RegistreCotxe::class.java)
+            intent.putExtra("obert_des_de", "cotxes_registrats")
+            intent.putExtra("dni", user?.dni)
+            registreCotxeLauncher.launch(intent)
+        }
+
 
     }
 

@@ -38,9 +38,16 @@ class HistorialViatges : AppCompatActivity() {
 
     private fun carregarViatges() {
         val crud = CrudApiEasyDrive()
+        var viatges : List<Viatja>? = null
+
 
         try {
-            val viatges = crud.getAllViatgesByUsuari(user?.dni!!)
+            if (user?.rol == false){
+                viatges = crud.getAllViatgesByUsuari(user?.dni!!)
+            }else{
+                viatges = crud.getAllViatgesByTaxista(user?.dni!!)
+            }
+
             if (!viatges.isNullOrEmpty()) {
                 mostrarViatges(viatges)
             } else {
@@ -56,10 +63,17 @@ class HistorialViatges : AppCompatActivity() {
         binding.llEmptyState.visibility = View.VISIBLE
         binding.rcvViatgesPendents.visibility = View.GONE
 
-        binding.makeAbook.setOnClickListener {
-            val intent = Intent(this, IniciUsuari::class.java)
-            startActivity(intent)
+
+        if (user?.rol == false){
+            binding.makeAbook.visibility = View.VISIBLE
+            binding.makeAbook.setOnClickListener {
+                val intent = Intent(this, IniciUsuari::class.java)
+                startActivity(intent)
+            }
+        }else{
+            binding.makeAbook.visibility = View.GONE
         }
+
     }
 
     private fun mostrarViatges(viatges: List<Viatja>) {

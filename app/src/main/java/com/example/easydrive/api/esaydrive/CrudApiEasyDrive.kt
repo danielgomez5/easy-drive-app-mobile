@@ -279,6 +279,21 @@ class CrudApiEasyDrive() : CoroutineScope {
 
     }
 
+    fun getAllViatgesByTaxista(id_usuari:String): List<Viatja>?{
+        var resposta: Response<List<Viatja>?>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getAllViatgesByTaxista(id_usuari)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return resposta!!.body()
+        else
+            return null
+
+    }
+
     fun getUsuariById(id: String): Usuari?{
         var resposta: Response<Usuari>? = null
         runBlocking {

@@ -43,9 +43,14 @@ class AdaptadorViatges(val llista: List<Viatja>): RecyclerView.Adapter<Adaptador
         val entrada = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val sortida = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
-        val dataFormatejada = LocalDate.parse(dataViatge, entrada).format(sortida)
+        val dataFormatejada = try {
+            LocalDate.parse(dataViatge, entrada).format(sortida)
+        } catch (e: Exception) {
+            "Data no disponible"
+        }
 
         holder.tvData.text = dataFormatejada
+
 
         holder.tvDistanciaDurada.text = "Distància: ${viatge.distancia} km · Durada: ${viatge.durada} min"
         holder.tvValoracio.text = "⭐ ${viatge.valoracio ?: "-"}"

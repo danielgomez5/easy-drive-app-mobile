@@ -1,6 +1,7 @@
 package com.example.easydrive.activities.interficie_taxista
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -924,5 +925,9 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
     }
 }

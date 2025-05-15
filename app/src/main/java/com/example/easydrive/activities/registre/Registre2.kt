@@ -62,7 +62,7 @@ class Registre2 : AppCompatActivity() {
         carregaDisponibilitat()
 
         binding.imagebtnR1.setOnClickListener {
-            startActivity(Intent(this, Registre1::class.java))
+            finish()
         }
 
         binding.tieDataNeixR2.setOnClickListener {

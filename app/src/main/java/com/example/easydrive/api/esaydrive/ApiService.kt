@@ -124,6 +124,9 @@ interface ApiService {
     @GET("/api/viatges-usuari/{id_usuari}")
     suspend fun getAllViatgesByUser(@Path("id_usuari") id_usuari:String): Response<List<Viatja>?> // es si les reserves estan confirmades
 
+    @GET("/api/viatges-taxista/{id_usuari}")
+    suspend fun getAllViatgesByTaxista(@Path("id_usuari") id_usuari:String): Response<List<Viatja>?>
+
     @GET("/api/usuari/{id}")
     suspend fun getUserById(@Path("id") id: String): Response<Usuari>
 

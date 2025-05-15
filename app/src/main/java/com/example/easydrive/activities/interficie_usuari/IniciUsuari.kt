@@ -1,6 +1,7 @@
 package com.example.easydrive.activities.interficie_usuari
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -199,6 +200,10 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
 
         editarHeader()
         afegirFoto()
+    }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
     }
 
 }

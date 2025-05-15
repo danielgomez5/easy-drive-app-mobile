@@ -53,12 +53,7 @@ class Registre3 : AppCompatActivity() {
         Log.d("cotxe r3", cotxe.toString())
 
         binding.imagebtnR1.setOnClickListener {
-            if (usuari?.rol == true) {
-                startActivity(Intent(this, RegistreCotxe::class.java))
-            } else {
-                startActivity(Intent(this, Registre2::class.java))
-            }
-
+            finish()
         }
 
         binding.crearCompte.setOnClickListener {

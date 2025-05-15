@@ -32,7 +32,7 @@ class Registre1 : AppCompatActivity() {
         }
 
         binding.imagebtnR1.setOnClickListener {
-            startActivity(Intent(this,MainActivity::class.java))
+            finish()
         }
 
         usuari = Usuari(null, null,null,null,null,null,null,null,null,null,null,null,null,null)

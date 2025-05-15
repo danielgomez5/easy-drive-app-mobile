@@ -1,5 +1,6 @@
 package com.example.easydrive.activities.registre
 
+import android.app.Activity
 import android.content.Intent
 import android.database.Cursor
 import android.graphics.Bitmap
@@ -20,8 +21,10 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.easydrive.R
 import com.example.easydrive.activities.MainActivity
+import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.Usuari
+import com.example.easydrive.dades.UsuariCotxeDTO
 import com.example.easydrive.databinding.ActivityRegistreCotxeBinding
 import java.io.File
 import java.io.FileOutputStream
@@ -54,6 +57,13 @@ class RegistreCotxe : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityRegistreCotxeBinding.inflate(layoutInflater)
+        val obertDesDe = intent.getStringExtra("obert_des_de")
+        val esDesDeCotxes = obertDesDe == "cotxes_registrats"
+
+        if (esDesDeCotxes) {
+            binding.btnSeguent.text = "Registra cotxe"
+        }
+
         setContentView(binding.root)
         textDocAdjuntat = findViewById(R.id.textDocAdjuntat)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -62,13 +72,16 @@ class RegistreCotxe : AppCompatActivity() {
             insets
         }
         usuari = intent.getSerializableExtra("usuari") as? Usuari
+        val dniExtra = intent.getStringExtra("dni")
         rutaPerfil = intent.getStringExtra("ruta")
 
         carregarComboboxes()
 
+
         binding.imagebtnR1.setOnClickListener {
-            startActivity(Intent(this, Registre2::class.java))
+           finish()
         }
+
         cotxe = Cotxe(null,null,null,null,null,null,null,null,null, null)
         binding.btnSeguent.setOnClickListener {
             val marca = binding.tieMarcaRC.text.toString()
@@ -116,10 +129,11 @@ class RegistreCotxe : AppCompatActivity() {
                 isValid = false
             } else binding.til6CardRC.error = null
 
-            if (usuari?.fotoCarnet.isNullOrBlank()) {
+            if (!esDesDeCotxes && usuari?.fotoCarnet.isNullOrBlank()) {
                 Toast.makeText(this, "Has de pujar una foto del carnet", Toast.LENGTH_LONG).show()
                 isValid = false
             }
+
 
             if (cotxe?.fotoFitxaTecnica.isNullOrBlank()) {
                 Toast.makeText(this, "Has de pujar la documentació tècnica", Toast.LENGTH_LONG).show()
@@ -134,34 +148,63 @@ class RegistreCotxe : AppCompatActivity() {
                 cotxe?.tipus = tipus
                 cotxe?.color = color
                 cotxe?.capacitat = capacitat.toInt()
-                intentRegistre3()
-            }
-        }
 
-
-        binding.btnPujar1RC.setOnClickListener {
-            val galeria = Intent(
-                Intent.ACTION_PICK,
-                MediaStore.Images.Media.INTERNAL_CONTENT_URI
-            ).also { imatge ->
-                imatge.type = "image/*"
-                val mimeTypes = arrayOf("image/jpeg", "image/png")
-                imatge.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-            }
-            resultLauncher.launch(galeria) // Lanza el intent usando el resultLauncher registrado
-        }
-        resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK){
-                val imageUri = result.data?.data
-                usuari?.fotoCarnet = imageUri?.let { comprimirImagen(it) }
-
-                if (imageUri != null) {
-                    binding.imagePreview1.setImageURI(imageUri)
-                    binding.imagePreview1.visibility = View.VISIBLE
+                if (esDesDeCotxes) {
+                    val crud = CrudApiEasyDrive()
+                    if (crud.insertCotxe(cotxe!!)) {
+                        if (crud.updateCotxeFitxaTecnica(cotxe?.matricula.toString(), cotxe?.fotoFitxaTecnica.toString())) {
+                            val relacio = UsuariCotxeDTO(
+                                dniUsuari  = dniExtra ?: "",
+                                matriculaCotxe = cotxe?.matricula ?: ""
+                            )
+                            Log.d("relacio", relacio.toString())
+                            if(crud.insertRelacioCotxeUsuari(relacio)){
+                                Toast.makeText(this, "Cotxe registrat correctament", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            Toast.makeText(this, "Hi ha hagut un problema insertant el cotxe...", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    setResult(RESULT_OK)
+                    finish()
+                } else {
+                    intentRegistre3()
                 }
-                Log.d("ruta comprimida", usuari?.fotoCarnet.toString())
             }
         }
+
+
+        if (!esDesDeCotxes) {
+            binding.btnPujar1RC.setOnClickListener {
+                val galeria = Intent(
+                    Intent.ACTION_PICK,
+                    MediaStore.Images.Media.INTERNAL_CONTENT_URI
+                ).also { imatge ->
+                    imatge.type = "image/*"
+                    val mimeTypes = arrayOf("image/jpeg", "image/png")
+                    imatge.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+                }
+                resultLauncher.launch(galeria)
+            }
+
+            resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK){
+                    val imageUri = result.data?.data
+                    usuari?.fotoCarnet = imageUri?.let { comprimirImagen(it) }
+
+                    if (imageUri != null) {
+                        binding.imagePreview1.setImageURI(imageUri)
+                        binding.imagePreview1.visibility = View.VISIBLE
+                    }
+                    Log.d("ruta comprimida", usuari?.fotoCarnet.toString())
+                }
+            }
+        } else {
+            binding.tvFotoCarnet.visibility = View.GONE
+            binding.btnPujar1RC.visibility = View.GONE
+            binding.imagePreview1.visibility = View.GONE
+        }
+
 
 
         binding.btnPujar2RC.setOnClickListener {
