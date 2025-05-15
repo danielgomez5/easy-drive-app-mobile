@@ -44,6 +44,7 @@ import com.example.easydrive.dades.DadesPagament
 import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.dataViatge
 import com.example.easydrive.dades.horaViatge
+import com.example.easydrive.dades.reservaConf
 import com.example.easydrive.dades.rutaDesti
 import com.example.easydrive.dades.rutaEscollida
 import com.example.easydrive.dades.rutaOrigen
@@ -408,7 +409,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                     reserva.dataViatge = dataViatge
                     reserva.idUsuari = user?.dni
                     reserva.idEstat = 2
-
+                    reservaConf = reserva
                     crud.insertDadesPagament(pagament!!)
                     crud.insertReserves(reserva)
                 }

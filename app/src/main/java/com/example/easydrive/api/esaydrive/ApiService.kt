@@ -139,6 +139,9 @@ interface ApiService {
     @GET("/api/cotxes-taxista/{id_taxista}")
     suspend fun getCotxesTaxista(@Path("id_taxista") id: String) : Response<List<Cotxe>>
 
+    @GET("/api/reserva-confirmada/{id_usuari}/{id_reserva}")
+    suspend fun getReservaConfirmada(@Path("id_usuari") idUser: String, @Path("id_reserva") idReserva: String) : Response<Reserva>
+
     //Dels
     @DELETE("api/usuari/del_all/{id_usuari}")
     suspend fun delUser(@Path("id_usuari") id_usuari: String): Response<Missatge>

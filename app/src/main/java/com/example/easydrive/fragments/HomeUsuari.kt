@@ -1,15 +1,20 @@
 package com.example.easydrive.fragments
 
 import android.Manifest
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat.is24HourFormat
@@ -21,21 +26,28 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.util.Pair
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.easydrive.R
 import com.example.easydrive.activities.interficie_usuari.MapaRutaUsuari
+import com.example.easydrive.activities.interficie_usuari.Valoracio
 import com.example.easydrive.adaptadors.AdaptadorRVDestins
+import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.api.geoapify.CrudGeo
+import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.dataViatge
 import com.example.easydrive.dades.horaViatge
+import com.example.easydrive.dades.reservaConf
 import com.example.easydrive.dades.rutaDesti
 import com.example.easydrive.dades.rutaEscollida
 import com.example.easydrive.dades.rutaOrigen
+import com.example.easydrive.dades.user
 import com.example.easydrive.databinding.FragmentHomeUsuariBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -43,8 +55,11 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.DateValidatorPointForward
@@ -68,6 +83,15 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
     private var map: GoogleMap? = null
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private var reserva: Boolean = false
+
+    var ubicacioActual: LatLng? = null
+    private var marcador: Marker? = null
+
+    private val handler = Handler(Looper.getMainLooper())
+    private lateinit var checkReservesRunnable: Runnable
+    private var isRequestInProgress = false
+    val novaPendents = mutableListOf<Reserva>()
+    var arribadaDesti: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,7 +139,65 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
                 }
             }
         }
+        val intervalMillis: Long = 20000 // cada 10 segundos
+
+        checkReservesRunnable = object : Runnable {
+            override fun run() {
+                comprovarArribada()
+                handler.postDelayed(this, intervalMillis)
+            }
+
+        }
+
+
         return binding.root
+    }
+
+    private fun comprovarArribada() {
+        if (isRequestInProgress) return
+        isRequestInProgress = true
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val hoy = sdf.parse(sdf.format(Date()))
+
+                val crud = CrudApiEasyDrive()
+                val conf = crud.getReservaConf(user?.dni!!,reservaConf?.id.toString())
+                if (conf != null){
+                    val dataReserva = conf?.dataViatge?.let { sdf.parse(it) }
+                    if (dataReserva != null && dataReserva == hoy) {
+                        dialogInfo()
+                    }
+                }else{
+                    Log.d("confirmacio", "encara no confirmat")
+                }
+
+
+                if (novaPendents.isNotEmpty() && arribadaDesti) {
+                    withContext(Dispatchers.Main) {
+                        startActivity(Intent(requireContext(), Valoracio::class.java))
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("API_ERROR", "Error obtenint reserves: ${e.message}")
+            } finally {
+                isRequestInProgress = false
+            }
+        }
+    }
+
+    private fun dialogInfo(){
+        val dialeg = Dialog(requireContext())
+        dialeg.setContentView(R.layout.dialeg_reserva_confirmat)
+        dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        //dialeg.window?.setWindowAnimations(R.style.animation)
+        dialeg.setCancelable(false)
+        dialeg.findViewById<MaterialButton>(R.id.btnConfirmarDRC).setOnClickListener {
+
+            dialeg.dismiss()
+        }
+        dialeg.show()
     }
 
     private fun dialogReserva() {
@@ -257,19 +339,42 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
             return
         }
 
-        map?.isMyLocationEnabled = true
+        map?.isMyLocationEnabled = false
         fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
-                val ubicacio = LatLng(location.latitude, location.longitude)
-                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(ubicacio, 15f))
+                ubicacioActual = LatLng(location.latitude, location.longitude)
+                marcador = map?.addMarker(
+                    MarkerOptions()
+                        .position(ubicacioActual!!)
+                        .title("Simulació Ubi actual")
+                        .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap()))
+                )
+                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(ubicacioActual!!, 10f),2000,null)
                 rutaOrigen = CrudGeo(requireContext()).getLocationByLatLon(
-                    ubicacio.latitude.toString(),
-                    ubicacio.longitude.toString()
+                    ubicacioActual?.latitude.toString(),
+                    ubicacioActual?.longitude.toString()
                 )
             } else {
                 Toast.makeText(requireContext(), "Ubicació no disponible", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    fun returnBitmap(): Bitmap{
+        return getBitmapFromVectorDrawable(R.drawable.baseline_boy_24)
+    }
+
+    fun getBitmapFromVectorDrawable(@DrawableRes drawableId: Int): Bitmap {
+        val drawable = ContextCompat.getDrawable(requireContext(), drawableId) ?: return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
     }
 
     private fun ocultarTeclat() {

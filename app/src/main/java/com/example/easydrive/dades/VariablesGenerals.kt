@@ -17,3 +17,6 @@ var viatja : Viatja?=null
 
 //coche
 var cotxeSeleccionat : Cotxe?=null
+
+//Reserva
+var reservaConf: Reserva?=null

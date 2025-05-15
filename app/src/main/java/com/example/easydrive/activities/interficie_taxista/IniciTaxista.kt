@@ -100,8 +100,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     var controlRecollirClients: Boolean = false
     var rutaDelViajeMostrada = false
-    var rutaAlDestiMostrada = false
-
 
     var ubiClient: LatLng?=null
     var destiClient : LatLng?=null
@@ -118,7 +116,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var checkReservesRunnable: Runnable
-
     private var isRequestInProgress = false
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
@@ -150,7 +147,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         editarHeader()
         afegirFoto()
         getDisponiblitat(crud)
-
 
         val intervalMillis: Long = 20000 // cada 10 segundos
 
@@ -228,6 +224,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }
 
         binding.simulacio.setOnClickListener {
+            binding.simulacio.visibility = View.GONE
             simulacioRutaArribarDesti()
         }
     }
@@ -507,6 +504,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                                             "Viatge finalitzat",
                                             Toast.LENGTH_SHORT
                                         ).show()
+                                        trazarRutaViaje()
                                     }
                                     handler.removeCallbacks(this)
                                 }
@@ -529,8 +527,8 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     private fun drawRoute(gMap: GoogleMap, coordenades: List<List<Double>>) {
         poly?.remove()
-        val polylineOptions = PolylineOptions().color(Color.BLUE)        // Cambia el color si quieres
-            .width(10f)               // Grosor de la línea
+        val polylineOptions = PolylineOptions().color(R.color.md_theme_inversePrimary_mediumContrast_night)
+            .width(10f)
             .geodesic(true)
 
         coordenades.forEach {
@@ -642,10 +640,10 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 it.latitude, it.longitude,
                 distancia
             )
-            if (distancia[0] < 30 && !rutaDelViajeMostrada) {
+            if (distancia[0] < 10 && !rutaDelViajeMostrada) {
                 rutaDelViajeMostrada = true
                 estat5 = true
-                trazarRutaViaje() // Aquí ejecutas lo que toca al llegar
+                // Aquí ejecutas lo que toca al llegar
             }
         }
     }
@@ -669,7 +667,9 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     fun trazarRutaViaje() {
         binding.cardInfoClient.visibility = View.INVISIBLE
-        poly?.remove()
+        binding.cardDispo.visibility = View.GONE
+        binding.btnExpandMenu.visibility = View.GONE
+        //poly?.remove()
 
         val ubiOrg = LatLng(ubiClient!!.latitude,ubiClient!!.longitude)
         Log.d("UbiOrg", ubiOrg.toString())
@@ -769,22 +769,19 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                         duration = currentStep.duration
                         if (indexPunt >= start && indexPunt <= end) {
                             // Mostrar instrucción una vez
-                            mostrarInstruccio(currentStep.instruction, currentStep.name)
+                            mostrarInstruccio(currentStep.instruction, currentStep.name,
+                                currentStep.duration.toString(), currentStep.distance.toString())
                             indexStep++
                         }
                         if (currentStep.instruction.contains("Arrive")){
                             final = true
                         }
                     }
-                    //verificarDistanciaDestiFinal(ubicacioActual!!)
                 }
-
-                //verificarDistanciaDestiFinal(ubicacioActual!!)
 
                 duration!! *100
                 coordenades.removeAt(0)
                 indexPunt++
-                //delay((duration!! *100).toLong())
                 delay(1000)
             }
             withContext(Dispatchers.Main) {
@@ -799,14 +796,21 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
 
         if (final){
-            //dialogArribadaDesti()
             verificarDistanciaDestiFinal(ubicacioActual!!)
         }
     }
-    private fun mostrarInstruccio(instruccio: String, carrer: String) {
+    private fun mostrarInstruccio(instruccio: String, carrer: String, duracio: String, distancia: String) {
         binding.indicacions.visibility = View.VISIBLE
         binding.txtInstruccio.text = instruccio
         binding.txtCarrer.text = carrer
+
+        val horas = (duracio.toInt() / 3600)
+        val minutos = ((duracio.toInt()-horas!!*3600)/60)
+        val segundos = duracio.toInt()-(horas!!*3600+minutos!!*60)
+        binding.cardDuracio.text = "${horas}:${minutos}:${segundos}"
+
+        val dec = DecimalFormat("#,###.00")
+        binding.cardDistancia.text = "${dec.format(distancia.toDouble()/1000)} km"
     }
 
     fun verificarDistanciaDestiFinal(posicionActual: LatLng) {
@@ -820,6 +824,8 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
             if (distancia[0] < 30  && !arribatAlDesti) {
                 arribatAlDesti = true  // Marca como "ya ha llegado"
+                binding.cardDispo.visibility = View.GONE
+                binding.btnExpandMenu.visibility = View.GONE
                 dialogArribadaDesti()
                 /*CoroutineScope(Dispatchers.Main).launch {
                     dialogArribadaDesti()
@@ -846,6 +852,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     }
 
     fun dialogArribadaDesti(){
+        val crud = CrudApiEasyDrive()
         val dialeg = Dialog(this@IniciTaxista)
         dialeg.setContentView(R.layout.dialeg_ruta_finalitzada_taxi)
         dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -854,7 +861,9 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         dialeg.findViewById<ImageButton>(R.id.btnTanca).setOnClickListener {
             reservaXEdit?.idEstat = 3
+            crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
             //poner un crud de updateReserva
+            binding.indicacions.visibility = View.GONE
             dialeg.dismiss()
         }
 
