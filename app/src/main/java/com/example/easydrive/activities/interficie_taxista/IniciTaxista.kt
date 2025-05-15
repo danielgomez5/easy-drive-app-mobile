@@ -3,6 +3,10 @@ package com.example.easydrive.activities.interficie_taxista
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -10,6 +14,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -27,6 +32,8 @@ import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
@@ -36,6 +43,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.easydrive.R
+import com.example.easydrive.activities.MainActivity
 import com.example.easydrive.activities.interficie_usuari.IniciUsuari
 import com.example.easydrive.activities.menu.Ajuda
 import com.example.easydrive.activities.menu.Configuracio
@@ -144,6 +152,18 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }else{
             demanarPermisos()
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                1002
+            )
+        }
+
+        crearCanalNotificacions()
         editarHeader()
         afegirFoto()
         getDisponiblitat(crud)
@@ -226,6 +246,54 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         binding.simulacio.setOnClickListener {
             binding.simulacio.visibility = View.GONE
             simulacioRutaArribarDesti()
+        }
+    }
+
+
+    private fun crearCanalNotificacions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val canal = NotificationChannel(
+                "RECOLLIDA_CLIENTS",
+                "Notificacions de recollida",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Canal per notificar clients a recollir"
+            }
+
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(canal)
+        }
+    }
+
+    fun crearPendingIntent(context: Context): PendingIntent {
+        val intent = Intent(context, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+        return PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    fun enviarNotificacioClient(context: Context) {
+        val builder = NotificationCompat.Builder(context, "RECOLLIDA_CLIENTS")
+            .setSmallIcon(R.drawable.baseline_circle_notifications_24) // Asegúrate de tener un icono válido
+            .setContentTitle("Atenció!")
+            .setContentText("Hi ha un client a recollir.")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(crearPendingIntent(context))
+            .setAutoCancel(true)
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+
+            with(NotificationManagerCompat.from(context)) {
+                notify(1001, builder.build())
+            }
+        } else {
+            Log.w("NOTIFICATION", "Permís de notificació no concedit.")
         }
     }
 
@@ -346,7 +414,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         dialeg.findViewById<MaterialButton>(R.id.btnAcceptarD).setOnClickListener { // si acepta la reserva
             controlRecollirClients = false
-            reservaXEdit = novaPendents.first()
+            reservaXEdit = novaPendents.removeFirstOrNull()
             handler.removeCallbacks(checkReservesRunnable) // Detenemos comprobación de nuevas reservas
             startCheckingReserva() // Comenzamos a comprobar estado de la reserva activa
 
@@ -406,6 +474,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }
 
         dialeg.findViewById<MaterialButton>(R.id.btnCancelarD).setOnClickListener {
+            novaPendents.removeFirstOrNull()
             controlRecollirClients = true
             dialeg.dismiss()
         }
@@ -444,6 +513,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 if (novaPendents.isNotEmpty() && controlRecollirClients) {
                     withContext(Dispatchers.Main) {
                         dialogRecollirClient()
+                        enviarNotificacioClient(this@IniciTaxista)
                     }
                 }
             } catch (e: Exception) {
