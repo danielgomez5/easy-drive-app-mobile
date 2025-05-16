@@ -2,13 +2,21 @@ package com.example.easydrive.activities.interficie_usuari
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.MenuItem
+import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.DrawableRes
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -17,24 +25,57 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.easydrive.R
 import com.example.easydrive.activities.menu.Ajuda
 import com.example.easydrive.activities.menu.Configuracio
 import com.example.easydrive.activities.menu.HistorialViatges
 import com.example.easydrive.activities.menu.Perfil
+import com.example.easydrive.adaptadors.AdaptadorEscollirCotxe
+import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
+import com.example.easydrive.api.geoapify.CrudGeo
+import com.example.easydrive.dades.Globals.clientUbi
+import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.Usuari
+import com.example.easydrive.dades.cotxeSeleccionat
+import com.example.easydrive.dades.reservaConf
 import com.example.easydrive.dades.user
 import com.example.easydrive.databinding.ActivityIniciUsuariBinding
 import com.example.easydrive.fragments.HomeUsuari
 import com.example.easydrive.fragments.ViatgesGuardats
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.MapFragment
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
     private lateinit var binding: ActivityIniciUsuariBinding
     private lateinit var actionBarDrawerToggle: ActionBarDrawerToggle
     val REQUESTS_PERMISIONS = 1
     var permisos = false
+
+    private lateinit var checkReservesRunnable: Runnable
+    val novaConfirmat = mutableListOf<Reserva>()
+    var resConf: Reserva?=null
+
+    private var isRequestInProgress = false
+    private var lastReservaNotificadaId: Int? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private var arrivedCheckRunnable: Runnable? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,6 +135,116 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         canviaFragment(fragment)
         binding.bnv.selectedItemId = selectedFragment
 
+        val intervalMillis: Long = 20000 // cada 10 segundos
+
+        checkReservesRunnable = object : Runnable {
+            override fun run() {
+                comrpovarConfirmat()
+                handler.postDelayed(this, intervalMillis)
+            }
+        }
+
+        handler.post(checkReservesRunnable)
+    }
+
+    fun comrpovarConfirmat(){
+        if (isRequestInProgress) return
+        isRequestInProgress = true
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val hoy = sdf.parse(sdf.format(Date()))
+
+                val crud = CrudApiEasyDrive()
+                val estatOk = crud.getReservaConf2(user?.dni!!)
+
+                if (estatOk != null && estatOk.isNotEmpty()) {
+                    estatOk?.forEach { p->
+                        val dataReserva = p.dataViatge?.let { sdf.parse(it) }
+                        val novaReserva = estatOk.firstOrNull { it.id != lastReservaNotificadaId }
+                        Log.d("novaReserva", novaReserva.toString())
+                        if (novaReserva != null && (dataReserva != null && dataReserva == hoy)) {
+                            lastReservaNotificadaId = novaReserva.id
+                            runOnUiThread {
+                                dialogConfirmat(p)
+                            }
+                            handler.removeCallbacks(this as Runnable)
+                        }
+                    }
+
+                }
+            } catch (e: Exception) {
+                Log.e("API_ERROR", "Error obtenint reserves: ${e.message}")
+            } finally {
+                isRequestInProgress = false
+            }
+        }
+    }
+
+    private fun dialogConfirmat(p: Reserva){
+        val dialeg = Dialog(this)
+        resConf = p
+        dialeg.setContentView(R.layout.dialeg_reserva_confirmat)
+        dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        //dialeg.window?.setWindowAnimations(R.style.animation)
+        dialeg.setCancelable(false)
+
+        val llista = mutableListOf<Reserva>()
+        llista.add(p)
+        dialeg.findViewById<MaterialButton>(R.id.btnConfirmarDRC).setOnClickListener {
+            cmprovarArribadaDesti()
+            handler.post(arrivedCheckRunnable!!)
+            dialeg.dismiss()
+        }
+
+        dialeg.show()
+    }
+
+    private fun cmprovarArribadaDesti() {
+        val crud = CrudApiEasyDrive()
+        val crudGeo = CrudGeo(this)
+        arrivedCheckRunnable = object : Runnable {
+            override fun run() {
+                val reserva = crud.getResevraById(resConf?.id.toString())
+                if (reserva?.idEstat == 3){
+                    val ubi = crudGeo.getLocationByName(reserva.desti.toString())
+                    clientUbi = LatLng(ubi.first().lat,ubi.first().lon)
+                    val mapFragment = supportFragmentManager.findFragmentById(R.id.mapa) as SupportMapFragment
+                    mapFragment.getMapAsync { googleMap ->
+                        clientUbi?.let {
+                            googleMap.addMarker(MarkerOptions()
+                                .position(clientUbi!!)
+                                .title("Simulació Ubi desti")
+                                .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap())))
+                            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(it, 15f))
+                        }
+                    }
+
+
+                }else{
+                    handler.postDelayed(this, 10000)
+                }
+            }
+        }
+
+    }
+
+    fun returnBitmap(): Bitmap{
+        return getBitmapFromVectorDrawable(R.drawable.baseline_boy_24)
+    }
+
+    fun getBitmapFromVectorDrawable(@DrawableRes drawableId: Int): Bitmap {
+        val drawable = ContextCompat.getDrawable(this, drawableId) ?: return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
     }
 
     private fun editarHeader() {
@@ -207,3 +358,5 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
     }
 
 }
+
+

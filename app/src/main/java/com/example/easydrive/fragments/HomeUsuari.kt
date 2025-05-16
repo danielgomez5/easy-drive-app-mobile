@@ -40,6 +40,8 @@ import com.example.easydrive.activities.interficie_usuari.Valoracio
 import com.example.easydrive.adaptadors.AdaptadorRVDestins
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.api.geoapify.CrudGeo
+import com.example.easydrive.dades.Globals
+import com.example.easydrive.dades.Globals.clientUbi
 import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.dataViatge
 import com.example.easydrive.dades.horaViatge
@@ -342,17 +344,17 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         map?.isMyLocationEnabled = false
         fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
-                ubicacioActual = LatLng(location.latitude, location.longitude)
+                clientUbi = LatLng(location.latitude, location.longitude)
                 marcador = map?.addMarker(
                     MarkerOptions()
-                        .position(ubicacioActual!!)
+                        .position(clientUbi!!)
                         .title("Simulació Ubi actual")
                         .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap()))
                 )
-                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(ubicacioActual!!, 10f),2000,null)
+                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(clientUbi!!, 10f),2000,null)
                 rutaOrigen = CrudGeo(requireContext()).getLocationByLatLon(
-                    ubicacioActual?.latitude.toString(),
-                    ubicacioActual?.longitude.toString()
+                    clientUbi?.latitude.toString(),
+                    clientUbi?.longitude.toString()
                 )
             } else {
                 Toast.makeText(requireContext(), "Ubicació no disponible", Toast.LENGTH_SHORT).show()
@@ -413,4 +415,6 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         params.height = (300 * resources.displayMetrics.density).toInt()
         binding.rcv.layoutParams = params
     }
+
+
 }

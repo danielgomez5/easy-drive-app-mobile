@@ -15,6 +15,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.net.SocketTimeoutException
 import kotlin.coroutines.CoroutineContext
 
 class CrudOpenRoute (val context: Context) : CoroutineScope {
@@ -38,21 +39,33 @@ class CrudOpenRoute (val context: Context) : CoroutineScope {
             .addConverterFactory(GsonConverterFactory.create(gson)).build()
     }
 
-    fun getRutaCotxe(start : String, end: String): OpenRouteDades? {
-        var resposta : Response<OpenRouteDades>?=null
+    fun getRutaCotxe(start: String, end: String): OpenRouteDades? {
+        var resposta: Response<OpenRouteDades>? = null
+        var resultat: OpenRouteDades? = null
+        val job = CoroutineScope(Dispatchers.IO).launch {
+            try {
+                resposta = getRetrofit()
+                    .create(ApiServiceOpenRoute::class.java)
+                    .getRutaEnCoche(api, start, end)
+
+                if (resposta!!.isSuccessful) {
+                    resultat = resposta!!.body()
+                } else {
+                    Log.e("API_ERROR", "Codi error: ${resposta!!.code()}, missatge: ${resposta!!.message()}")
+                }
+            } catch (e: SocketTimeoutException) {
+                Log.e("API_TIMEOUT", "S'ha produït un timeout")
+            } catch (e: Exception) {
+                Log.e("API_EXCEPTION", "Error inesperat: ${e.message}")
+            }
+        }
 
         runBlocking {
-            val cor = launch {
-                resposta = getRetrofit().create(ApiServiceOpenRoute::class.java).getRutaEnCoche(api,start,end)
-            }
-            cor.join()
+            job.join() // Esperem que acabi la corrutina
         }
-        Log.d("ApiResponse", "Respuesta de la API: ${resposta!!.body()}")
-        if (resposta!!.isSuccessful){
-            return resposta!!.body()
-        }else{
-            return null
-        }
+
+        return resultat
     }
+
 
 }

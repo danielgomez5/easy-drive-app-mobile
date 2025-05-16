@@ -1,5 +1,7 @@
 package com.example.easydrive.dades
 
+import com.google.android.gms.maps.model.LatLng
+
 //GeoapifyDades
 var rutaEscollida: GeoapifyDades?=null
 var rutaOrigen: GeoapifyDades?=null
@@ -20,3 +22,10 @@ var cotxeSeleccionat : Cotxe?=null
 
 //Reserva
 var reservaConf: Reserva?=null
+
+//LatLng
+//var clientUbi: LatLng?=null
+object Globals {
+    var clientUbi: LatLng? = null
+}
+

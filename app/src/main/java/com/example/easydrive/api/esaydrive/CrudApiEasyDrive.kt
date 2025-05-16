@@ -364,6 +364,20 @@ class CrudApiEasyDrive() : CoroutineScope {
             return null
     }
 
+    fun getReservaConf2(id: String): List<Reserva>?{
+        var resposta: Response<List<Reserva>>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getReservaConfirmats(id)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return resposta!!.body()
+        else
+            return null
+    }
+
     //Update
     fun updateUserFoto(id: String, rutaPerfil: String?): Boolean {
         val filePerfil = File(rutaPerfil)

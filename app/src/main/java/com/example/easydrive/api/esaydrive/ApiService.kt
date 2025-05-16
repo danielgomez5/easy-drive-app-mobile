@@ -142,6 +142,9 @@ interface ApiService {
     @GET("/api/reserva-confirmada/{id_usuari}/{id_reserva}")
     suspend fun getReservaConfirmada(@Path("id_usuari") idUser: String, @Path("id_reserva") idReserva: String) : Response<Reserva>
 
+    @GET("/api/reserves-confirmats/{id_usuari}")
+    suspend fun getReservaConfirmats(@Path("id_usuari") idUser: String) : Response<List<Reserva>>
+
     //Dels
     @DELETE("api/usuari/del_all/{id_usuari}")
     suspend fun delUser(@Path("id_usuari") id_usuari: String): Response<Missatge>

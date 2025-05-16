@@ -392,7 +392,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                     }
 
                     val currentData = Date()
-                    val reserva = Reserva(null, null, null, null, null, null, null, null, null)
+                    val reserva = Reserva(null, null, null, null, null, null, null, null, null,null)
                     reserva.preu = preuTotal!!
                     reserva.origen = rutaOrigen?.address_line1 + ", " + rutaOrigen?.city
                     reserva.desti = rutaDesti?.address_line1 + ", " + rutaDesti?.city

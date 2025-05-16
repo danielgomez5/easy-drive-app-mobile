@@ -10,7 +10,7 @@ data class Cotxe(
     var tipus: String?,
     var capacitat: Int?,
     var color: String?,
-    var horesTreballades: Double?,
+    var horesTreballades: Float?,
     var fotoFitxaTecnica: String?,
     var id_usuaris: List<Usuari>?
 ): Serializable

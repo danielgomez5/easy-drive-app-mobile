@@ -7,6 +7,7 @@ data class Reserva(
     var dataReserva : String?,
     var dataViatge : String?,
     var preu : Double?,
+    var estat: String?,
     var idUsuari: String?,
     var idEstat: Int?,
     var horaViatge: String?,

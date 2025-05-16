@@ -67,6 +67,8 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
     //Glide
     implementation ("com.github.bumptech.glide:glide:4.16.0")
+    //LifeCycle
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
 
 
 
