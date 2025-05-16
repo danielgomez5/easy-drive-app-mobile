@@ -67,6 +67,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="16dp"/>
 
+
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabAddCar"
             android:layout_width="wrap_content"
@@ -81,6 +83,20 @@
             android:elevation="6dp"
             app:shapeAppearanceOverlay="@style/Widget.MaterialComponents.FloatingActionButton"/>
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabAddExistingCar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="96dp"
+            android:layout_marginEnd="20dp"
+            android:contentDescription="Afegir cotxe existent"
+            app:srcCompat="@drawable/baseline_car_rental_24"
+            app:backgroundTint="?attr/colorSecondary"
+            app:tint="?attr/colorOnSecondary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:elevation="6dp"
+            app:shapeAppearanceOverlay="@style/Widget.MaterialComponents.FloatingActionButton"/>
 
         <LinearLayout
             android:id="@+id/ll_emptyState"

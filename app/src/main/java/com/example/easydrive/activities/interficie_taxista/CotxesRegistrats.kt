@@ -1,13 +1,16 @@
 package com.example.easydrive.activities.interficie_taxista
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
@@ -23,6 +26,7 @@ import com.example.easydrive.adaptadors.AdapterViatgesPendents
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.Reserva
+import com.example.easydrive.dades.UsuariCotxeDTO
 import com.example.easydrive.dades.user
 import com.example.easydrive.databinding.ActivityCotxesRegistratsBinding
 import com.example.easydrive.databinding.ActivityIniciTaxistaBinding
@@ -85,6 +89,37 @@ class CotxesRegistrats : AppCompatActivity() {
             intent.putExtra("dni", user?.dni)
             registreCotxeLauncher.launch(intent)
         }
+
+        binding.fabAddExistingCar.setOnClickListener {
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_existing_car, null)
+            val etMatricula = dialogView.findViewById<EditText>(R.id.et_plate)
+
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setPositiveButton("Afegir") { _, _ ->
+                    val matricula = etMatricula.text.toString().trim()
+                    if (matricula.isNotEmpty()) {
+                        val crud = CrudApiEasyDrive()
+                        val relacio = UsuariCotxeDTO(
+                            dniUsuari  = user?.dni,
+                            matriculaCotxe = matricula
+                        )
+
+                        if(crud.insertRelacioCotxeUsuari(relacio)){
+                            Toast.makeText(this, "Cotxe registrat correctament", Toast.LENGTH_SHORT).show()
+                            carregaCotxes()
+                        }else{
+                            Toast.makeText(this, "La matrícula no està registrada", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(this, "La matrícula no pot estar buida", Toast.LENGTH_SHORT).show()
+                    }
+
+                }
+                .setNegativeButton("Cancel·lar", null)
+                .show()
+        }
+
 
 
     }
