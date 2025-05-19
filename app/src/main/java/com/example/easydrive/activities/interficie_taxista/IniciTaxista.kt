@@ -176,7 +176,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         editarHeader()
         afegirFoto()
         getDisponiblitat(crud)
-
+        //a
         runReserves()
 
         val prefs = getSharedPreferences("configuracio", MODE_PRIVATE)

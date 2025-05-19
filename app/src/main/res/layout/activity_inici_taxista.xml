@@ -135,7 +135,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/indicacions"
-            android:visibility="gone"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent">
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -164,7 +164,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="20dp"
-                        android:text="Nom:" />
+                        android:text="Nom:"
+                        android:layout_marginBottom="30dp"/>
 
                     <TextView
                         android:id="@+id/txtCarrer"
@@ -174,49 +175,6 @@
                         android:hint="nom" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/ll1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="08dp"
-                    android:orientation="horizontal"
-                    app:layout_constraintTop_toBottomOf="@+id/ll0">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:text="Distancia:" />
-
-                    <TextView
-                        android:id="@+id/cardDistancia"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:hint="distancia" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/ll2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="08dp"
-                    android:orientation="horizontal"
-                    app:layout_constraintTop_toBottomOf="@+id/ll1">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:text="Duració:" />
-
-                    <TextView
-                        android:id="@+id/cardDuracio"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:hint="distancia" />
-                </LinearLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
             <!--
             <androidx.recyclerview.widget.RecyclerView
