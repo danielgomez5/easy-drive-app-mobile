@@ -66,6 +66,26 @@ class CrudOpenRoute (val context: Context) : CoroutineScope {
 
         return resultat
     }
+    suspend fun getRutaCotxeSuspend(start: String, end: String): OpenRouteDades? {
+        return try {
+            val resposta = getRetrofit()
+                .create(ApiServiceOpenRoute::class.java)
+                .getRutaEnCoche(api, start, end)
+
+            if (resposta.isSuccessful) {
+                resposta.body()
+            } else {
+                Log.e("API_ERROR", "Codi error: ${resposta.code()}, missatge: ${resposta.message()}")
+                null
+            }
+        } catch (e: SocketTimeoutException) {
+            Log.e("API_TIMEOUT", "S'ha produït un timeout")
+            null
+        } catch (e: Exception) {
+            Log.e("API_EXCEPTION", "Error inesperat: ${e.message}")
+            null
+        }
+    }
 
 
 }

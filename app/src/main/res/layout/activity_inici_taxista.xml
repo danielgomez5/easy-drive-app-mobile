@@ -159,58 +159,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
+                        android:layout_marginBottom="40dp"
                         android:hint="nom" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/ll1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="08dp"
-                    android:orientation="horizontal"
-                    app:layout_constraintTop_toBottomOf="@+id/ll0">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:text="Distancia:" />
-
-                    <TextView
-                        android:id="@+id/cardDistancia"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:hint="distancia" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/ll2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="08dp"
-                    android:orientation="horizontal"
-                    app:layout_constraintTop_toBottomOf="@+id/ll1">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:text="Duració:" />
-
-                    <TextView
-                        android:id="@+id/cardDuracio"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:hint="distancia" />
-                </LinearLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
-            <!--
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:id="@+id/rcvIndicacions"/>-->
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView

@@ -1,5 +1,7 @@
 package com.example.easydrive.dades
 
+import java.io.Serializable
+
 data class Reserva(
     val id:Int?,
     var origen: String?,
@@ -13,4 +15,4 @@ data class Reserva(
     var horaViatge: String?,
     var viewType: Int = 0
 
-)
+): Serializable

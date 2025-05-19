@@ -82,7 +82,7 @@ import java.util.Locale
 class HomeUsuari : Fragment(), OnMapReadyCallback {
     private var cercaRealitzada = false
     private lateinit var binding: FragmentHomeUsuariBinding
-    private var map: GoogleMap? = null
+    var map: GoogleMap? = null
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private var reserva: Boolean = false
 
@@ -106,8 +106,15 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentHomeUsuariBinding.inflate(inflater,container, false)
-        val mapFragment = childFragmentManager.findFragmentById(R.id.mapa) as? SupportMapFragment
-        mapFragment?.getMapAsync(this)
+        val mapFragment = childFragmentManager.findFragmentById(R.id.mapa1) as? SupportMapFragment
+        if (mapFragment == null) {
+            val newMapFragment = SupportMapFragment.newInstance()
+            childFragmentManager.beginTransaction()
+                .replace(R.id.mapa1, newMapFragment)
+                .commit()
+        } else {
+            mapFragment.getMapAsync(this)
+        }
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
         binding.btnBuscar.setOnClickListener {
             if (rutaEscollida!= null){
@@ -141,7 +148,7 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
                 }
             }
         }
-        val intervalMillis: Long = 20000 // cada 10 segundos
+        /*val intervalMillis: Long = 20000 // cada 10 segundos
 
         checkReservesRunnable = object : Runnable {
             override fun run() {
@@ -149,13 +156,13 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
                 handler.postDelayed(this, intervalMillis)
             }
 
-        }
+        }*/
 
 
         return binding.root
     }
 
-    private fun comprovarArribada() {
+    /*private fun comprovarArribada() {
         if (isRequestInProgress) return
         isRequestInProgress = true
 
@@ -196,11 +203,10 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         //dialeg.window?.setWindowAnimations(R.style.animation)
         dialeg.setCancelable(false)
         dialeg.findViewById<MaterialButton>(R.id.btnConfirmarDRC).setOnClickListener {
-
             dialeg.dismiss()
         }
         dialeg.show()
-    }
+    }*/
 
     private fun dialogReserva() {
         val dialeg = Dialog(requireContext())

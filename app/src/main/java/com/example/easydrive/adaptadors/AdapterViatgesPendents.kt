@@ -118,6 +118,7 @@ class AdapterViatgesPendents(val llista: MutableList<Reserva>, private val onLis
                         .setPositiveButton("Sí") { _, _ ->
                             val crud = CrudApiEasyDrive()
                             item.idEstat = 4
+                            item.estat = "NO"
                             if (crud.changeEstatReserva(item.id.toString(), item)) {
                                 cancelarReserva(item)
                                 Toast.makeText(holder.vista.context, "S'ha cancel·lat la reserva correctament", Toast.LENGTH_LONG).show()

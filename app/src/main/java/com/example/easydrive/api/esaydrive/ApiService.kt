@@ -133,6 +133,9 @@ interface ApiService {
     @GET("/api/reserva/{id}")
     suspend fun getReservaById(@Path("id") id: String): Response<Reserva>
 
+    @GET("/api/viatge-reserva/{id}")
+    suspend fun getViatgeByReserva(@Path("id") id: String): Response<Viatja>
+
     @GET("/api/cotxe/{id}")
     suspend fun getCotxeByMatricula(@Path("id") id: String) : Response<Cotxe>
 

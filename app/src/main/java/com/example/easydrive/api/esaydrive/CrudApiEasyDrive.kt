@@ -34,6 +34,7 @@ class CrudApiEasyDrive() : CoroutineScope {
         get() = Dispatchers.Main + job
 
     val urlBase = "http://172.16.24.115:7126/"
+    //val urlBase = "http://192.168.1.145:7126/"
 
     private fun getClient(): OkHttpClient {
         var logging = HttpLoggingInterceptor()
@@ -369,6 +370,20 @@ class CrudApiEasyDrive() : CoroutineScope {
         runBlocking {
             val cor = launch {
                 resposta = getRetrofit().create(ApiService::class.java).getReservaConfirmats(id)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return resposta!!.body()
+        else
+            return null
+    }
+
+    fun getViatgeByReserva(id: String): Viatja?{
+        var resposta: Response<Viatja>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getViatgeByReserva(id)
             }
             cor.join()
         }

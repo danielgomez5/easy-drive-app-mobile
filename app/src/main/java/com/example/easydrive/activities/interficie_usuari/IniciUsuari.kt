@@ -143,11 +143,12 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
                 handler.postDelayed(this, intervalMillis)
             }
         }
-
         handler.post(checkReservesRunnable)
     }
+    private val reservesNotificades = mutableSetOf<Int>()
+    private var isCheckPaused = false
 
-    fun comrpovarConfirmat(){
+    fun comrpovarConfirmat() {
         if (isRequestInProgress) return
         isRequestInProgress = true
 
@@ -155,24 +156,24 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
             try {
                 val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val hoy = sdf.parse(sdf.format(Date()))
-
                 val crud = CrudApiEasyDrive()
                 val estatOk = crud.getReservaConf2(user?.dni!!)
 
-                if (estatOk != null && estatOk.isNotEmpty()) {
-                    estatOk?.forEach { p->
+                if (!estatOk.isNullOrEmpty()) {
+                    for (p in estatOk) {
                         val dataReserva = p.dataViatge?.let { sdf.parse(it) }
-                        val novaReserva = estatOk.firstOrNull { it.id != lastReservaNotificadaId }
-                        Log.d("novaReserva", novaReserva.toString())
-                        if (novaReserva != null && (dataReserva != null && dataReserva == hoy)) {
-                            lastReservaNotificadaId = novaReserva.id
-                            runOnUiThread {
+                        if (dataReserva != null &&
+                            sdf.format(dataReserva) == sdf.format(hoy) &&
+                            !reservesNotificades.contains(p.id)
+                        ) {
+                            reservesNotificades.add(p.id!!)
+                            withContext(Dispatchers.Main) {
+                                isCheckPaused = true
                                 dialogConfirmat(p)
                             }
-                            handler.removeCallbacks(this as Runnable)
+                            break
                         }
                     }
-
                 }
             } catch (e: Exception) {
                 Log.e("API_ERROR", "Error obtenint reserves: ${e.message}")
@@ -185,6 +186,7 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
     private fun dialogConfirmat(p: Reserva){
         val dialeg = Dialog(this)
         resConf = p
+        Log.d("resConf", resConf.toString())
         dialeg.setContentView(R.layout.dialeg_reserva_confirmat)
         dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         //dialeg.window?.setWindowAnimations(R.style.animation)
@@ -194,7 +196,8 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         llista.add(p)
         dialeg.findViewById<MaterialButton>(R.id.btnConfirmarDRC).setOnClickListener {
             cmprovarArribadaDesti()
-            handler.post(arrivedCheckRunnable!!)
+            //handler.post(arrivedCheckRunnable!!)
+            //arrivedCheckRunnable?.let { handler.post(it) }
             dialeg.dismiss()
         }
 
@@ -204,31 +207,52 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
     private fun cmprovarArribadaDesti() {
         val crud = CrudApiEasyDrive()
         val crudGeo = CrudGeo(this)
+
         arrivedCheckRunnable = object : Runnable {
             override fun run() {
-                val reserva = crud.getResevraById(resConf?.id.toString())
-                if (reserva?.idEstat == 3){
-                    val ubi = crudGeo.getLocationByName(reserva.desti.toString())
-                    clientUbi = LatLng(ubi.first().lat,ubi.first().lon)
-                    val mapFragment = supportFragmentManager.findFragmentById(R.id.mapa) as SupportMapFragment
-                    mapFragment.getMapAsync { googleMap ->
-                        clientUbi?.let {
-                            googleMap.addMarker(MarkerOptions()
-                                .position(clientUbi!!)
-                                .title("Simulació Ubi desti")
-                                .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap())))
-                            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(it, 15f))
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val reserva = crud.getResevraById(resConf?.id.toString())
+                    Log.d("reserva", reserva.toString())
+                    if (reserva?.idEstat == 3) {
+
+                        val ubi = crudGeo.getLocationByName(reserva.desti.toString())
+                        clientUbi = LatLng(ubi.first().lat, ubi.first().lon)
+                        Log.d("clientUbi", clientUbi.toString())
+                        withContext(Dispatchers.Main) {
+                            // Accede al Fragment y llama a la función
+                            val fragment = supportFragmentManager.findFragmentById(R.id.fcv) as? HomeUsuari
+                            fragment?.let {
+                                it.map?.let { googleMap ->
+                                    googleMap.addMarker(
+                                        MarkerOptions()
+                                            .position(clientUbi!!)
+                                            .title("Simulació Ubi destí")
+                                            .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap()))
+                                    )
+                                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(clientUbi!!, 15f))
+                                }
+                            }
+                            val intent = Intent(this@IniciUsuari, Valoracio::class.java)
+                            intent.putExtra("reserva", reserva)
+                            startActivity(intent)
+
                         }
+
+                    }else {
+                        // Repetir comprobación en 10 segundos si aún no está en estado 3
+                        handler.postDelayed(arrivedCheckRunnable!!, 10000)
                     }
-
-
-                }else{
-                    handler.postDelayed(this, 10000)
                 }
             }
+
         }
 
+        // Iniciar la primera comprobación
+        handler.post(arrivedCheckRunnable!!)
     }
+
+
+
 
     fun returnBitmap(): Bitmap{
         return getBitmapFromVectorDrawable(R.drawable.baseline_boy_24)
