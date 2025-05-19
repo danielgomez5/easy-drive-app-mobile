@@ -6,7 +6,7 @@
     app:behavior_hideable="true"
     app:behavior_peekHeight="0dp"
     app:circularflow_radiusInDP="20dp"
-    android:background="#fdecda"
+    android:background="?colorSurfaceContainer"
     style="@style/Widget.Material3.BottomSheet.Modal"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <LinearLayout
@@ -201,7 +201,7 @@
             android:id="@+id/til1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nº tarjeta"
+            android:hint="Nº targeta"
             android:layout_marginTop="12dp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/tiet_numTarjeta"
@@ -209,6 +209,7 @@
                 android:layout_height="match_parent"
                 android:inputType="number"
                 android:maxLines="1"
+                android:maxLength="16"
                 android:singleLine="true"
                 android:imeOptions="actionNext"/>
         </com.google.android.material.textfield.TextInputLayout>
@@ -251,6 +252,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:inputType="numberPassword"
+                    android:maxLength="3"
                     android:maxLines="1"
                     android:singleLine="true"/>
             </com.google.android.material.textfield.TextInputLayout>

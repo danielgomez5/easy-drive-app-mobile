@@ -69,6 +69,9 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
 
+
+
+
         binding.btnLogin.setOnClickListener {
             val email = binding.tieCorreuLogin.text.toString().trim()
             val password = binding.tieContrsenyaLogin.text.toString().trim()
@@ -135,6 +138,12 @@ class MainActivity : AppCompatActivity() {
                                     Toast.LENGTH_LONG
                                 ).show()
                             }
+                        }
+
+                        val sharedPref = getSharedPreferences("user_session", MODE_PRIVATE)
+                        with(sharedPref.edit()) {
+                            putString("dni", usuari.dni)
+                            apply()
                         }
                     } else {
                         Snackbar.make(

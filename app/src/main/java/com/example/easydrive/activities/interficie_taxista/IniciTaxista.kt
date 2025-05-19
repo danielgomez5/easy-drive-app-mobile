@@ -19,12 +19,12 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
+import android.widget.CompoundButton
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -34,6 +34,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -84,7 +85,6 @@ import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -177,10 +177,45 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         afegirFoto()
         getDisponiblitat(crud)
 
-
-
         runReserves()
 
+        val prefs = getSharedPreferences("configuracio", MODE_PRIVATE)
+        val editor = prefs.edit()
+
+        val modeOscur = prefs.getBoolean("mode_oscuro", false)
+        binding.switchMode.isChecked = modeOscur
+
+        fun updateSwitchIcon(isNight: Boolean) {
+            val drawableRes = if (isNight) R.drawable.baseline_dark_mode_24 else R.drawable.baseline_sunny_24
+            binding.switchMode.thumbDrawable = ContextCompat.getDrawable(this, drawableRes)
+        }
+
+        updateSwitchIcon(modeOscur)
+
+        AppCompatDelegate.setDefaultNightMode(
+            if (modeOscur) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        )
+
+        binding.switchMode.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
+            editor.putBoolean("mode_oscuro", isChecked)
+            editor.apply()
+
+            updateSwitchIcon(isChecked)
+
+            AppCompatDelegate.setDefaultNightMode(
+                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
+
+
+        val intervalMillis: Long = 20000 // cada 10 segundos
+
+        checkReservesRunnable = object : Runnable {
+            override fun run() {
+                comprovarNousViatges()
+                handler.postDelayed(this, intervalMillis)
+            }
+        }
 
         val btnExpandMenu = binding.btnExpandMenu
         val tvCotxes = binding.flCotxesRegistrats
@@ -257,6 +292,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }
     }
 
+
     private fun runReserves() {
         val intervalMillis: Long = 20000 // cada 10 segundos
         checkReservesRunnable = object : Runnable {
@@ -266,7 +302,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             }
         }
     }
-
 
     private fun crearCanalNotificacions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -362,10 +397,10 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         //posar imatge
         var fotoUser = headerView.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.fotoHeader)
         try{
-            Glide.with(this)
-                .load("http://172.16.24.115:7126/Photos/${user?.fotoPerfil}")
-                .error(R.drawable.logo_easydrive)
-                .into(fotoUser)
+        Glide.with(this)
+            .load("http://172.16.24.115:7126/Photos/${user?.fotoPerfil}")
+            .error(R.drawable.logo_easydrive)
+            .into(fotoUser)
         }catch (e: Exception){
             fotoUser.setImageResource(R.drawable.logo_easydrive)
         }
@@ -373,10 +408,10 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     private fun afegirFoto() {
         try{
-            Glide.with(this)
-                .load("http://172.16.24.115:7126/Photos/${user?.fotoPerfil}")
-                .error(R.drawable.logo_easydrive)
-                .into(binding.btnPerfil)
+        Glide.with(this)
+            .load("http://172.16.24.115:7126/Photos/${user?.fotoPerfil}")
+            .error(R.drawable.logo_easydrive)
+            .into(binding.btnPerfil)
         }catch (e: Exception){
             binding.btnPerfil.setImageResource(R.drawable.logo_easydrive)
         }
@@ -543,7 +578,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }
     }
 
-
     private var checkingReservaJob: Job? = null
 
     private fun startCheckingReserva() {
@@ -608,10 +642,11 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }
     }
 
-
     private fun drawRoute(gMap: GoogleMap, coordenades: List<List<Double>>) {
         poly?.remove()
-        val polylineOptions = PolylineOptions()
+        val polylineOptions = PolylineOptions().color(R.color.md_theme_inversePrimary_mediumContrast_night)
+            .width(10f)
+            .geodesic(true)
 
         coordenades.forEach {
             polylineOptions.add(LatLng(it[1], it[0]))
@@ -674,7 +709,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }
 
     }
-
     private var simulacioJob: Job? = null
 
     fun simularRuta() {
@@ -715,7 +749,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             }
         }
     }
-
 
 
     fun verificarDistancia(posicionActual: LatLng) {
@@ -811,6 +844,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     }
 
     private var simulacioRutaJob: Job? = null
+
 
 
 
@@ -912,13 +946,10 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         animator.start()
     }
 
-
-
-    private fun mostrarInstruccio(instruccio: String, carrer: String/*, duracio: String, distancia: String*/) {
+    private fun mostrarInstruccio(instruccio: String, carrer: String, /*, duracio: String, distancia: String*/) {
         binding.indicacions.visibility = View.VISIBLE
         binding.txtInstruccio.text = instruccio
         binding.txtCarrer.text = carrer
-
     }
 
     fun verificarDistanciaDestiFinal(posicionActual: LatLng) {
@@ -1022,6 +1053,4 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         simulacioRutaJob?.cancel()
         super.onDestroy()
     }
-
-
 }

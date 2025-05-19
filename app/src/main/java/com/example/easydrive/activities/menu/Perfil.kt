@@ -219,12 +219,21 @@ class Perfil : AppCompatActivity() {
         }
 
         binding.btnLogout.setOnClickListener {
+            val sharedPref = getSharedPreferences("user_session", MODE_PRIVATE)
+            with(sharedPref.edit()) {
+                clear()
+                apply()
+            }
+
+            user = null
+
             val intent = Intent(this, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
-            user = null
+
             Toast.makeText(this, "Sessió tancada", Toast.LENGTH_LONG).show()
         }
+
 
         binding.tilDataNaix.setEndIconOnClickListener {
             val constraints = CalendarConstraints.Builder()

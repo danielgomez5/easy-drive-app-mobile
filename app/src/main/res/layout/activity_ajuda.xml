@@ -25,30 +25,20 @@
             android:id="@+id/textView1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Ajuda"
+            android:text="Preguntes freqüents"
             android:textSize="32sp"
             android:textStyle="bold"
             android:layout_marginTop="24dp"
             android:layout_marginHorizontal="24dp"
             app:layout_constraintTop_toBottomOf="@+id/imagebtnR1" />
 
-        <SearchView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/textView1"
-            android:layout_marginTop="10dp"
-            android:layout_marginHorizontal="20dp"
-            android:id="@+id/buscador"
-            android:background="@drawable/search_background"
-            android:queryHint="Buscar"
-            />
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_margin="20dp"
             android:id="@+id/rcvAjuda"
-            app:layout_constraintTop_toBottomOf="@+id/buscador"
+            app:layout_constraintTop_toBottomOf="@+id/textView1"
             app:layout_constraintBottom_toTopOf="@+id/btnContacte"/>
         <com.google.android.material.button.MaterialButton
             android:layout_width="match_parent"

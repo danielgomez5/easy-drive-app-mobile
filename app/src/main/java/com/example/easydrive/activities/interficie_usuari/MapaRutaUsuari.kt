@@ -360,7 +360,51 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
         }
 
         layout_bottom_sheet.findViewById<Button>(R.id.pagar).setOnClickListener {
-            bottom_behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            val tietNumTarjeta = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_numTarjeta)
+            val tietCaducitat = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_Caducitat)
+            val tietCvv = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_cvv)
+            val guardarTarjeta = layout_bottom_sheet.findViewById<CheckBox>(R.id.guardarTarjeta)
+
+            var isValid = true
+
+            tietNumTarjeta.error = null
+            tietCaducitat.error = null
+
+            if (tietNumTarjeta.text.isNullOrBlank()) {
+                tietNumTarjeta.error = "El número de targeta es obligatòri"
+                isValid = false
+            } else if (tietNumTarjeta.text!!.length < 12) {
+                tietNumTarjeta.error = "Número de targeta invàlid"
+                isValid = false
+            }
+
+            // Validar fecha caducidad
+            val caducitatText = tietCaducitat.text?.toString() ?: ""
+            if (caducitatText.isBlank()) {
+                tietCaducitat.error = "La data de caducidat es obligatòria"
+                isValid = false
+            } else {
+                val parts = caducitatText.split("/")
+                if (parts.size != 2 || parts[0].toIntOrNull() !in 1..12 || parts[1].toIntOrNull() == null) {
+                    tietCaducitat.error = "Formato de fecha incorrecto (MM/AA)"
+                    isValid = false
+                }
+            }
+
+
+            if (tietCvv.text.isNullOrBlank()) {
+                tietCvv.error = "El CVV es obligatòri"
+                isValid = false
+            } else if (tietCvv.text!!.length < 3) {
+                tietCvv.error = "CVV invàlid"
+                isValid = false
+            }
+
+            if (!isValid) {
+                return@setOnClickListener
+            }
+
+            bottom_behavior.setState(BottomSheetBehavior.STATE_HIDDEN)
 
             binding.loadingOverlay.visibility = View.VISIBLE
             binding.progressBar.visibility = View.VISIBLE
@@ -376,8 +420,8 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                     val sdfBD = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
                     pagament = DadesPagament(null, null, null, null, null)
-                    if (layout_bottom_sheet.findViewById<CheckBox>(R.id.guardarTarjeta).isChecked) {
-                        val input = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_Caducitat).text.toString()
+                    if (guardarTarjeta.isChecked) {
+                        val input = tietCaducitat.text.toString()
                         val parts = input.split("/")
                         if (parts.size == 2) {
                             val mes = parts[0].padStart(2, '0')
@@ -386,7 +430,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                             pagament?.dataExpiracio = dataFormatejada
                         }
 
-                        pagament?.numeroTarjeta = layout_bottom_sheet.findViewById<TextInputEditText>(R.id.tiet_numTarjeta).text.toString()
+                        pagament?.numeroTarjeta = tietNumTarjeta.text.toString()
                         pagament?.idUsuari = user?.dni.toString()
                         pagament?.titular = user?.nom + " " + user?.cognom
                     }
@@ -410,7 +454,9 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                     reserva.idUsuari = user?.dni
                     reserva.idEstat = 2
                     reservaConf = reserva
-                    crud.insertDadesPagament(pagament!!)
+                    if (guardarTarjeta.isChecked) {
+                        crud.insertDadesPagament(pagament!!)
+                    }
                     crud.insertReserves(reserva)
                 }
 
@@ -422,10 +468,9 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                 intent.putExtra("SELECTED_FRAGMENT", R.id.menuDestinsGuardats)
                 intent.putExtra("MOSTRAR_SNACKBAR", true)
                 startActivity(intent)
-
-
             }
         }
+
     }
 
     private fun dibuixarRuta(ubicacioActual: LatLng?, ubicacioDesti: LatLng) {

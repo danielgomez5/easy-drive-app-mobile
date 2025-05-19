@@ -7,9 +7,9 @@
         android:checked="false"
         />
     <item
-        android:title="Configuració"
+        android:title="Dades de pagament"
         android:id="@+id/menuConfig"
-        android:icon="@drawable/settings_selector"
+        android:icon="@drawable/dp_selector"
         android:checked="false"
         />
     <item

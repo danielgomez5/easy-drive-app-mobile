@@ -69,6 +69,9 @@ interface ApiService {
     @PUT("/api/usuari/{id}")
     suspend fun updateUser(@Path("id") id: String, @Body usuari: Usuari): Response<Missatge>
 
+    @PUT("/api/dades-pagament/{id}")
+    suspend fun updateDadesPagament(@Path("id") id: Int, @Body dp: DadesPagament): Response<Missatge>
+
     @PUT("/api/usuari/canvi-contrasenya/{id}")
     suspend fun changePassword(@Path("id") id: String?, @Body request: ChangePasswordRequest): Response<String>
 
@@ -157,4 +160,8 @@ interface ApiService {
 
     @DELETE("/api/cotxe/{id}")
     suspend fun delCotxe(@Path("id") id: String): Response<Missatge>
+
+    @DELETE("/api/dades-pagament/{id}")
+    suspend fun delDadesPagament(@Path("id") id: Int): Response<Missatge>
+
 }

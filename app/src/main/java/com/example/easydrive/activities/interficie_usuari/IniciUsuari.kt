@@ -13,12 +13,14 @@ import android.os.Looper
 import android.util.Log
 import android.view.MenuItem
 import android.view.ViewGroup
+import android.widget.CompoundButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -103,6 +105,35 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         }
         afegirFoto()
         editarHeader()
+
+        val prefs = getSharedPreferences("configuracio", MODE_PRIVATE)
+        val editor = prefs.edit()
+
+        val modeOscur = prefs.getBoolean("mode_oscuro", false)
+        binding.switchMode.isChecked = modeOscur
+
+        fun updateSwitchIcon(isNight: Boolean) {
+            val drawableRes = if (isNight) R.drawable.baseline_dark_mode_24 else R.drawable.baseline_sunny_24
+            binding.switchMode.thumbDrawable = ContextCompat.getDrawable(this, drawableRes)
+        }
+
+        updateSwitchIcon(modeOscur)
+
+        AppCompatDelegate.setDefaultNightMode(
+            if (modeOscur) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        )
+
+        binding.switchMode.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
+            editor.putBoolean("mode_oscuro", isChecked)
+            editor.apply()
+
+            updateSwitchIcon(isChecked)
+
+            AppCompatDelegate.setDefaultNightMode(
+                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
+
         actionBarDrawerToggle = ActionBarDrawerToggle(this, binding.main, R.string.obert, R.string.tancat)
         binding.main.addDrawerListener(actionBarDrawerToggle)
         binding.navigator.setNavigationItemSelectedListener(this)
@@ -143,12 +174,13 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
                 handler.postDelayed(this, intervalMillis)
             }
         }
+
         handler.post(checkReservesRunnable)
     }
     private val reservesNotificades = mutableSetOf<Int>()
     private var isCheckPaused = false
 
-    fun comrpovarConfirmat() {
+    fun comrpovarConfirmat(){
         if (isRequestInProgress) return
         isRequestInProgress = true
 
@@ -156,6 +188,7 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
             try {
                 val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val hoy = sdf.parse(sdf.format(Date()))
+
                 val crud = CrudApiEasyDrive()
                 val estatOk = crud.getReservaConf2(user?.dni!!)
 

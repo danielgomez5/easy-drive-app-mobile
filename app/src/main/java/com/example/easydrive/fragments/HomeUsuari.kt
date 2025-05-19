@@ -203,6 +203,7 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         //dialeg.window?.setWindowAnimations(R.style.animation)
         dialeg.setCancelable(false)
         dialeg.findViewById<MaterialButton>(R.id.btnConfirmarDRC).setOnClickListener {
+
             dialeg.dismiss()
         }
         dialeg.show()

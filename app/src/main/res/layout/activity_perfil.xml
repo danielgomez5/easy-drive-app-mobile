@@ -303,7 +303,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Eliminar compte"
-                        android:backgroundTint="@color/md_theme_error"
+                        android:backgroundTint="?colorError"
                         android:textColor="?attr/colorOnError" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>

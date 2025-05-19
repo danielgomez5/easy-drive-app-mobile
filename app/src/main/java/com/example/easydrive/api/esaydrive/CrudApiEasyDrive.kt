@@ -34,7 +34,6 @@ class CrudApiEasyDrive() : CoroutineScope {
         get() = Dispatchers.Main + job
 
     val urlBase = "http://172.16.24.115:7126/"
-    //val urlBase = "http://192.168.1.145:7126/"
 
     private fun getClient(): OkHttpClient {
         var logging = HttpLoggingInterceptor()
@@ -501,6 +500,20 @@ class CrudApiEasyDrive() : CoroutineScope {
             return false
     }
 
+    fun updateDadesPagament(id: Int, dp: DadesPagament): Boolean {
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).updateDadesPagament(id, dp)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
+
     fun changePassword(id: String?, request: ChangePasswordRequest): Boolean {
         var resposta: Response<String>? = null
         runBlocking {
@@ -579,6 +592,20 @@ class CrudApiEasyDrive() : CoroutineScope {
         runBlocking {
             val cor = launch {
                 resposta = getRetrofit().create(ApiService::class.java).delUser(id)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return true
+        else
+            return false
+    }
+
+    fun delDadesPagament(id: Int): Boolean {
+        var resposta: Response<Missatge>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).delDadesPagament(id)
             }
             cor.join()
         }
