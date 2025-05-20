@@ -39,6 +39,7 @@ import com.example.easydrive.activities.menu.Perfil
 import com.example.easydrive.adaptadors.AdaptadorEscollirCotxe
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
 import com.example.easydrive.api.geoapify.CrudGeo
+import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.Globals.clientUbi
 import com.example.easydrive.dades.Reserva
 import com.example.easydrive.dades.Usuari
@@ -201,53 +202,51 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
                             !reservesNotificades.contains(p.id)
                         ) {
                             reservesNotificades.add(p.id!!)
+
+                            val viatge = crud.getViatgeByReserva(p.id!!)
+                            val conductor = viatge?.idTaxista?.let { crud.getUsuariById(it) }
+                            val cotxe = viatge?.idCotxe?.let { crud.getCotxeByMatr(it) }
+                            Log.d("cotxe viatje", cotxe.toString())
+
                             withContext(Dispatchers.Main) {
                                 isCheckPaused = true
-                                dialogConfirmat(p)
+                                dialogConfirmat(p, conductor, cotxe)
                             }
                             break
                         }
                     }
                 }
             } catch (e: Exception) {
-                Log.e("API_ERROR", "Error obtenint reserves: ${e.message}")
+                Log.d("API_DEBUG", "user: ${user.toString()}")
+                Log.e("API_ERROR", "Error obtenint reserves: $e")
             } finally {
                 isRequestInProgress = false
             }
         }
+
     }
 
-    private fun dialogConfirmat(p: Reserva) {
+    private fun dialogConfirmat(p: Reserva, conductor: Usuari?, cotxe: Cotxe?) {
         val dialeg = Dialog(this)
         resConf = p
         dialeg.setContentView(R.layout.dialeg_reserva_confirmat)
         dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         dialeg.setCancelable(false)
 
-        val crud = CrudApiEasyDrive()
+        val txtNom = dialeg.findViewById<TextView>(R.id.txtNomConductor)
+        val txtMatricula = dialeg.findViewById<TextView>(R.id.txtMatriculaCotxe)
+        val img = dialeg.findViewById<CircleImageView>(R.id.imgFotoConductor)
 
-        val viatge = crud.getViatgeByReserva(p.id!!)
-        if (viatge != null) {
-            val conductor = crud.getUsuariById(viatge.idTaxista!!)
-            val cotxe = crud.getCotxeByMatr(viatge.idCotxe!!)
+        txtNom.text = conductor?.nom ?: "Nom no disponible"
+        txtMatricula.text = cotxe?.matricula ?: "Sense matrícula"
 
-            val txtNom = dialeg.findViewById<TextView>(R.id.txtNomConductor)
-            val txtMatricula = dialeg.findViewById<TextView>(R.id.txtMatriculaCotxe)
-            val img = dialeg.findViewById<CircleImageView>(R.id.imgFotoConductor)
-
-            txtNom.text = conductor?.nom ?: "Nom no disponible"
-            txtMatricula.text = cotxe?.matricula ?: "Sense matrícula"
-
-            try{
-                Glide.with(this)
-                    .load("http://172.16.24.115:7126/Photos/${conductor?.fotoPerfil}")
-                    .error(R.drawable.baseline_person_24)
-                    .into(img)
-            }catch (e: Exception){
-                img.setImageResource(R.drawable.baseline_person_24)
-            }
-        } else {
-            Log.e("Viatge", "No s'ha trobat cap viatge per aquesta reserva")
+        try {
+            Glide.with(this)
+                .load("http://172.16.24.115:7126/Photos/${conductor?.fotoPerfil}")
+                .error(R.drawable.baseline_person_24)
+                .into(img)
+        } catch (e: Exception) {
+            img.setImageResource(R.drawable.baseline_person_24)
         }
 
         dialeg.findViewById<MaterialButton>(R.id.btnConfirmarDRC).setOnClickListener {
@@ -257,6 +256,7 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
 
         dialeg.show()
     }
+
 
 
     private fun cmprovarArribadaDesti() {

@@ -478,24 +478,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
                 val client = crud.getUsuariById(reservaXEdit?.idUsuari.toString())
 
-                val viatgeIncomplet = Viatja(
-                    id = null,
-                    durada = null,
-                    distancia = null,
-                    valoracio = null,
-                    comentari = null,
-                    idZona = null,
-                    idTaxista = user?.dni,
-                    idReserva = reservaXEdit?.id,
-                    idCotxe = cotxe?.matricula,
-                    idReservaNavigation = null
-                )
 
-                if (crud.insertViatge(viatgeIncomplet)){
-                    Log.d("viatge temporal insertat", "CORRECTE")
-                } else{
-                    Log.d("viatge temporal insertat", "INCORRECTE")
-                }
 
                 if (ActivityCompat.checkSelfPermission(
                         this,
@@ -537,6 +520,25 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                     }
 
                     dialegCotxe.show()
+                }
+
+                val viatgeIncomplet = Viatja(
+                    id = null,
+                    durada = null,
+                    distancia = null,
+                    valoracio = null,
+                    comentari = null,
+                    idZona = null,
+                    idTaxista = user?.dni,
+                    idReserva = reservaXEdit?.id,
+                    idCotxe = cotxe?.matricula,
+                    idReservaNavigation = null
+                )
+
+                if (crud.insertViatge(viatgeIncomplet)){
+                    Log.d("viatge temporal insertat", "CORRECTE")
+                } else{
+                    Log.d("viatge temporal insertat", "INCORRECTE")
                 }
             } else{
                 Log.d("ya lo han confirmado", "pues eso")
