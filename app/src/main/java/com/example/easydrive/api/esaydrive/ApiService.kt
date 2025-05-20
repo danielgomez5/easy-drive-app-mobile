@@ -89,7 +89,7 @@ interface ApiService {
     suspend fun updateReserva(@Path("id") id: String, @Body reserva: Reserva): Response<Missatge>
 
     @PUT("/api/viatge/{id}")
-    suspend fun updateViatge(@Path("id") id: String, @Body viatge: Viatja): Response<Missatge>
+    suspend fun updateViatge(@Path("id") id: Int, @Body viatge: Viatja): Response<Missatge>
 
     @PUT("/api/cotxe/{id}")
     suspend fun updateCotxe(@Path("id") id: String, @Body cotxe: Cotxe): Response<Missatge>
@@ -137,7 +137,7 @@ interface ApiService {
     suspend fun getReservaById(@Path("id") id: String): Response<Reserva>
 
     @GET("/api/viatge-reserva/{id}")
-    suspend fun getViatgeByReserva(@Path("id") id: String): Response<Viatja>
+    suspend fun getViatgeByReserva(@Path("id") id: Int): Response<Viatja>
 
     @GET("/api/cotxe/{id}")
     suspend fun getCotxeByMatricula(@Path("id") id: String) : Response<Cotxe>

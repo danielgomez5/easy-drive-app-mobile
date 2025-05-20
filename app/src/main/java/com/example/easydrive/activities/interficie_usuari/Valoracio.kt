@@ -34,17 +34,17 @@ class Valoracio : AppCompatActivity() {
         }
         val crud = CrudApiEasyDrive()
         reserva = intent.getSerializableExtra("reserva") as? Reserva
-        viatge = crud.getViatgeByReserva(reserva?.id.toString())
+        viatge = crud.getViatgeByReserva(reserva?.id!!)
         taxista = crud.getUsuariById(viatge?.idTaxista.toString())
         afegirFoto()
         binding.nomTaxista.setText(taxista?.nom+" "+taxista?.cognom)
 
-        //a
+
 
         binding.btnValora.setOnClickListener {
             viatge?.comentari = binding.textComentari.text.toString()
             viatge?.valoracio = binding.valoracio.rating
-            if (crud.updateViatge(viatge?.id.toString(), viatge!!)){
+            if (crud.updateViatge(viatge?.id!!, viatge!!)){
                 Log.d("Update Viatge", "S'ha pogut fer")
                 startActivity(Intent(this, IniciUsuari::class.java))
                 finish()

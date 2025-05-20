@@ -67,6 +67,7 @@ import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.Viatja
 import com.example.easydrive.dades.cotxeSeleccionat
 import com.example.easydrive.dades.user
+import com.example.easydrive.dades.viatja
 import com.example.easydrive.databinding.ActivityIniciTaxistaBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -123,7 +124,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     val novaPendents = mutableListOf<Reserva>()
     var reservaXEdit : Reserva?=null
-    var viatja : Viatja?=null
     var cotxe : Cotxe?=null
     var cotxesByTaxi : List<Cotxe>?=null
     var destFinal: String?=null
@@ -478,6 +478,25 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
                 val client = crud.getUsuariById(reservaXEdit?.idUsuari.toString())
 
+                val viatgeIncomplet = Viatja(
+                    id = null,
+                    durada = null,
+                    distancia = null,
+                    valoracio = null,
+                    comentari = null,
+                    idZona = null,
+                    idTaxista = user?.dni,
+                    idReserva = reservaXEdit?.id,
+                    idCotxe = cotxe?.matricula,
+                    idReservaNavigation = null
+                )
+
+                if (crud.insertViatge(viatgeIncomplet)){
+                    Log.d("viatge temporal insertat", "CORRECTE")
+                } else{
+                    Log.d("viatge temporal insertat", "INCORRECTE")
+                }
+
                 if (ActivityCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_FINE_LOCATION
@@ -790,58 +809,67 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         binding.btnExpandMenu.visibility = View.GONE
         poly?.remove()
 
-        val ubiOrg = LatLng(ubiClient!!.latitude,ubiClient!!.longitude)
+        val ubiOrg = LatLng(ubiClient!!.latitude, ubiClient!!.longitude)
         Log.d("UbiOrg", ubiOrg.toString())
-        val ubiDest = LatLng(destiClient!!.latitude,destiClient!!.longitude)
+        val ubiDest = LatLng(destiClient!!.latitude, destiClient!!.longitude)
         Log.d("UbiDest", ubiDest.toString())
 
-        val crud = CrudOpenRoute(this)
-        val start = ubiOrg.longitude.toString() + "," + ubiOrg.latitude.toString()
-        val end = ubiDest.longitude.toString() + "," + ubiDest.latitude.toString()
+        val crudRuta = CrudOpenRoute(this)
+        val start = "${ubiOrg.longitude},${ubiOrg.latitude}"
+        val end = "${ubiDest.longitude},${ubiDest.latitude}"
         destFinal = end
-        Log.d("start", start.toString())
-        Log.d("end", end.toString())
+        Log.d("start", start)
+        Log.d("end", end)
 
-        var horas: Int? = null
-        var minutos: Int? = null
         var segundos: Int? = null
+        var resposta = crudRuta.getRutaCotxe(start, end)
 
-
-        var resposta = crud.getRutaCotxe(start, end)
         if (resposta != null) {
             resposta.features.map {
                 coordenadesViatgeClient = it.geometry.coordinates as MutableList<List<Double>>?
                 segundos = it.properties.summary.duration.toInt()
-                viatja?.distancia = (it.properties.summary.distance / 1000).toDouble()
-                it.properties.segments.map {
-                    instruccio = it.steps
+                it.properties.segments.map { segment ->
+                    instruccio = segment.steps
                 }
             }
+
             val crud = CrudApiEasyDrive()
 
-            viatja?.idTaxista = user?.dni
-            viatja?.durada = (segundos?.div(60))
-            viatja?.idZona = user?.idZona
-            viatja?.idReserva = reservaXEdit?.id
-            viatja?.idCotxe = cotxe?.matricula
-            cotxe?.horesTreballades = cotxe?.horesTreballades?.plus(segundos?.toFloat()!!.div(60))
-            if (crud.insertViatge(viatja!!))
-                Log.d("insert Viatge", "correcte")
-            else
-                Log.d("insert Viatge", "incorrecte")
+            // Recuperar el viatge existente por ID de reserva
+            val viatgeExist = crud.getViatgeByReserva(reservaXEdit?.id!!)
+            if (viatgeExist != null) {
+                viatgeExist.distancia = resposta.features.first().properties.summary.distance / 1000
+                viatgeExist.durada = segundos?.div(60)
+                viatgeExist.idZona = user?.idZona
 
-            if (crud.updateCotxe(cotxe?.matricula!!, cotxe!!))
-                Log.d("update cotxe", "correcte")
-            else
-                Log.d("update cotxe", "incorrecte")
+                // Actualizar horas del coche
+                cotxe?.horesTreballades = cotxe?.horesTreballades?.plus(segundos?.toFloat()!!.div(60))
 
-            drawRoute(map!!, coordenadesViatgeClient!!)
+                // Actualizar el viaje
+                if (crud.updateViatge(viatgeExist.id!!, viatgeExist)) {
+                    Log.d("update Viatge", "correcte")
+                } else {
+                    Log.d("update Viatge", "incorrecte")
+                }
 
+                // Actualizar el coche
+                if (cotxe != null && crud.updateCotxe(cotxe?.matricula!!, cotxe!!)) {
+                    Log.d("update cotxe", "correcte")
+                } else {
+                    Log.d("update cotxe", "incorrecte")
+                }
+
+                drawRoute(map!!, coordenadesViatgeClient!!)
+            } else {
+                Log.e("Viatge error", "No s'ha trobat cap viatge per aquesta reserva.")
+                Toast.makeText(this, "Error: no s'ha trobat el viatge", Toast.LENGTH_LONG).show()
+            }
         } else {
             Log.d("resposta api", resposta.toString())
-            Toast.makeText(this, "No hi ha resposta", Toast.LENGTH_LONG)
+            Toast.makeText(this, "No hi ha resposta", Toast.LENGTH_LONG).show()
         }
     }
+
 
     private var simulacioRutaJob: Job? = null
 

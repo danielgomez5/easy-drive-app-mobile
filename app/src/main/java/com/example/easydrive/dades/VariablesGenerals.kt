@@ -23,6 +23,8 @@ var cotxeSeleccionat : Cotxe?=null
 //Reserva
 var reservaConf: Reserva?=null
 
+
+
 //LatLng
 //var clientUbi: LatLng?=null
 object Globals {

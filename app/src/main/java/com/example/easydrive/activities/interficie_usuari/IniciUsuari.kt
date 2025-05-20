@@ -56,6 +56,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener
+import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -216,26 +217,47 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         }
     }
 
-    private fun dialogConfirmat(p: Reserva){
+    private fun dialogConfirmat(p: Reserva) {
         val dialeg = Dialog(this)
         resConf = p
-        Log.d("resConf", resConf.toString())
         dialeg.setContentView(R.layout.dialeg_reserva_confirmat)
         dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        //dialeg.window?.setWindowAnimations(R.style.animation)
         dialeg.setCancelable(false)
 
-        val llista = mutableListOf<Reserva>()
-        llista.add(p)
+        val crud = CrudApiEasyDrive()
+
+        val viatge = crud.getViatgeByReserva(p.id!!)
+        if (viatge != null) {
+            val conductor = crud.getUsuariById(viatge.idTaxista!!)
+            val cotxe = crud.getCotxeByMatr(viatge.idCotxe!!)
+
+            val txtNom = dialeg.findViewById<TextView>(R.id.txtNomConductor)
+            val txtMatricula = dialeg.findViewById<TextView>(R.id.txtMatriculaCotxe)
+            val img = dialeg.findViewById<CircleImageView>(R.id.imgFotoConductor)
+
+            txtNom.text = conductor?.nom ?: "Nom no disponible"
+            txtMatricula.text = cotxe?.matricula ?: "Sense matrícula"
+
+            try{
+                Glide.with(this)
+                    .load("http://172.16.24.115:7126/Photos/${conductor?.fotoPerfil}")
+                    .error(R.drawable.baseline_person_24)
+                    .into(img)
+            }catch (e: Exception){
+                img.setImageResource(R.drawable.baseline_person_24)
+            }
+        } else {
+            Log.e("Viatge", "No s'ha trobat cap viatge per aquesta reserva")
+        }
+
         dialeg.findViewById<MaterialButton>(R.id.btnConfirmarDRC).setOnClickListener {
             cmprovarArribadaDesti()
-            //handler.post(arrivedCheckRunnable!!)
-            //arrivedCheckRunnable?.let { handler.post(it) }
             dialeg.dismiss()
         }
 
         dialeg.show()
     }
+
 
     private fun cmprovarArribadaDesti() {
         val crud = CrudApiEasyDrive()

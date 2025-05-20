@@ -378,7 +378,7 @@ class CrudApiEasyDrive() : CoroutineScope {
             return null
     }
 
-    fun getViatgeByReserva(id: String): Viatja?{
+    fun getViatgeByReserva(id: Int): Viatja?{
         var resposta: Response<Viatja>? = null
         runBlocking {
             val cor = launch {
@@ -557,7 +557,7 @@ class CrudApiEasyDrive() : CoroutineScope {
             return false
     }
 
-    fun updateViatge(id:String, viatge: Viatja): Boolean{
+    fun updateViatge(id:Int, viatge: Viatja): Boolean{
         var resposta: Response<Missatge>? = null
         runBlocking {
             val cor = launch {

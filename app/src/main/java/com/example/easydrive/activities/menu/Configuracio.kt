@@ -189,7 +189,109 @@ class Configuracio : AppCompatActivity() {
             }
         }
 
+        binding.btnAddPayment.setOnClickListener {
+            var dp: DadesPagament? = null
+            val bottomSheetView = layoutInflater.inflate(R.layout.bottom_sheet_modificar_dades_pagament, null)
+            val dialog = BottomSheetDialog(this)
+            dialog.setContentView(bottomSheetView)
 
+            val etNumTarjeta = bottomSheetView.findViewById<TextInputEditText>(R.id.etNumTarjeta)
+            val etCaducitat = bottomSheetView.findViewById<TextInputEditText>(R.id.etCaducitat)
+            val btnGuardar = bottomSheetView.findViewById<Button>(R.id.btnGuardar)
+
+            btnGuardar.setOnClickListener {
+                val numero = etNumTarjeta.text.toString()
+                val caducitat = etCaducitat.text.toString()
+
+                var isValid = true
+
+                if (numero.length < 12) {
+                    etNumTarjeta.error = "Número no vàlid"
+                    isValid = false
+                }
+
+                val parts = caducitat.split("/")
+                if (parts.size != 2 || parts[0].toIntOrNull() !in 1..12 || parts[1].length != 2) {
+                    etCaducitat.error = "Format ha de ser MM/AA"
+                    isValid = false
+                }
+
+                if (!isValid) return@setOnClickListener
+
+                dp = DadesPagament(null, numero, "${user?.nom} ${user?.cognom}", convertirCaducitatASQLDate(caducitat), user?.dni)
+
+                lifecycleScope.launch(Dispatchers.IO) {{
+
+                }
+                    if (crud.insertDadesPagament(dp!!)){
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@Configuracio, "Dades de pagament afegides", Toast.LENGTH_SHORT).show()
+                            dialog.dismiss()
+
+                            actualitzarVistaPagament(dp)
+                        }
+                    }else{
+                        Toast.makeText(this@Configuracio, "Hi ha hagut un problema afegint les dades", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                    }
+                }
+            }
+
+            etCaducitat.addTextChangedListener(object : TextWatcher {
+                private var isEditing = false
+
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+                override fun afterTextChanged(s: Editable?) {
+                    if (isEditing) return
+                    isEditing = true
+
+                    s?.let {
+                        val digits = it.toString().replace("[^\\d]".toRegex(), "")
+                        val builder = StringBuilder()
+
+                        // Validar mes
+                        if (digits.length >= 2) {
+                            val month = digits.substring(0, 2).toIntOrNull()
+                            if (month == null || month !in 1..12) {
+                                etCaducitat.setText("")
+                                isEditing = false
+                                return
+                            }
+                            builder.append(String.format("%02d", month)).append("/")
+                        } else {
+                            builder.append(digits)
+                            isEditing = false
+                            return
+                        }
+
+                        // Validar año solo si hay 2 dígitos
+                        if (digits.length >= 4) {
+                            val yearPart = digits.substring(2, 4)
+                            val year = yearPart.toIntOrNull()
+                            val currentYear = Calendar.getInstance().get(Calendar.YEAR) % 100
+
+                            if (year != null && year < currentYear) {
+                                etCaducitat.setText("")
+                                isEditing = false
+                                return
+                            }
+
+                            builder.append(yearPart)
+                        } else if (digits.length > 2) {
+                            builder.append(digits.substring(2))
+                        }
+
+                        etCaducitat.setText(builder.toString())
+                        etCaducitat.setSelection(builder.length.coerceAtMost(etCaducitat.text?.length ?: 0))
+                    }
+
+                    isEditing = false
+                }
+            })
+            dialog.show()
+        }
 
 
         binding.imagebtnR1.setOnClickListener {
