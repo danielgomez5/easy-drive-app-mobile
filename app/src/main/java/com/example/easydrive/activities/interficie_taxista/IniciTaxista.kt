@@ -121,6 +121,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     var ubiClient: LatLng?=null
     var destiClient : LatLng?=null
     private var marcadorSimulacio: Marker? = null
+    private var marcadorFinal: Marker? = null
 
     val novaPendents = mutableListOf<Reserva>()
     var reservaXEdit : Reserva?=null
@@ -738,6 +739,16 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }
 
         val coordenades = coordenadesViatgeClient!!.toMutableList()
+        val steps = instruccio ?: emptyList()
+        var indexPunt = 0
+        var indexStep = 0
+
+        val primerPunt = coordenades.first()
+        val latLngInicial = LatLng(primerPunt[1], primerPunt[0])
+        val puntFinal = coordenades.last()
+
+        val latLngFinal= LatLng(puntFinal[1], puntFinal[0])
+        marcadorFinal = map?.addMarker(MarkerOptions().position(latLngFinal))
 
         simulacioJob = CoroutineScope(Dispatchers.Main).launch {
             while (coordenades.isNotEmpty()) {
@@ -760,16 +771,33 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
                 map?.animateCamera(CameraUpdateFactory.newLatLng(posicio))
 
+                if (indexStep < steps.size) {
+                    val currentStep = steps[indexStep]
+                    val (start, end) = currentStep.way_points
 
-                verificarDistancia(posicio)
+                    if (indexPunt >= start && indexPunt <= end) {
+                        indexStep++
+                    }
 
+                    if (currentStep.instruction.contains("arrive", ignoreCase = true)) {
+                        Log.d("SIMULACIO", "Detectat pas final per instrucció: ${currentStep.instruction}")
+                    }
+                }
+
+                indexPunt++
                 delay(1000L) // espera 1 segundo entre puntos
+            }
+
+            withContext(Dispatchers.Main) {
+                Log.d("SIMULACIO", "Verificació de distància forçada al final")
+                verificarDistancia(ubicacioActual!!)
             }
         }
     }
 
-
     fun verificarDistancia(posicionActual: LatLng) {
+        Log.d("VERIFICAR", "ubicacioActual: $posicionActual, ubiClient: $ubiClient")
+
         ubiClient?.let {
             val distancia = FloatArray(1)
             Location.distanceBetween(
@@ -777,14 +805,17 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 it.latitude, it.longitude,
                 distancia
             )
-            if (distancia[0] < 10 && !rutaDelViajeMostrada) {
+            Log.d("VERIFICAR", "Distancia al client: ${distancia[0]}")
+
+            if (distancia[0] < 30 && !rutaDelViajeMostrada) {
+                Log.d("VERIFICAR", "Distancia < 10m -> estat5=true")
                 rutaDelViajeMostrada = true
                 estat5 = true
                 simulacioJob?.cancel()
-                // Aquí ejecutas lo que toca al llegar
             }
-        }
+        } ?: Log.e("VERIFICAR", "ubiClient és NULL")
     }
+
 
     fun ubicacioLatLagByText(reserva: String): LatLng?{
         val crudGeo = CrudGeo(this)
@@ -807,6 +838,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         binding.cardDispo.visibility = View.GONE
         binding.btnExpandMenu.visibility = View.GONE
         poly?.remove()
+        marcadorFinal?.remove()
 
         val ubiOrg = LatLng(ubiClient!!.latitude, ubiClient!!.longitude)
         Log.d("UbiOrg", ubiOrg.toString())
@@ -944,36 +976,8 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         }
     }
 
-    fun animateMarkerAndCamera(
-        marker: Marker,
-        map: GoogleMap,
-        start: LatLng,
-        end: LatLng,
-        durationMs: Long = 1000L,
-        onAnimationEnd: () -> Unit
-    ) {
-        val animator = ValueAnimator.ofFloat(0f, 1f)
-        animator.duration = durationMs
-        animator.interpolator = LinearInterpolator()
 
-        animator.addUpdateListener { valueAnimator ->
-            val t = valueAnimator.animatedValue as Float
-            val lat = (end.latitude - start.latitude) * t + start.latitude
-            val lng = (end.longitude - start.longitude) * t + start.longitude
-            val newPos = LatLng(lat, lng)
-
-            marker.position = newPos
-            map.animateCamera(CameraUpdateFactory.newLatLng(newPos))
-        }
-
-        animator.doOnEnd {
-            onAnimationEnd()
-        }
-
-        animator.start()
-    }
-
-    private fun mostrarInstruccio(instruccio: String, carrer: String, /*, duracio: String, distancia: String*/) {
+    private fun mostrarInstruccio(instruccio: String, carrer: String) {
         binding.indicacions.visibility = View.VISIBLE
         binding.txtInstruccio.text = instruccio
         binding.txtCarrer.text = carrer
@@ -996,9 +1000,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 reservaXEdit?.idEstat =3
                 crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
                 dialogArribadaDesti()
-                /*CoroutineScope(Dispatchers.Main).launch {
-                    dialogArribadaDesti()
-                }*/
             }
         }
     }

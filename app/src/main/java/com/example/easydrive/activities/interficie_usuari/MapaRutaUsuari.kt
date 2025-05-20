@@ -512,7 +512,9 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun drawRoute(gMap: GoogleMap, coordenades: List<List<Double>>) {
-        val polylineOptions = PolylineOptions()
+        val polylineOptions = PolylineOptions().color(R.color.md_theme_inversePrimary_mediumContrast_night)
+            .width(10f)
+            .geodesic(true)
 
         coordenades.forEach {
             polylineOptions.add(LatLng(it[1], it[0]))
