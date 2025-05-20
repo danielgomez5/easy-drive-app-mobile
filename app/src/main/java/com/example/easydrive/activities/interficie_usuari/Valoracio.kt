@@ -39,8 +39,6 @@ class Valoracio : AppCompatActivity() {
         afegirFoto()
         binding.nomTaxista.setText(taxista?.nom+" "+taxista?.cognom)
 
-
-
         binding.btnValora.setOnClickListener {
             viatge?.comentari = binding.textComentari.text.toString()
             viatge?.valoracio = binding.valoracio.rating

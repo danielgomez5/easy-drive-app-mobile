@@ -51,7 +51,8 @@ class AdaptadorAjuda (val llista: List<AjudaDades>,
 
         layout_bottom_sheet.findViewById<Button>(R.id.btnContacte).setOnClickListener {
             bottom_behavior.state = BottomSheetBehavior.STATE_HIDDEN
-            //startActivity(Intent(holder.vista.context, Contacte::class.java))
+            val intent = Intent(holder.vista.context, Contacte::class.java)
+            holder.vista.context.startActivity(intent)
         }
 
     }

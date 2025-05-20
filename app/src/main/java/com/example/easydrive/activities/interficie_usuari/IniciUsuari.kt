@@ -59,6 +59,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -193,7 +194,7 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
 
                 val crud = CrudApiEasyDrive()
                 val estatOk = crud.getReservaConf2(user?.dni!!)
-
+                Log.d("estatOk", estatOk.toString())
                 if (!estatOk.isNullOrEmpty()) {
                     for (p in estatOk) {
                         val dataReserva = p.dataViatge?.let { sdf.parse(it) }
@@ -278,15 +279,18 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
                             val fragment = supportFragmentManager.findFragmentById(R.id.fcv) as? HomeUsuari
                             fragment?.let {
                                 it.map?.let { googleMap ->
-                                    googleMap.addMarker(
+                                    it.marcador?.remove()
+                                    it.marcador =  googleMap.addMarker(
                                         MarkerOptions()
                                             .position(clientUbi!!)
                                             .title("Simulació Ubi destí")
                                             .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap()))
                                     )
+
                                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(clientUbi!!, 15f))
                                 }
                             }
+                            delay(1500L)
                             val intent = Intent(this@IniciUsuari, Valoracio::class.java)
                             intent.putExtra("reserva", reserva)
                             startActivity(intent)
@@ -305,9 +309,6 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         // Iniciar la primera comprobación
         handler.post(arrivedCheckRunnable!!)
     }
-
-
-
 
     fun returnBitmap(): Bitmap{
         return getBitmapFromVectorDrawable(R.drawable.baseline_boy_24)

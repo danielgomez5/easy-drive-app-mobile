@@ -87,7 +87,7 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
     private var reserva: Boolean = false
 
     var ubicacioActual: LatLng? = null
-    private var marcador: Marker? = null
+    var marcador: Marker? = null
 
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var checkReservesRunnable: Runnable

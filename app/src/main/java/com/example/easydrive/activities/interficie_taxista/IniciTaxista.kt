@@ -176,7 +176,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         editarHeader()
         afegirFoto()
         getDisponiblitat(crud)
-        //a
         runReserves()
 
         val prefs = getSharedPreferences("configuracio", MODE_PRIVATE)
@@ -278,6 +277,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         actionBarDrawerToggle = ActionBarDrawerToggle(this, binding.main, R.string.obert, R.string.tancat)
         binding.main.addDrawerListener(actionBarDrawerToggle)
         binding.navigator.setNavigationItemSelectedListener(this)
+        binding.navigator.menu.findItem(R.id.menuConfig).isVisible = false
 
         binding.btnPerfil.setOnClickListener {
             binding.main.openDrawer(GravityCompat.START)
@@ -285,9 +285,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         binding.simulacio.setOnClickListener {
             binding.simulacio.visibility = View.GONE
-            //simularRuta()
-            //simularRutaUnificada(true)
-            //iniciarSimulacioRutaDesti()
             simulacioRutaArribarDesti()
         }
     }

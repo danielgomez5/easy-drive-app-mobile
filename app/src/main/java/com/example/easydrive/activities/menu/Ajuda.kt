@@ -1,5 +1,6 @@
 package com.example.easydrive.activities.menu
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -44,6 +45,11 @@ class Ajuda : AppCompatActivity() {
         }
 
         binding.imagebtnR1.setOnClickListener {
+            finish()
+        }
+
+        binding.btnContacte.setOnClickListener {
+            startActivity(Intent(this, Contacte::class.java))
             finish()
         }
     }
