@@ -1,32 +1,18 @@
 package com.example.easydrive.adaptadors
 
 import android.app.AlertDialog
-import android.app.Dialog
-import android.graphics.Color
 import android.os.Build
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.appcompat.widget.AppCompatImageButton
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.easydrive.R
 import com.example.easydrive.api.esaydrive.CrudApiEasyDrive
-import com.example.easydrive.api.geoapify.CrudGeo
 import com.example.easydrive.dades.Reserva
-import com.example.easydrive.dades.rutaDesti
-import com.example.easydrive.dades.rutaEscollida
-import com.example.easydrive.dades.rutaOrigen
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import java.text.SimpleDateFormat
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -101,6 +87,16 @@ class AdapterViatgesPendents(val llista: MutableList<Reserva>, private val onLis
                     llista[position].viewType = 1
                     notifyDataSetChanged()
                 }
+
+                val statusText = holder.vista.findViewById<TextView>(R.id.statusText)
+
+                if (item.idEstat == 1) {
+                    statusText.visibility = View.VISIBLE
+                    statusText.text = "Confirmada"
+                } else {
+                    statusText.visibility = View.GONE
+                }
+
             }
 
 
@@ -134,7 +130,17 @@ class AdapterViatgesPendents(val llista: MutableList<Reserva>, private val onLis
                     llista[position].viewType = 0
                     notifyDataSetChanged()
                 }
+
+                val statusText = holder.vista.findViewById<TextView>(R.id.statusText)
+
+                if (item.idEstat == 1) {
+                    statusText.visibility = View.VISIBLE
+                    statusText.text = "Confirmada"
+                } else {
+                    statusText.visibility = View.GONE
+                }
             }
+
         }
     }
 

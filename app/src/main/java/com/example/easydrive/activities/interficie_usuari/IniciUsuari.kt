@@ -12,6 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.TextView
@@ -112,6 +113,12 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         val prefs = getSharedPreferences("configuracio", MODE_PRIVATE)
         val editor = prefs.edit()
 
+        val idsNotificats = prefs.getStringSet("reserves_notificades", emptySet())
+            ?.mapNotNull { it.toIntOrNull() }
+            ?.toMutableSet() ?: mutableSetOf()
+        reservesNotificades.addAll(idsNotificats)
+
+
         val modeOscur = prefs.getBoolean("mode_oscuro", false)
         binding.switchMode.isChecked = modeOscur
 
@@ -136,6 +143,8 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
                 if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
             )
         }
+
+
 
         actionBarDrawerToggle = ActionBarDrawerToggle(this, binding.main, R.string.obert, R.string.tancat)
         binding.main.addDrawerListener(actionBarDrawerToggle)
@@ -204,6 +213,11 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
                         ) {
                             reservesNotificades.add(p.id!!)
 
+                            val prefs = getSharedPreferences("configuracio", MODE_PRIVATE)
+                            val editor = prefs.edit()
+                            editor.putStringSet("reserves_notificades", reservesNotificades.map { it.toString() }.toSet())
+                            editor.apply()
+
                             val viatge = crud.getViatgeByReserva(p.id!!)
                             val conductor = viatge?.idTaxista?.let { crud.getUsuariById(it) }
                             val cotxe = viatge?.idCotxe?.let { crud.getCotxeByMatr(it) }
@@ -238,8 +252,8 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
         val txtMatricula = dialeg.findViewById<TextView>(R.id.txtMatriculaCotxe)
         val img = dialeg.findViewById<CircleImageView>(R.id.imgFotoConductor)
 
-        txtNom.text = conductor?.nom ?: "Nom no disponible"
-        txtMatricula.text = cotxe?.matricula ?: "Sense matrícula"
+        txtNom.text = "${conductor?.nom} ${conductor?.cognom}" ?: "Nom no disponible"
+        txtMatricula.text = "Matrícula del cotxe: ${cotxe?.matricula}" ?: "Sense matrícula"
 
         try {
             Glide.with(this)
@@ -359,6 +373,12 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
 
 
     fun canviaFragment(f : Fragment) : Boolean{
+        if (f is ViatgesGuardats) {
+            binding.switchMode.visibility = View.GONE
+        } else {
+            binding.switchMode.visibility = View.VISIBLE
+        }
+
         val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.fcv,f)
         transaction.commit()

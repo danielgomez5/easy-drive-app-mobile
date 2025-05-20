@@ -342,6 +342,8 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
 
 
     fun carregarUbicacio() {
+        if (!isAdded) return
+
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(requireContext(), "Permisos no concedits", Toast.LENGTH_SHORT).show()
@@ -350,6 +352,8 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
 
         map?.isMyLocationEnabled = false
         fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
+            if (!isAdded) return@addOnSuccessListener
+
             if (location != null) {
                 clientUbi = LatLng(location.latitude, location.longitude)
                 marcador = map?.addMarker(
@@ -369,12 +373,14 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         }
     }
 
+
     fun returnBitmap(): Bitmap{
         return getBitmapFromVectorDrawable(R.drawable.baseline_boy_24)
     }
 
     fun getBitmapFromVectorDrawable(@DrawableRes drawableId: Int): Bitmap {
-        val drawable = ContextCompat.getDrawable(requireContext(), drawableId) ?: return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val context = context ?: return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val drawable = ContextCompat.getDrawable(context, drawableId) ?: return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         val bitmap = Bitmap.createBitmap(
             drawable.intrinsicWidth,
             drawable.intrinsicHeight,
@@ -385,6 +391,7 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         drawable.draw(canvas)
         return bitmap
     }
+
 
     private fun ocultarTeclat() {
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

@@ -5,12 +5,30 @@
     android:layout_marginHorizontal="16dp"
     android:layout_marginTop="10dp"
     app:cardCornerRadius="16dp"
-    app:cardElevation="6dp">
+    app:cardElevation="6dp"
+    android:id="@+id/cardPendents"
+    >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp">
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/status_chip"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:text="✓ Confirmada"
+            android:textColor="?colorOnPrimary"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/NomDesti"
@@ -20,10 +38,12 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="?colorPrimary"
+            android:layout_marginTop="10dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_borrar"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/statusText"
             app:layout_constraintBottom_toBottomOf="parent" />
+
 
         <ImageButton
             android:id="@+id/btn_borrar"
@@ -33,9 +53,8 @@
             android:backgroundTint="?attr/colorError"
             app:tint="@android:color/white"
             android:background="@drawable/rounded_icon_bg"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
