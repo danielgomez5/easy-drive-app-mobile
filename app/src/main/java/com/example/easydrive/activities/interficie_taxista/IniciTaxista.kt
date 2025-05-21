@@ -442,12 +442,12 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         return true
     }
 
+
     fun dialogRecollirClient(){
         controlRecollirClients = false
         val dialeg = Dialog(this)
         dialeg.setContentView(R.layout.dialog_recollirclient)
         dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        //dialeg.window?.setWindowAnimations(R.style.animation)
         dialeg.setCancelable(false)
 
         val reserva = novaPendents.first()
@@ -462,36 +462,35 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         tvDataHora.text = "Data i hora: ${reserva.dataViatge ?: ""} ${reserva.horaViatge ?: ""}"
         tvPreu.text = "Preu: ${reserva.preu?.toString() ?: "No disponible"} €"
 
-
-        dialeg.findViewById<MaterialButton>(R.id.btnAcceptarD).setOnClickListener { // si acepta la reserva
+        dialeg.findViewById<MaterialButton>(R.id.btnAcceptarD).setOnClickListener {
             controlRecollirClients = false
             reservaXEdit = novaPendents.removeFirstOrNull()
-            handler.removeCallbacks(checkReservesRunnable) // Detenemos comprobación de nuevas reservas
-            startCheckingReserva() // Comenzamos a comprobar estado de la reserva activa
+            handler.removeCallbacks(checkReservesRunnable)
+            startCheckingReserva()
 
             val crud = CrudApiEasyDrive()
-            if(getReservaNoConfirmada(crud, reservaXEdit!!)){
+            if (getReservaNoConfirmada(crud, reservaXEdit!!)) {
                 reservaXEdit?.idEstat = 1
                 reservaXEdit?.estat = "OK"
                 crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
                 val client = crud.getUsuariById(reservaXEdit?.idUsuari.toString())
 
-
-
                 if (ActivityCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_FINE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                    ) != PackageManager.PERMISSION_GRANTED ||
+                    ActivityCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_COARSE_LOCATION
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     return@setOnClickListener
                 }
+
                 cotxesByTaxi = crud.getAllCotxesByUsuari(user?.dni!!)
                 if (cotxesByTaxi?.size == 1) {
                     cotxe = cotxesByTaxi?.first()
-                    tracarRutaFinsClient(reservaXEdit!!, client!!)
+                    iniciarRutaSegonsHora(client!!)
                     dialeg.dismiss()
                 } else {
                     val dialegCotxe = Dialog(this)
@@ -504,12 +503,10 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                     recyclerView.layoutManager = LinearLayoutManager(this)
                     recyclerView.adapter = AdaptadorEscollirCotxe(cotxesByTaxi!!)
 
-
                     btnAcceptarCotxe.setOnClickListener {
-                        Log.d("cotxeSele", "Total cotxes: ${cotxeSeleccionat.toString()}")
                         if (cotxeSeleccionat != null) {
                             cotxe = cotxeSeleccionat
-                            tracarRutaFinsClient(reservaXEdit!!, client!!)
+                            iniciarRutaSegonsHora(client!!)
                             dialegCotxe.dismiss()
                             dialeg.dismiss()
                         } else {
@@ -533,17 +530,16 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                     idReservaNavigation = null
                 )
 
-                if (crud.insertViatge(viatgeIncomplet)){
+                if (crud.insertViatge(viatgeIncomplet)) {
                     Log.d("viatge temporal insertat", "CORRECTE")
-                } else{
+                } else {
                     Log.d("viatge temporal insertat", "INCORRECTE")
                 }
-            } else{
+            } else {
                 Log.d("ya lo han confirmado", "pues eso")
             }
+
             dialeg.dismiss()
-
-
         }
 
         dialeg.findViewById<MaterialButton>(R.id.btnCancelarD).setOnClickListener {
@@ -554,6 +550,32 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         dialeg.show()
     }
+
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    private fun iniciarRutaSegonsHora(client: Usuari) {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        val dataHoraReserva = sdf.parse("${reservaXEdit?.dataViatge} ${reservaXEdit?.horaViatge}")
+        val ara = Date()
+
+        if (dataHoraReserva != null && dataHoraReserva.after(ara)) {
+            Log.d("Reserva", "És una reserva programada. Esperant hora...")
+            esperarMomentReserva(dataHoraReserva, reservaXEdit!!, client)
+        } else {
+            tracarRutaFinsClient(reservaXEdit!!, client)
+        }
+    }
+
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    private fun esperarMomentReserva(hora: Date, reserva: Reserva, client: Usuari) {
+        val delayMillis = hora.time - System.currentTimeMillis()
+        handler.postDelayed({
+            tracarRutaFinsClient(reserva, client)
+        }, delayMillis)
+    }
+
+
+
+
 
     fun getReservaNoConfirmada(crud : CrudApiEasyDrive, reserva: Reserva): Boolean{
         val reserva = crud.getResevraById(reserva?.id.toString())

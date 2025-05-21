@@ -192,53 +192,67 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
     private val reservesNotificades = mutableSetOf<Int>()
     private var isCheckPaused = false
 
-    fun comrpovarConfirmat(){
+    fun comrpovarConfirmat() {
         if (isRequestInProgress) return
         isRequestInProgress = true
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val hoy = sdf.parse(sdf.format(Date()))
+                val sdfData = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val sdfDataHora = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                val ara = Date()
 
                 val crud = CrudApiEasyDrive()
                 val estatOk = crud.getReservaConf2(user?.dni!!)
-                Log.d("estatOk", estatOk.toString())
                 if (!estatOk.isNullOrEmpty()) {
                     for (p in estatOk) {
-                        val dataReserva = p.dataViatge?.let { sdf.parse(it) }
-                        if (dataReserva != null &&
-                            sdf.format(dataReserva) == sdf.format(hoy) &&
-                            !reservesNotificades.contains(p.id)
-                        ) {
-                            reservesNotificades.add(p.id!!)
+                        val dataHoraReserva = sdfDataHora.parse("${p.dataViatge} ${p.horaViatge}")
 
-                            val prefs = getSharedPreferences("configuracio", MODE_PRIVATE)
-                            val editor = prefs.edit()
-                            editor.putStringSet("reserves_notificades", reservesNotificades.map { it.toString() }.toSet())
-                            editor.apply()
-
+                        if (!reservesNotificades.contains(p.id)) {
                             val viatge = crud.getViatgeByReserva(p.id!!)
                             val conductor = viatge?.idTaxista?.let { crud.getUsuariById(it) }
                             val cotxe = viatge?.idCotxe?.let { crud.getCotxeByMatr(it) }
-                            Log.d("cotxe viatje", cotxe.toString())
+
+                            guardarNotificacio(p.id!!)
 
                             withContext(Dispatchers.Main) {
                                 isCheckPaused = true
                                 dialogConfirmat(p, conductor, cotxe)
+
+                                // Lógica añadida: si la reserva es para más tarde, esperar para iniciar viaje
+                                if (dataHoraReserva != null && dataHoraReserva.after(ara)) {
+                                    esperarHoraPerIniciarSeguiment(p, dataHoraReserva)
+                                } else {
+                                    cmprovarArribadaDesti()
+                                }
                             }
+
                             break
                         }
                     }
                 }
             } catch (e: Exception) {
-                Log.d("API_DEBUG", "user: ${user.toString()}")
-                Log.e("API_ERROR", "Error obtenint reserves: $e")
+                Log.e("API_ERROR", "Error comprovant reserves: $e")
             } finally {
                 isRequestInProgress = false
             }
         }
+    }
 
+    private fun guardarNotificacio(idReserva: Int) {
+        val prefs = getSharedPreferences("configuracio", MODE_PRIVATE)
+        val editor = prefs.edit()
+        reservesNotificades.add(idReserva)
+        editor.putStringSet("reserves_notificades", reservesNotificades.map { it.toString() }.toSet())
+        editor.apply()
+    }
+
+    private fun esperarHoraPerIniciarSeguiment(reserva: Reserva, dataHora: Date) {
+        val delay = dataHora.time - System.currentTimeMillis()
+        handler.postDelayed({
+            resConf = reserva
+            cmprovarArribadaDesti()
+        }, delay)
     }
 
     private fun dialogConfirmat(p: Reserva, conductor: Usuari?, cotxe: Cotxe?) {
