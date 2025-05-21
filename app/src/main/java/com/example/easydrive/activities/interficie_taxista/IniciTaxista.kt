@@ -709,7 +709,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         val start = ubicacioActual?.longitude.toString() + "," + ubicacioActual?.latitude.toString()
         val end = ubiClient?.longitude.toString() + "," + ubiClient?.latitude.toString()
-
+        marcadorFinal = map?.addMarker(MarkerOptions().position(ubiClient!!))
         Log.d("start", start.toString())
         Log.d("end", end.toString())
 
@@ -767,10 +767,10 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         val primerPunt = coordenades.first()
         val latLngInicial = LatLng(primerPunt[1], primerPunt[0])
-        val puntFinal = coordenades.last()
+        /*val puntFinal = coordenades.last()
 
         val latLngFinal= LatLng(puntFinal[1], puntFinal[0])
-        marcadorFinal = map?.addMarker(MarkerOptions().position(latLngFinal))
+        marcadorFinal = map?.addMarker(MarkerOptions().position(latLngFinal))*/
 
         simulacioJob = CoroutineScope(Dispatchers.Main).launch {
             while (coordenades.isNotEmpty()) {
@@ -833,6 +833,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 Log.d("VERIFICAR", "Distancia < 10m -> estat5=true")
                 rutaDelViajeMostrada = true
                 estat5 = true
+                marcadorFinal?.remove()
                 simulacioJob?.cancel()
             }
         } ?: Log.e("VERIFICAR", "ubiClient és NULL")
@@ -866,7 +867,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         Log.d("UbiOrg", ubiOrg.toString())
         val ubiDest = LatLng(destiClient!!.latitude, destiClient!!.longitude)
         Log.d("UbiDest", ubiDest.toString())
-
+        marcadorFinal = map?.addMarker(MarkerOptions().position(ubiDest))
         val crudRuta = CrudOpenRoute(this)
         val start = "${ubiOrg.longitude},${ubiOrg.latitude}"
         val end = "${ubiDest.longitude},${ubiDest.latitude}"
@@ -1020,6 +1021,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 binding.cardDispo.visibility = View.GONE
                 binding.btnExpandMenu.visibility = View.GONE
                 reservaXEdit?.idEstat =3
+                marcadorFinal?.remove()
                 crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
                 dialogArribadaDesti()
             }

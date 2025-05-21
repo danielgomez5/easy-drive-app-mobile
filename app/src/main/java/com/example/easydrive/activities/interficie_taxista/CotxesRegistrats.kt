@@ -42,6 +42,7 @@ class CotxesRegistrats : AppCompatActivity() {
     private lateinit var binding: ActivityCotxesRegistratsBinding
     private lateinit var openDocumentLauncher: ActivityResultLauncher<Array<String>>
     private var fileCallback: ((File?) -> Unit)? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
