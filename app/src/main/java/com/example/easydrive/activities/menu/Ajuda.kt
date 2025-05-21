@@ -2,6 +2,7 @@ package com.example.easydrive.activities.menu
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -33,6 +34,12 @@ class Ajuda : AppCompatActivity() {
         }
         layout_bottom_sheet = findViewById(R.id.layout_bottom_sheet_Ajuda)
         bottom_behavior = BottomSheetBehavior.from(layout_bottom_sheet)
+
+        val btnCerrar: ImageButton = layout_bottom_sheet.findViewById(R.id.btnCerrar)
+        btnCerrar.setOnClickListener {
+            bottom_behavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+
 
         if (user?.rol!!){
             binding.rcvAjuda.adapter = AdaptadorAjuda(llistaAjudaTaxista,layout_bottom_sheet,

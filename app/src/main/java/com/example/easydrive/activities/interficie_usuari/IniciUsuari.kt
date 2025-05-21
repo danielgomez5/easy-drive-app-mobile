@@ -219,7 +219,6 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
                                 isCheckPaused = true
                                 dialogConfirmat(p, conductor, cotxe)
 
-                                // Lógica añadida: si la reserva es para más tarde, esperar para iniciar viaje
                                 if (dataHoraReserva != null && dataHoraReserva.after(ara)) {
                                     esperarHoraPerIniciarSeguiment(p, dataHoraReserva)
                                 } else {
