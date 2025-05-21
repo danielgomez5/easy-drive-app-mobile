@@ -162,53 +162,6 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
         return binding.root
     }
 
-    /*private fun comprovarArribada() {
-        if (isRequestInProgress) return
-        isRequestInProgress = true
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val hoy = sdf.parse(sdf.format(Date()))
-
-                val crud = CrudApiEasyDrive()
-                val conf = crud.getReservaConf(user?.dni!!,reservaConf?.id.toString())
-                if (conf != null){
-                    val dataReserva = conf?.dataViatge?.let { sdf.parse(it) }
-                    if (dataReserva != null && dataReserva == hoy) {
-                        dialogInfo()
-                    }
-                }else{
-                    Log.d("confirmacio", "encara no confirmat")
-                }
-
-
-                if (novaPendents.isNotEmpty() && arribadaDesti) {
-                    withContext(Dispatchers.Main) {
-                        startActivity(Intent(requireContext(), Valoracio::class.java))
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("API_ERROR", "Error obtenint reserves: ${e.message}")
-            } finally {
-                isRequestInProgress = false
-            }
-        }
-    }
-
-    private fun dialogInfo(){
-        val dialeg = Dialog(requireContext())
-        dialeg.setContentView(R.layout.dialeg_reserva_confirmat)
-        dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        //dialeg.window?.setWindowAnimations(R.style.animation)
-        dialeg.setCancelable(false)
-        dialeg.findViewById<MaterialButton>(R.id.btnConfirmarDRC).setOnClickListener {
-
-            dialeg.dismiss()
-        }
-        dialeg.show()
-    }*/
-
     private fun dialogReserva() {
         val dialeg = Dialog(requireContext())
         dialeg.setContentView(R.layout.dialog_reserva)

@@ -208,11 +208,6 @@ class RegistreCotxe : AppCompatActivity() {
 
 
         binding.btnPujar2RC.setOnClickListener {
-            /*val fitxer = Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = "text/plain"
-            }
-            openDocumentLauncher.launch(fitxer)*/
-            //openDocumentLauncher.launch(arrayOf("application/octet-stream", "text/plain"))
             openDocumentLauncher.launch(arrayOf("application/pdf"))
         }
 
