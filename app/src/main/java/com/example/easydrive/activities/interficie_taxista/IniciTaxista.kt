@@ -396,6 +396,15 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         nomUser.text = "${user?.nom} ${user?.cognom}"
         //posar imatge
         var fotoUser = headerView.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.fotoHeader)
+
+        val crud = CrudApiEasyDrive()
+
+        try{
+            user?.fotoPerfil = crud.getImagePerfName(user?.dni!!)
+        }catch (e: Exception){
+
+        }
+
         try{
         Glide.with(this)
             .load("http://172.16.24.115:7126/Photos/${user?.fotoPerfil}")
@@ -407,6 +416,15 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     }
 
     private fun afegirFoto() {
+
+        val crud = CrudApiEasyDrive()
+
+        try{
+            user?.fotoPerfil = crud.getImagePerfName(user?.dni!!)
+        }catch (e: Exception){
+
+        }
+
         try{
         Glide.with(this)
             .load("http://172.16.24.115:7126/Photos/${user?.fotoPerfil}")

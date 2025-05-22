@@ -1,9 +1,13 @@
 package com.example.easydrive.activities.registre
 
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +21,7 @@ import com.example.easydrive.dades.Cotxe
 import com.example.easydrive.dades.Usuari
 import com.example.easydrive.dades.UsuariCotxeDTO
 import com.example.easydrive.databinding.ActivityRegistre3Binding
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -111,8 +116,17 @@ class Registre3 : AppCompatActivity() {
             intent.putExtra("user", usuari)
             startActivity(intent)
         } else {
-            Toast.makeText(this, "no s'ha afegit", Toast.LENGTH_LONG).show()
-            Log.d("3 if", "no s'ha afegit")
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            val view = currentFocus ?: View(this)
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+            Snackbar.make(findViewById(R.id.main), "El DNI especificat ja està registrat a l'app.", Snackbar.LENGTH_LONG)
+                .setBackgroundTint(resources.getColor(R.color.md_theme_secondary, null))
+                .setTextColor(resources.getColor(R.color.md_theme_onSecondary, null))
+                .show()
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                finish()
+            }, 2000)
         }
     }
 
@@ -133,7 +147,18 @@ class Registre3 : AppCompatActivity() {
             }
             Log.d("insert taxista", "s'ha afegit")
         } else {
-            Toast.makeText(this, "no s'ha afegit", Toast.LENGTH_LONG).show()
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            val view = currentFocus ?: View(this)
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+            Snackbar.make(findViewById(R.id.main), "El DNI especificat ja està registrat a l'app.", Snackbar.LENGTH_LONG)
+                .setBackgroundTint(resources.getColor(R.color.md_theme_secondary, null))
+                .setTextColor(resources.getColor(R.color.md_theme_onSecondary, null))
+                .show()
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                finish()
+
+            }, 2000)
             Log.d("insert taxista", "no s'ha afegit")
         }
 
@@ -146,7 +171,17 @@ class Registre3 : AppCompatActivity() {
                 Log.d("if insert foto cotxe", "NO s'ha editat")
             }
         } else {
-            Toast.makeText(this, "no s'ha afegit", Toast.LENGTH_LONG).show()
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            val view = currentFocus ?: View(this)
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+            Snackbar.make(findViewById(R.id.main), "La matrícula ja està registrada a l'app.", Snackbar.LENGTH_LONG)
+                .setBackgroundTint(resources.getColor(R.color.md_theme_secondary, null))
+                .setTextColor(resources.getColor(R.color.md_theme_onSecondary, null))
+                .show()
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                finish()
+            }, 2000)
             Log.d("insert cotxe", "no s'ha afegit")
         }
 

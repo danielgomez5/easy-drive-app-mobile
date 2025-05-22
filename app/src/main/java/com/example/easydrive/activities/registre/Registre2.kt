@@ -137,6 +137,11 @@ class Registre2 : AppCompatActivity() {
                 valid = false
             }
 
+            if (usuari?.rol == true && usuari?.fotoPerfil.isNullOrBlank()) {
+                Toast.makeText(this, "Has de pujar una foto de perfil per continuar", Toast.LENGTH_LONG).show()
+                valid = false
+            }
+
             if (zonaEscollida == null) {
                 Toast.makeText(this, "Has d’escollir una zona", Toast.LENGTH_LONG).show()
                 valid = false
