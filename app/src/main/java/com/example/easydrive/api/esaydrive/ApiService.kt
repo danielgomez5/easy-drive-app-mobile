@@ -12,6 +12,7 @@ import com.example.easydrive.dades.Viatja
 import com.example.easydrive.dades.Zona
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -72,8 +73,8 @@ interface ApiService {
     @PUT("/api/dades-pagament/{id}")
     suspend fun updateDadesPagament(@Path("id") id: Int, @Body dp: DadesPagament): Response<Missatge>
 
-    @PUT("/api/usuari/canvi-contrasenya/{id}")
-    suspend fun changePassword(@Path("id") id: String?, @Body request: ChangePasswordRequest): Response<String>
+    @PUT("/api/usuari/canvi-contrasenya")
+    suspend fun changePassword(@Query("id") id: String?, @Body request: ChangePasswordRequest): Response<ResponseBody>
 
     @Multipart
     @PUT("/api/cotxe_ftecnic/{matricula}")

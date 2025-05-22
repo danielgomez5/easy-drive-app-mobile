@@ -302,7 +302,6 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
                         clientUbi = LatLng(ubi.first().lat, ubi.first().lon)
                         Log.d("clientUbi", clientUbi.toString())
                         withContext(Dispatchers.Main) {
-                            // Accede al Fragment y llama a la función
                             handler.removeCallbacks(arrivedCheckRunnable!!)
                             val fragment = supportFragmentManager.findFragmentById(R.id.fcv) as? HomeUsuari
                             fragment?.let {

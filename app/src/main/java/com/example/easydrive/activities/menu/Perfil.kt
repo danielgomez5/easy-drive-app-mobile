@@ -176,6 +176,9 @@ class Perfil : AppCompatActivity() {
                     "Contrasenya actualitzada correctament",
                     Toast.LENGTH_LONG
                 ).show()
+                binding.tiePassword1.setText("")
+                binding.tiePassword2.setText("")
+
             } else {
                 Toast.makeText(
                     this,

@@ -21,7 +21,7 @@ val llistaAjudaTaxista = listOf<AjudaDades>(
     AjudaDades("Què faig si el passatger no es presenta?", "Espera els 5 minuts de cortesia. Si no arriba, pots cancel·lar el viatge seleccionant “El passatger no s’ha presentat”. Podries rebre una compensació pel temps d’espera."),
     AjudaDades("No puc iniciar sessió a l'app de conductor", "Comprova que la connexió a internet sigui estable i que les dades d’accés siguin correctes. Si el problema persisteix, intenta restablir la contrasenya o contacta amb suport."),
     AjudaDades("Com actualitzo la meva documentació?", "Ves a la secció “Perfil” dins de l’app EasyDrive com a conductor. Des d’allà podràs pujar qualsevol document nou o renovat."),
-    AjudaDades("Com faig que no estic disponible?", "A la pantalla principal de l'aplicació hi ha un interruptor amb el qual pots indicar si estàs disponible o no."),
+    AjudaDades("Com indico que no estic disponible?", "A la pantalla principal de l'aplicació hi ha un interruptor amb el qual pots indicar si estàs disponible o no."),
     AjudaDades("Hi ha un número d’atenció per a emergències?", "Sí, pots trucar al 900 123 456 per a emergències durant el servei. Està disponible 24/7."),
     AjudaDades("Com funcionen les puntuacions dels passatgers?", "Després de cada viatge pots valorar el teu passatger. També ells et poden valorar a tu. Aquestes puntuacions ajuden a mantenir la qualitat del servei."),
     AjudaDades("El meu compte ha sigut bloquejat, què puc fer?", "Contacta amb el nostre servei d’atenció a conductors mitjançant l’app o envia un correu a suport@easydrive.com. T’informarem del motiu i dels passos per reactivar el teu compte."),

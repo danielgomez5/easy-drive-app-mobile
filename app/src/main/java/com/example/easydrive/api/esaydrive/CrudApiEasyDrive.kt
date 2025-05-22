@@ -21,6 +21,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -515,10 +516,9 @@ class CrudApiEasyDrive() : CoroutineScope {
     }
 
     fun changePassword(id: String?, request: ChangePasswordRequest): Boolean {
-        var resposta: Response<String>? = null
+        var resposta: Response<ResponseBody>? = null
         runBlocking {
             val cor = launch {
-                resposta = getRetrofit().create(ApiService::class.java).changePassword(id, request)
                 resposta = getRetrofit().create(ApiService::class.java).changePassword(id, request)
             }
             cor.join()
