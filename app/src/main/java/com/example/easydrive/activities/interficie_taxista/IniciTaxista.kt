@@ -286,7 +286,9 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         binding.simulacio.setOnClickListener {
             binding.simulacio.visibility = View.GONE
-            simulacioRutaArribarDesti()
+            mostrarDialegClientPujat {
+                simulacioRutaArribarDesti()
+            }
         }
     }
 
@@ -644,7 +646,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                                     binding.cardInfoClient.visibility = View.GONE
                                     Toast.makeText(
                                         this@IniciTaxista,
-                                        "Viatge finalitzat",
+                                        "Arribada a la ubicació d'origen",
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     if (reserva.idEstat == 5) {
@@ -734,9 +736,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 }
                 drawRoute(map!!, coordenadesViatgeClient!!)
                 poly?.remove()
-                mostrarDialegClientPujat {
-                    simularRuta()
-                }
+                simularRuta()
                 //simularRutaUnificada(false)
                 //simulacioRutaArribarDesti()
             } else {
@@ -882,6 +882,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     fun trazarRutaViaje() {
         binding.cardInfoClient.visibility = View.INVISIBLE
         binding.cardDispo.visibility = View.GONE
+        binding.switchMode.visibility = View.GONE
         binding.btnExpandMenu.visibility = View.GONE
         poly?.remove()
         marcadorFinal?.remove()
@@ -1082,6 +1083,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             //poner un crud de updateReserva
             binding.indicacions.visibility = View.GONE
             binding.cardDispo.visibility = View.VISIBLE
+            binding.switchMode.visibility = View.VISIBLE
             binding.btnExpandMenu.visibility = View.VISIBLE
             runReserves()
             dialeg.dismiss()

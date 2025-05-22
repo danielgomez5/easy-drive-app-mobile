@@ -303,6 +303,7 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
                         Log.d("clientUbi", clientUbi.toString())
                         withContext(Dispatchers.Main) {
                             // Accede al Fragment y llama a la función
+                            handler.removeCallbacks(arrivedCheckRunnable!!)
                             val fragment = supportFragmentManager.findFragmentById(R.id.fcv) as? HomeUsuari
                             fragment?.let {
                                 it.map?.let { googleMap ->

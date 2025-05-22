@@ -132,56 +132,91 @@
             app:layout_constraintTop_toBottomOf="@+id/cardDispo" />
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/indicacions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/indicacions"
+            android:layout_margin="16dp"
             android:visibility="gone"
+            android:elevation="8dp"
+            android:padding="16dp"
+            app:cardCornerRadius="16dp"
             app:layout_constraintBottom_toBottomOf="parent">
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/iconInstruccio"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/outline_route_24"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
 
                 <TextView
                     android:id="@+id/txtInstruccio"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="40dp"
-                    android:layout_marginTop="20dp"
-                    android:textAlignment="center"
-                    android:textSize="20sp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Segueix recte durant 200m"
+                    android:textAlignment="viewStart"
+                    android:textSize="18sp"
                     android:textStyle="bold"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:padding="5dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/iconInstruccio"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Línea inferior -->
+                <View
+                    android:id="@+id/divider"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:background="#CCCCCC"
+                    app:layout_constraintTop_toBottomOf="@id/txtInstruccio"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
 
                 <LinearLayout
                     android:id="@+id/ll0"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="08dp"
+                    android:layout_marginTop="12dp"
+                    android:paddingBottom="16dp"
                     android:orientation="horizontal"
-                    app:layout_constraintTop_toBottomOf="@+id/txtInstruccio">
+                    app:layout_constraintTop_toBottomOf="@id/divider"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/baseline_location_pin_24" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:text="Nom:"
-                        android:layout_marginBottom="30dp"/>
+                        android:text="Carrer:"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/txtCarrer"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:hint="nom" />
+                        android:layout_marginStart="6dp"
+                        android:text="Nom del carrer" />
                 </LinearLayout>
-
             </androidx.constraintlayout.widget.ConstraintLayout>
-            <!--
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:id="@+id/rcvIndicacions"/>-->
         </androidx.cardview.widget.CardView>
+
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
