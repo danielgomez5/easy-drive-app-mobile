@@ -437,11 +437,11 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val menu = binding.navigator.menu
-        for (i in 0 until menu.size()) {
+        /*for (i in 0 until menu.size()) {
             menu.getItem(i).isChecked = false
         }
 
-        item.setChecked(true)
+        item.setChecked(true)*/
         when(item.itemId){
             R.id.menuPerfil -> {
                 startActivity(Intent(this, Perfil::class.java))

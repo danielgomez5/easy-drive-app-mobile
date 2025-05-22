@@ -317,7 +317,7 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
                                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(clientUbi!!, 15f))
                                 }
                             }
-                            delay(1500L)
+                            delay(2500L)
                             val intent = Intent(this@IniciUsuari, Valoracio::class.java)
                             intent.putExtra("reserva", reserva)
                             startActivity(intent)
@@ -418,11 +418,11 @@ class IniciUsuari : AppCompatActivity() , OnNavigationItemSelectedListener {
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val menu = binding.navigator.menu
-        for (i in 0 until menu.size()) {
+       /* for (i in 0 until menu.size()) {
             menu.getItem(i).isChecked = false
-        }
+        }*/
 
-        item.setChecked(true)
+        //item.setChecked(true)
         when(item.itemId){
             R.id.menuPerfil -> {
                 startActivity(Intent(this, Perfil::class.java))

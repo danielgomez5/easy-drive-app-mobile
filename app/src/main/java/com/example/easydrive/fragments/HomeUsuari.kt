@@ -315,7 +315,7 @@ class HomeUsuari : Fragment(), OnMapReadyCallback {
                         .title("Simulació Ubi actual")
                         .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap()))
                 )
-                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(clientUbi!!, 10f),2000,null)
+                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(clientUbi!!, 15f),2000,null)
                 rutaOrigen = CrudGeo(requireContext()).getLocationByLatLon(
                     clientUbi?.latitude.toString(),
                     clientUbi?.longitude.toString()

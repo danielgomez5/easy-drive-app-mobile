@@ -57,6 +57,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
@@ -354,8 +355,26 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
             markerDesti = map!!.addMarker(
                 MarkerOptions().position(ubiacioDesti)
             )
+            /*val central = LatLng(
+                (ubicacioActual?.latitude!!+ubiacioDesti.latitude)/2,(ubicacioActual?.longitude!!+ubiacioDesti.longitude)/2
+            )
+            map!!.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(central, 12.0f),3000,null
+            )
+            Log.d("ubicacioActual antes de la funcion", ubicacioActual.toString())
+            dibuixarRuta(ubicacioActual, ubiacioDesti)*/
+            val builder = LatLngBounds.Builder()
+            builder.include(ubicacioActual!!)
+            builder.include(ubiacioDesti)
+            val bounds = builder.build()
+
+            val padding = 300 // Puedes ajustar este valor si necesitas más espacio alrededor
+            val cu = CameraUpdateFactory.newLatLngBounds(bounds, padding)
+
+            map!!.animateCamera(cu, 3000, null)
             Log.d("ubicacioActual antes de la funcion", ubicacioActual.toString())
             dibuixarRuta(ubicacioActual, ubiacioDesti)
+
 
         }
 
