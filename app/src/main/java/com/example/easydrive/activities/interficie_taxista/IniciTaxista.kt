@@ -734,7 +734,9 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 }
                 drawRoute(map!!, coordenadesViatgeClient!!)
                 poly?.remove()
-                simularRuta()
+                mostrarDialegClientPujat {
+                    simularRuta()
+                }
                 //simularRutaUnificada(false)
                 //simulacioRutaArribarDesti()
             } else {
@@ -815,6 +817,27 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 verificarDistancia(ubicacioActual!!)
             }
         }
+    }
+
+    private fun mostrarDialegClientPujat(onConfirmar: () -> Unit) {
+        val dialeg = Dialog(this)
+        dialeg.setContentView(R.layout.dialog_client_pujat)
+        dialeg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        dialeg.setCancelable(false)
+
+        val btnConfirmar = dialeg.findViewById<MaterialButton>(R.id.btnClientPujat)
+        val btnCancelar = dialeg.findViewById<MaterialButton>(R.id.btnCancelPujat)
+
+        btnConfirmar.setOnClickListener {
+            dialeg.dismiss()
+            onConfirmar()
+        }
+
+        btnCancelar.setOnClickListener {
+            Toast.makeText(this, "Espera fins que el client estigui al vehicle", Toast.LENGTH_SHORT).show()
+        }
+
+        dialeg.show()
     }
 
     fun verificarDistancia(posicionActual: LatLng) {
