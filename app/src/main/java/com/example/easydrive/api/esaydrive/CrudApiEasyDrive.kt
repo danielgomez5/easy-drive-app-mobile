@@ -351,6 +351,20 @@ class CrudApiEasyDrive() : CoroutineScope {
             return null
     }
 
+    fun getImagePerfName(id: String) : String?{
+        var resposta: Response<String>? = null
+        runBlocking {
+            val cor = launch {
+                resposta = getRetrofit().create(ApiService::class.java).getImagePerfName(id)
+            }
+            cor.join()
+        }
+        if (resposta!!.isSuccessful)
+            return resposta!!.body()
+        else
+            return null
+    }
+
     fun getReservaConf(id: String, idR:String): Reserva?{
         var resposta: Response<Reserva>? = null
         runBlocking {

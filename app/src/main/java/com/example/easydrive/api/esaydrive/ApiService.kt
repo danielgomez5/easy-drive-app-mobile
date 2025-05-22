@@ -116,6 +116,9 @@ interface ApiService {
     @GET("/api/usuari-pagaments/{id_usuari}")
     suspend fun getDadesPagamentByUsuari(@Path("id_usuari") id_usuari: String) : Response<DadesPagament>
 
+    @GET("/api/usuari_image_name/{id}")
+    suspend fun getImagePerfName(@Path("id") id: String) : Response<String>
+
     @GET("/api/disponiblitat-taxista/{id}")
     suspend fun getDispoTaxista(@Path("id") id: String) : Response<Boolean>
 
