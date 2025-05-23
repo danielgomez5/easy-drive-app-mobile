@@ -939,7 +939,9 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 viatgeExist.idZona = user?.idZona
 
                 // Actualizar horas del coche
-                cotxe?.horesTreballades = cotxe?.horesTreballades?.plus(segundos?.toFloat()!!.div(60))
+                val duracioMinuts = (segundos?.toDouble() ?: 0.0) / 60.0
+                cotxe?.horesTreballades = (cotxe?.horesTreballades ?: 0f) + duracioMinuts.toFloat()
+
 
                 // Actualizar el viaje
                 if (crud.updateViatge(viatgeExist.id!!, viatgeExist)) {
