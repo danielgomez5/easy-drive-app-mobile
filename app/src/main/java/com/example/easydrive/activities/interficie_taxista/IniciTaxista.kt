@@ -479,7 +479,23 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
         tvOrigen.text = "Origen: ${reserva.origen ?: "Desconegut"}"
         tvDesti.text = "Desti: ${reserva.desti ?: "Desconegut"}"
-        tvDataHora.text = "Data i hora: ${reserva.dataViatge ?: ""} ${reserva.horaViatge ?: ""}"
+        val data = reserva.dataViatge
+        val hora = reserva.horaViatge
+
+        val formattedDateTime = if (!data.isNullOrBlank() && !hora.isNullOrBlank()) {
+            try {
+                val parser = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                val date = parser.parse("$data $hora")
+                "Data i hora: ${formatter.format(date)}"
+            } catch (e: Exception) {
+                "Data i hora: ${data} ${hora}"
+            }
+        } else {
+            "Data i hora: No disponible"
+        }
+
+        tvDataHora.text = formattedDateTime
         tvPreu.text = "Preu: ${reserva.preu?.toString() ?: "No disponible"} €"
 
         dialeg.findViewById<MaterialButton>(R.id.btnAcceptarD).setOnClickListener {
@@ -490,10 +506,6 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
             val crud = CrudApiEasyDrive()
             if (getReservaNoConfirmada(crud, reservaXEdit!!)) {
-                reservaXEdit?.idEstat = 1
-                reservaXEdit?.estat = "OK"
-                crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
-                val client = crud.getUsuariById(reservaXEdit?.idUsuari.toString())
 
                 if (ActivityCompat.checkSelfPermission(
                         this,
@@ -509,6 +521,11 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
                 cotxesByTaxi = crud.getAllCotxesByUsuari(user?.dni!!)
                 if (cotxesByTaxi?.size == 1) {
+                    reservaXEdit?.idEstat = 1
+                    reservaXEdit?.estat = "OK"
+                    crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
+                    val client = crud.getUsuariById(reservaXEdit?.idUsuari.toString())
+
                     cotxe = cotxesByTaxi?.first()
                     iniciarRutaSegonsHora(client!!)
                     dialeg.dismiss()
@@ -526,6 +543,11 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                     btnAcceptarCotxe.setOnClickListener {
                         if (cotxeSeleccionat != null) {
                             cotxe = cotxeSeleccionat
+
+                            reservaXEdit?.idEstat = 1
+                            reservaXEdit?.estat = "OK"
+                            crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
+                            val client = crud.getUsuariById(reservaXEdit?.idUsuari.toString())
                             iniciarRutaSegonsHora(client!!)
                             dialegCotxe.dismiss()
                             dialeg.dismiss()

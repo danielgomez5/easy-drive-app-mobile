@@ -60,7 +60,15 @@ class AdaptadorRVCotxes(val llista: MutableList<Cotxe>,
         holder.tvAny.text = "Any: ${item.any}"
         holder.tvTipusCapacitat.text = "Tipus: ${item.tipus} | Capacitat: ${item.capacitat}"
         holder.tvColor.text = "Color: ${item.color}"
-        holder.tvHores.text = "Hores conduïdes: ${item.horesTreballades ?: "0"}"
+        val totalMinuts = item.horesTreballades ?: 0f
+        val hores = totalMinuts.toInt() / 60
+        val minuts = totalMinuts.toInt() % 60
+
+        holder.tvHores.text = if (hores == 0) {
+            "Hores conduïdes: %d minuts".format(minuts)
+        } else {
+            "Hores conduïdes: %02d hores i %d minuts".format(hores, minuts)
+        }
 
         holder.btnEliminar.setOnClickListener {
             AlertDialog.Builder(holder.vista.context)

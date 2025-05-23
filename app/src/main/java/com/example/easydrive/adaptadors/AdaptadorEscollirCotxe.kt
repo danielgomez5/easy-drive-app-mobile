@@ -33,7 +33,15 @@ class AdaptadorEscollirCotxe (val llista: List<Cotxe>): RecyclerView.Adapter<Ada
         val item = llista[position]
 
         holder.titol.setText("${item.matricula} - ${item.marca} ${item.model}")
-        holder.hores.setText("Hores de conducció: ${item.horesTreballades} h")
+        val totalMinuts = item.horesTreballades ?: 0f
+        val hores = totalMinuts.toInt() / 60
+        val minuts = totalMinuts.toInt() % 60
+
+        holder.hores.text = if (hores == 0) {
+            "Temps de conducció: %d minuts".format(minuts)
+        } else {
+            "Temps de conducció: %02d hores i %d minuts".format(hores, minuts)
+        }
 
         if (position == selectedPosition) {
             holder.cards.setCardBackgroundColor(
