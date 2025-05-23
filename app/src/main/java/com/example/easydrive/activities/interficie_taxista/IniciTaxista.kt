@@ -521,13 +521,33 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
                 cotxesByTaxi = crud.getAllCotxesByUsuari(user?.dni!!)
                 if (cotxesByTaxi?.size == 1) {
-                    reservaXEdit?.idEstat = 1
-                    reservaXEdit?.estat = "OK"
-                    crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
-                    val client = crud.getUsuariById(reservaXEdit?.idUsuari.toString())
+
 
                     cotxe = cotxesByTaxi?.first()
+                    reservaXEdit?.idEstat = 1
+                    reservaXEdit?.estat = "OK"
+
+                    crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
+                    val client = crud.getUsuariById(reservaXEdit?.idUsuari.toString())
                     iniciarRutaSegonsHora(client!!)
+                    val viatgeIncomplet = Viatja(
+                        id = null,
+                        durada = null,
+                        distancia = null,
+                        valoracio = null,
+                        comentari = null,
+                        idZona = null,
+                        idTaxista = user?.dni,
+                        idReserva = reservaXEdit?.id,
+                        idCotxe = cotxe?.matricula,
+                        idReservaNavigation = null
+                    )
+
+                    if (crud.insertViatge(viatgeIncomplet)) {
+                        Log.d("viatge temporal insertat", "CORRECTE")
+                    } else {
+                        Log.d("viatge temporal insertat", "INCORRECTE")
+                    }
                     dialeg.dismiss()
                 } else {
                     val dialegCotxe = Dialog(this)
@@ -549,6 +569,26 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                             crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
                             val client = crud.getUsuariById(reservaXEdit?.idUsuari.toString())
                             iniciarRutaSegonsHora(client!!)
+
+                            val viatgeIncomplet = Viatja(
+                                id = null,
+                                durada = null,
+                                distancia = null,
+                                valoracio = null,
+                                comentari = null,
+                                idZona = null,
+                                idTaxista = user?.dni,
+                                idReserva = reservaXEdit?.id,
+                                idCotxe = cotxe?.matricula,
+                                idReservaNavigation = null
+                            )
+
+                            if (crud.insertViatge(viatgeIncomplet)) {
+                                Log.d("viatge temporal insertat", "CORRECTE")
+                            } else {
+                                Log.d("viatge temporal insertat", "INCORRECTE")
+                            }
+
                             dialegCotxe.dismiss()
                             dialeg.dismiss()
                         } else {
@@ -559,24 +599,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                     dialegCotxe.show()
                 }
 
-                val viatgeIncomplet = Viatja(
-                    id = null,
-                    durada = null,
-                    distancia = null,
-                    valoracio = null,
-                    comentari = null,
-                    idZona = null,
-                    idTaxista = user?.dni,
-                    idReserva = reservaXEdit?.id,
-                    idCotxe = cotxe?.matricula,
-                    idReservaNavigation = null
-                )
 
-                if (crud.insertViatge(viatgeIncomplet)) {
-                    Log.d("viatge temporal insertat", "CORRECTE")
-                } else {
-                    Log.d("viatge temporal insertat", "INCORRECTE")
-                }
             } else {
                 Log.d("ya lo han confirmado", "pues eso")
             }
