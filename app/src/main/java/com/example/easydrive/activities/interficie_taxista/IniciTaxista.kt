@@ -49,6 +49,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.easydrive.R
 import com.example.easydrive.activities.MainActivity
+import com.example.easydrive.activities.SplashActivity
 import com.example.easydrive.activities.interficie_usuari.IniciUsuari
 import com.example.easydrive.activities.menu.Ajuda
 import com.example.easydrive.activities.menu.Configuracio
@@ -319,7 +320,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
     }
 
     fun crearPendingIntent(context: Context): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java)
+        val intent = Intent(context, SplashActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
 
         return PendingIntent.getActivity(
@@ -332,7 +333,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
 
     fun enviarNotificacioClient(context: Context) {
         val builder = NotificationCompat.Builder(context, "RECOLLIDA_CLIENTS")
-            .setSmallIcon(R.drawable.baseline_circle_notifications_24) // Asegúrate de tener un icono válido
+            .setSmallIcon(R.drawable.car) // Asegúrate de tener un icono válido
             .setContentTitle("Atenció!")
             .setContentText("Hi ha un client a recollir.")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -375,7 +376,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 marcadorSimulacio = map?.addMarker(
                     MarkerOptions()
                         .position(ubicacioActual!!)
-                        .title("Simulació Ubi actual")
+                        .title("Estàs aquí")
                         .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap()))
                 )
                 map?.animateCamera(
@@ -787,11 +788,19 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
             if (resposta != null) {
                 resposta.features.map {
                     coordenadesViatgeClient = it.geometry.coordinates as MutableList<List<Double>>?
-                    horas = (it.properties.summary.duration.toInt() / 3600)
-                    minutos = ((it.properties.summary.duration.toInt()-horas!!*3600)/60)
-                    segundos = it.properties.summary.duration.toInt()-(horas!!*3600+minutos!!*60)
-                    binding.arribada.setText("Arribada en ${horas.toString()}:${minutos.toString()}:${segundos.toString()} per recollir client")
-                    binding.nomClient.setText(client.nom + " " + client.cognom)
+                    val duracio = it.properties.summary.duration.toInt()
+                    val hores = duracio / 3600
+                    val minuts = (duracio % 3600) / 60
+
+                    val horaMinFormat = if (hores > 0) {
+                        "%02d hores i %d minuts".format(hores, minuts)
+                    } else {
+                        "%d minuts".format(minuts)
+                    }
+
+                    binding.arribada.setText("Arribada en $horaMinFormat per recollir al client")
+
+                    binding.nomClient.setText("${client.nom} ${client.cognom}")
                 }
 
                 lifecycleScope.launch(Dispatchers.Default) {
@@ -849,7 +858,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                     marcadorSimulacio = map?.addMarker(
                         MarkerOptions()
                             .position(posicio)
-                            .title("Simulació")
+                            .title("Marcador d'ubicació")
                             .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap()))
                     )
                 } else {
@@ -947,6 +956,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         binding.cardDispo.visibility = View.GONE
         binding.switchMode.visibility = View.GONE
         binding.btnExpandMenu.visibility = View.GONE
+        binding.flCotxesRegistrats.visibility = View.GONE
         poly?.remove()
         marcadorFinal?.remove()
 
@@ -1039,7 +1049,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
         marcadorSimulacio = map?.addMarker(
             MarkerOptions()
                 .position(latLngInicial)
-                .title("Simulació")
+                .title("Marcador d'ubicació")
                 .icon(BitmapDescriptorFactory.fromBitmap(returnBitmap()))
         )
 
@@ -1109,6 +1119,7 @@ class IniciTaxista : AppCompatActivity(), OnNavigationItemSelectedListener , OnM
                 arribatAlDesti = true  // Marca como "ya ha llegado"
                 binding.cardDispo.visibility = View.GONE
                 binding.btnExpandMenu.visibility = View.GONE
+                binding.flCotxesRegistrats.visibility = View.GONE
                 reservaXEdit?.idEstat =3
                 marcadorFinal?.remove()
                 crud.changeEstatReserva(reservaXEdit?.id.toString(), reservaXEdit!!)
