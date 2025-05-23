@@ -487,6 +487,7 @@ class MapaRutaUsuari : AppCompatActivity(), OnMapReadyCallback {
                 intent.putExtra("SELECTED_FRAGMENT", R.id.menuDestinsGuardats)
                 intent.putExtra("MOSTRAR_SNACKBAR", true)
                 startActivity(intent)
+                finish()
             }
         }
 
